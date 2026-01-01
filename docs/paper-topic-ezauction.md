@@ -1,10 +1,11 @@
 # EzAuction
 
+
 Menu-first marketplace with listings, buy orders, and async safety nets.
 
-- **Paper/Purpur 1.21+**
+- **Paper / Spigot / Purpur / Bukkit 1.7 - 1.21.***
 - **Vault economy required**
-- YAML fallback + MySQL/HikariCP
+- YAML fallback + MySQL
 - English/Dutch/Spanish/Chinese menus included
 - PlaceholderAPI stats
 
@@ -22,7 +23,7 @@ Pre-release of EzAuction 1.0.1 is available [in the Discord server of EzPlugins]
 
 ## Feature Highlights
 - **Configurable menus & translations** – Override browser/confirm layouts, filler glass, and button text across the bundled English, Dutch, Spanish, and Chinese menu files.
-- **Flexible storage** – Start on lightweight YAML or flip to production-ready MySQL with SSL flags, table prefixes, and shaded HikariCP pooling.
+- **Flexible storage** – Start on lightweight YAML or flip to production-ready MySQL with SSL flags and table prefixes.
 - **Asynchronous history** – Background save queues batch player history writes to keep gameplay responsive, even during heavy auction traffic.
 - **Player protections** – Deposit refunds, balance checks, expiry sweeps, and inventory-aware delivery prevent dupes and lost currency.
 - **PlaceholderAPI hooks** – Drop `%ezauction_*%` placeholders into scoreboards or holograms to surface active listings, orders, limits, or pending returns.
@@ -81,6 +82,8 @@ holograms:
 
 <details>
 <summary>Installation & Configuration</summary>
+
+**Need more details?** See the [full configuration guide](https://github.com/ez-plugins/EzAuction/blob/main/docs/configuration.md) for all YAML, MySQL, menu, and advanced settings options.
 
 ### Requirements
 | Requirement | Notes |
