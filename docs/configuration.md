@@ -23,7 +23,7 @@ Configuration files are generated in the `plugins/EzAuction/` directory on first
 | `language`                  | string    | "en"           | Language code for plugin messages.                                          |
 | `auto-remove-expired`       | boolean   | true            | Automatically remove expired listings.                                      |
 | `history-enabled`           | boolean   | true            | Enable/disable auction transaction history.                                 |
-| `holograms-enabled`         | boolean   | false           | Enable/disable auction hologram displays.                                   |
+| `holograms-enabled`         | boolean   | false           | Enable/disable auction hologram displays. <br>**Compatibility:** Hologram features require Minecraft 1.19+ and a supported server implementation. On legacy servers, hologram features will be disabled automatically and a warning will be logged. |
 | `notification-sound`        | string    | "ENTITY_EXPERIENCE_ORB_PICKUP" | Sound played on auction notifications. |
 
 ---
@@ -77,6 +77,13 @@ Configuration files are generated in the `plugins/EzAuction/` directory on first
 ---
 
 ## Advanced Options
+
+
+- **Hologram Compatibility:**
+  - Hologram features use the TextDisplay entity, available only on Minecraft 1.19 and newer. On older server versions, hologram features will be disabled and a warning will be shown in console.
+  - The plugin uses runtime checks and reflection to ensure compatibility. If your server does not support TextDisplay, all hologram-related commands and displays will be gracefully disabled.
+  - For legacy support, the plugin falls back to a no-op implementation, ensuring no errors or crashes occur on unsupported versions.
+  - For more details, see the [compatibility documentation](../docs/paper-topic-ezauction.md).
 
 - See inline comments in each config file for further details.
 - For troubleshooting and advanced usage, refer to the [full documentation](../docs/).
