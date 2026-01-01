@@ -1,0 +1,15 @@
+# Configuration for displaying estimated item values in the auction GUI.
+enabled: false
+# Where value data is sourced when enabled. Supported values: configured, ezshops-buy, ezshops-sell
+mode: configured
+# Lore line shown when a value is available. Use {value} as the currency placeholder.
+format: "&7Value: &6{value}"
+# Configure material names (or namespaced keys) to hard-coded estimates used when no external provider is registered.
+materials:
+  diamond: 2500.0
+# Optional EzShops-powered shop price overlay. Choose ezshops-buy or ezshops-sell for the mode when enabled.
+# Leave the enabled flag unset to auto-detect EzShops and toggle the overlay automatically.
+shop-price:
+  # enabled: true
+  mode: ezshops-buy
+  format: "&7Shop Price: &6{value}"

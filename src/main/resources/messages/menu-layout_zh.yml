@@ -1,0 +1,52 @@
+# EzAuction 浏览器与确认菜单的中文布局配置。
+browser:
+  title: "&2拍卖行 &7({page}/{total_pages})"
+  size: 54
+  filler:
+    material: GRAY_STAINED_GLASS_PANE
+    display-name: "&8 "
+  navigation:
+    previous-slot: 45
+    close-slot: 49
+    next-slot: 53
+  empty-listing-slot: 22
+  # 配置浏览器底部一行显示的切换按钮。
+  search:
+    slot: 48
+    material: COMPASS
+    display-name: "&b搜索"
+    lore:
+      - "&7按名称查找物品。"
+  toggles:
+    listings:
+      slot: 46
+      material: CHEST
+      display-name: "&a在售商品"
+      lore:
+        - "&7浏览玩家正在出售的拍卖品。"
+    orders:
+      slot: 52
+      material: PAPER
+      display-name: "&a求购订单"
+      lore:
+        - "&7浏览进行中的求购订单。"
+confirm:
+  title: "&2确认购买"
+  size: 27
+  filler:
+    material: GRAY_STAINED_GLASS_PANE
+    display-name: "&8 "
+  listing-slot: 13
+  # 自定义购买/履约界面中显示的确认与取消按钮。
+  # 动态提示（价格、返还说明）会在游戏内自动追加。
+  buttons:
+    confirm:
+      slot: 11
+      material: LIME_CONCRETE
+      display-name: "&a确认"
+      lore: []
+    cancel:
+      slot: 15
+      material: RED_CONCRETE
+      display-name: "&c取消"
+      lore: []

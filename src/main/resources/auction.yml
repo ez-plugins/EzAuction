@@ -1,0 +1,37 @@
+# Primary configuration for the EzAuction plugin.
+debug: false
+# Choose any language code that has matching files under messages/*_<code>.yml (defaults to English when missing).
+language: en
+# Storage settings are managed in auction-storage.yml, menu layouts live in messages/menu-layout_*.yml,
+# menu interaction defaults reside in messages/menu-interactions_*.yml, and item values are configured in auction-values.yml.
+listings:
+  default-duration-hours: 24
+  max-duration-hours: 72
+  # Optional custom list of durations players can choose from when creating listings or buy orders.
+  # Values support minute or hour units (e.g. "30m", "90m", "1.5h", "24h"). Invalid entries are ignored.
+  # Leave the list empty to fall back to the default rotation of 6h, 12h, 24h, and 48h options.
+  duration-options:
+    - 6h
+    - 12h
+    - 24h
+    - 48h
+  minimum-price: 10.0
+  listing-deposit-percent: 5.0
+  # Base number of active listings allowed per player. Island level tiers can override this value.
+  max-listings-per-player: 3
+holograms:
+  enabled: true
+  # Interval (in ticks) between hologram refreshes. 20 ticks = 1 second.
+  update-interval-ticks: 100
+  # Horizontal radius (in blocks) used to find and reattach existing holograms when placing new ones.
+  search-radius: 2.5
+  # Vertical offset applied when spawning holograms above the target block.
+  height-offset: 1.75
+live-auctions:
+  enabled: false
+  # When enabled, new listings are pushed into a live announcement queue that can be consumed sequentially.
+  queue-enabled: true
+  # Broadcast queued live auctions to the server chat.
+  display-in-chat: true
+  # Interval (in ticks) between live auction broadcasts when chat display is enabled.
+  announcement-interval-ticks: 200

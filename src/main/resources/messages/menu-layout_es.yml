@@ -1,0 +1,49 @@
+# Configuración de diseño para los menús del navegador y confirmación de EzAuction (Español).
+browser:
+  title: "&2Casa de Subastas &7({page}/{total_pages})"
+  size: 54
+  filler:
+    material: GRAY_STAINED_GLASS_PANE
+    display-name: "&8 "
+  navigation:
+    previous-slot: 45
+    close-slot: 49
+    next-slot: 53
+  empty-listing-slot: 22
+  search:
+    slot: 48
+    material: COMPASS
+    display-name: "&bBuscar"
+    lore:
+      - "&7Busca objetos por nombre."
+  toggles:
+    listings:
+      slot: 46
+      material: CHEST
+      display-name: "&aAnuncios"
+      lore:
+        - "&7Explora los anuncios de venta de jugadores."
+    orders:
+      slot: 52
+      material: PAPER
+      display-name: "&aÓrdenes de compra"
+      lore:
+        - "&7Explora las órdenes de compra activas."
+confirm:
+  title: "&2Confirmar compra"
+  size: 27
+  filler:
+    material: GRAY_STAINED_GLASS_PANE
+    display-name: "&8 "
+  listing-slot: 13
+  buttons:
+    confirm:
+      slot: 11
+      material: LIME_CONCRETE
+      display-name: "&aConfirmar"
+      lore: []
+    cancel:
+      slot: 15
+      material: RED_CONCRETE
+      display-name: "&cCancelar"
+      lore: []

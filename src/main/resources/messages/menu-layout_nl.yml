@@ -1,0 +1,49 @@
+# Lay-outconfiguratie voor de EzAuction-browser en bevestigingsmenu's (Nederlands).
+browser:
+  title: "&2Veilinghuis &7({page}/{total_pages})"
+  size: 54
+  filler:
+    material: GRAY_STAINED_GLASS_PANE
+    display-name: "&8 "
+  navigation:
+    previous-slot: 45
+    close-slot: 49
+    next-slot: 53
+  empty-listing-slot: 22
+  search:
+    slot: 48
+    material: COMPASS
+    display-name: "&bZoeken"
+    lore:
+      - "&7Zoek items op naam."
+  toggles:
+    listings:
+      slot: 46
+      material: CHEST
+      display-name: "&aAanbiedingen"
+      lore:
+        - "&7Bekijk spelersaanbiedingen."
+    orders:
+      slot: 52
+      material: PAPER
+      display-name: "&aAankooporders"
+      lore:
+        - "&7Bekijk actieve aankooporders."
+confirm:
+  title: "&2Bevestig aankoop"
+  size: 27
+  filler:
+    material: GRAY_STAINED_GLASS_PANE
+    display-name: "&8 "
+  listing-slot: 13
+  buttons:
+    confirm:
+      slot: 11
+      material: LIME_CONCRETE
+      display-name: "&aBevestigen"
+      lore: []
+    cancel:
+      slot: 15
+      material: RED_CONCRETE
+      display-name: "&cAnnuleren"
+      lore: []

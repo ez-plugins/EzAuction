@@ -1,0 +1,121 @@
+# EzAuction 出售与求购菜单的中文交互配置。
+sell:
+  layout:
+    title: "&2创建拍卖物品"
+    size: 27
+    filler:
+      material: GRAY_STAINED_GLASS_PANE
+      display-name: "&8 "
+    listing-slot: 11
+    price-display:
+      slot: 13
+      material: SUNFLOWER
+      display-name: "&6上架价格"
+    duration-display:
+      slot: 15
+      material: CLOCK
+      display-name: "&e拍卖时长"
+    custom-price:
+      slot: 16
+      material: WRITABLE_BOOK
+      display-name: "&b自定义价格"
+    confirm:
+      slot: 22
+      material: LIME_CONCRETE
+      display-name: "&a创建拍卖"
+    cancel:
+      slot: 24
+      material: RED_CONCRETE
+      display-name: "&c取消"
+    price-adjust:
+      slots:
+        - 0
+        - 1
+        - 2
+        - 3
+        - 5
+        - 6
+        - 7
+        - 8
+  # 打开出售菜单时的默认起始价格。
+  default-price: 100.0
+  # 出售菜单顶部用于快速调整价格的按钮。
+  price-adjustments:
+    - -1000.0
+    - -100.0
+    - -10.0
+    - -1.0
+    - 1.0
+    - 10.0
+    - 100.0
+    - 1000.0
+orders:
+  layout:
+    title: "&2创建求购订单"
+    size: 27
+    filler:
+      material: GRAY_STAINED_GLASS_PANE
+      display-name: "&8 "
+    item-slot: 11
+    price-display:
+      slot: 13
+      material: SUNFLOWER
+      display-name: "&6出价"
+    quantity-display:
+      slot: 14
+      material: WRITABLE_BOOK
+      display-name: "&b需求数量"
+    duration-display:
+      slot: 15
+      material: CLOCK
+      display-name: "&e订单时长"
+    custom-price:
+      slot: 16
+      material: PAPER
+      display-name: "&b自定义价格"
+    confirm:
+      slot: 22
+      material: LIME_CONCRETE
+      display-name: "&a确认订单"
+    cancel:
+      slot: 24
+      material: RED_CONCRETE
+      display-name: "&c取消"
+    price-adjust:
+      slots:
+        - 0
+        - 1
+        - 2
+        - 3
+        - 5
+        - 6
+        - 7
+        - 8
+    quantity-adjust:
+      slots:
+        - 9
+        - 10
+        - 12
+        - 18
+        - 19
+        - 20
+  # 打开求购菜单时每件物品的默认价格。
+  default-price: 100.0
+  # 求购菜单顶部用于调整出价的按钮。
+  price-adjustments:
+    - -1000.0
+    - -100.0
+    - -10.0
+    - -1.0
+    - 1.0
+    - 10.0
+    - 100.0
+    - 1000.0
+  # 求购菜单中用于调整需求数量的按钮。
+  quantity-adjustments:
+    - -16
+    - -8
+    - -1
+    - 1
+    - 8
+    - 16

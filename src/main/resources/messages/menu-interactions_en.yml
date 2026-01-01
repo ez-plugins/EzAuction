@@ -1,0 +1,121 @@
+# Default interaction configuration for EzAuction selling and order menus.
+sell:
+  layout:
+    title: "&2Create Auction Listing"
+    size: 27
+    filler:
+      material: GRAY_STAINED_GLASS_PANE
+      display-name: "&8 "
+    listing-slot: 11
+    price-display:
+      slot: 13
+      material: SUNFLOWER
+      display-name: "&6Listing Price"
+    duration-display:
+      slot: 15
+      material: CLOCK
+      display-name: "&eListing Duration"
+    custom-price:
+      slot: 16
+      material: WRITABLE_BOOK
+      display-name: "&bCustom Price"
+    confirm:
+      slot: 22
+      material: LIME_CONCRETE
+      display-name: "&aCreate Listing"
+    cancel:
+      slot: 24
+      material: RED_CONCRETE
+      display-name: "&cCancel"
+    price-adjust:
+      slots:
+        - 0
+        - 1
+        - 2
+        - 3
+        - 5
+        - 6
+        - 7
+        - 8
+  # Default starting price when opening the sell menu.
+  default-price: 100.0
+  # Buttons shown across the top row of the sell menu for quick price adjustments.
+  price-adjustments:
+    - -1000.0
+    - -100.0
+    - -10.0
+    - -1.0
+    - 1.0
+    - 10.0
+    - 100.0
+    - 1000.0
+orders:
+  layout:
+    title: "&2Create Buy Order"
+    size: 27
+    filler:
+      material: GRAY_STAINED_GLASS_PANE
+      display-name: "&8 "
+    item-slot: 11
+    price-display:
+      slot: 13
+      material: SUNFLOWER
+      display-name: "&6Offer Price"
+    quantity-display:
+      slot: 14
+      material: WRITABLE_BOOK
+      display-name: "&bRequested Quantity"
+    duration-display:
+      slot: 15
+      material: CLOCK
+      display-name: "&eOrder Duration"
+    custom-price:
+      slot: 16
+      material: PAPER
+      display-name: "&bCustom Price"
+    confirm:
+      slot: 22
+      material: LIME_CONCRETE
+      display-name: "&aConfirm Order"
+    cancel:
+      slot: 24
+      material: RED_CONCRETE
+      display-name: "&cCancel"
+    price-adjust:
+      slots:
+        - 0
+        - 1
+        - 2
+        - 3
+        - 5
+        - 6
+        - 7
+        - 8
+    quantity-adjust:
+      slots:
+        - 9
+        - 10
+        - 12
+        - 18
+        - 19
+        - 20
+  # Default price per item when opening the buy order menu.
+  default-price: 100.0
+  # Buttons shown across the top row of the order menu for price adjustments.
+  price-adjustments:
+    - -1000.0
+    - -100.0
+    - -10.0
+    - -1.0
+    - 1.0
+    - 10.0
+    - 100.0
+    - 1000.0
+  # Buttons shown for adjusting requested quantity in the order menu.
+  quantity-adjustments:
+    - -16
+    - -8
+    - -1
+    - 1
+    - 8
+    - 16

@@ -1,0 +1,116 @@
+# Configuración de interacción para los menús de venta y órdenes de EzAuction (Español).
+sell:
+  layout:
+    title: "&2Crear listado de subasta"
+    size: 27
+    filler:
+      material: GRAY_STAINED_GLASS_PANE
+      display-name: "&8 "
+    listing-slot: 11
+    price-display:
+      slot: 13
+      material: SUNFLOWER
+      display-name: "&6Precio del listado"
+    duration-display:
+      slot: 15
+      material: CLOCK
+      display-name: "&eDuración del listado"
+    custom-price:
+      slot: 16
+      material: WRITABLE_BOOK
+      display-name: "&bPrecio personalizado"
+    confirm:
+      slot: 22
+      material: LIME_CONCRETE
+      display-name: "&aCrear listado"
+    cancel:
+      slot: 24
+      material: RED_CONCRETE
+      display-name: "&cCancelar"
+    price-adjust:
+      slots:
+        - 0
+        - 1
+        - 2
+        - 3
+        - 5
+        - 6
+        - 7
+        - 8
+  default-price: 100.0
+  price-adjustments:
+    - -1000.0
+    - -100.0
+    - -10.0
+    - -1.0
+    - 1.0
+    - 10.0
+    - 100.0
+    - 1000.0
+orders:
+  layout:
+    title: "&2Crear orden de compra"
+    size: 27
+    filler:
+      material: GRAY_STAINED_GLASS_PANE
+      display-name: "&8 "
+    item-slot: 11
+    price-display:
+      slot: 13
+      material: SUNFLOWER
+      display-name: "&6Precio ofrecido"
+    quantity-display:
+      slot: 14
+      material: WRITABLE_BOOK
+      display-name: "&bCantidad solicitada"
+    duration-display:
+      slot: 15
+      material: CLOCK
+      display-name: "&eDuración de la orden"
+    custom-price:
+      slot: 16
+      material: PAPER
+      display-name: "&bPrecio personalizado"
+    confirm:
+      slot: 22
+      material: LIME_CONCRETE
+      display-name: "&aConfirmar orden"
+    cancel:
+      slot: 24
+      material: RED_CONCRETE
+      display-name: "&cCancelar"
+    price-adjust:
+      slots:
+        - 0
+        - 1
+        - 2
+        - 3
+        - 5
+        - 6
+        - 7
+        - 8
+    quantity-adjust:
+      slots:
+        - 9
+        - 10
+        - 12
+        - 18
+        - 19
+        - 20
+  default-price: 100.0
+  price-adjustments:
+    - -1000.0
+    - -100.0
+    - -10.0
+    - -1.0
+    - 1.0
+    - 10.0
+    - 100.0
+    - 1000.0
+  quantity-adjustments:
+    - -16
+    - -8
+    - -1
+    - 1
+    - 8
+    - 16

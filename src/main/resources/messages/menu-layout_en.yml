@@ -1,0 +1,52 @@
+# Layout configuration for EzAuction browser and confirmation menus.
+browser:
+  title: "&2Auction House &7({page}/{total_pages})"
+  size: 54
+  filler:
+    material: GRAY_STAINED_GLASS_PANE
+    display-name: "&8 "
+  navigation:
+    previous-slot: 45
+    close-slot: 49
+    next-slot: 53
+  empty-listing-slot: 22
+  # Configure the toggle buttons shown along the bottom row of the browser.
+  search:
+    slot: 48
+    material: COMPASS
+    display-name: "&bSearch"
+    lore:
+      - "&7Find items by name."
+  toggles:
+    listings:
+      slot: 46
+      material: CHEST
+      display-name: "&aListings"
+      lore:
+        - "&7Browse player sell listings."
+    orders:
+      slot: 52
+      material: PAPER
+      display-name: "&aBuy Orders"
+      lore:
+        - "&7Browse active buy orders."
+confirm:
+  title: "&2Confirm Purchase"
+  size: 27
+  filler:
+    material: GRAY_STAINED_GLASS_PANE
+    display-name: "&8 "
+  listing-slot: 13
+  # Customize the confirm/cancel buttons shown in the purchase/fulfillment screen.
+  # Dynamic prompts (price, return instructions) are appended automatically in-game.
+  buttons:
+    confirm:
+      slot: 11
+      material: LIME_CONCRETE
+      display-name: "&aConfirm"
+      lore: []
+    cancel:
+      slot: 15
+      material: RED_CONCRETE
+      display-name: "&cCancel"
+      lore: []

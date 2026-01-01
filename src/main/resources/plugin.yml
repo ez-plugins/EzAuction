@@ -1,0 +1,61 @@
+name: EzAuction
+version: ${project.version}
+main: com.skyblockexp.ezauction.EzAuctionPlugin
+author: Shadow48402
+description: Standalone auction house plugin for EzAuction-powered Minecraft servers (requires Vault + economy provider).
+softdepend: [Vault, EzShops, SkyblockExperienceCommon, EzScoreboard, PlaceholderAPI]
+api-version: 1.13
+commands:
+  auction:
+    description: Browse and manage EzAuction listings using your Vault-linked economy.
+    usage: |
+      /<command> - Open the auction house.
+      /<command> sell <price> [duration]
+      /<command> order <price> <amount> [duration]
+      /<command> claim - Retrieve returned auction items.
+      /<command> live - View upcoming live auctions.
+    aliases: [ah]
+    permission: ezauction.auction
+    permission-message: You do not have permission to use this command.
+  auctionhologram:
+    description: Place or remove EzAuction holographic displays.
+    usage: |
+      /<command> <type> - Place an auction hologram showing the selected data.
+      /<command> clear - Remove the closest auction hologram.
+    permission: ezauction.hologram
+    permission-message: You do not have permission to manage auction holograms.
+  liveauction:
+    description: Open the live auctions browser or sell into the live queue.
+    usage: |
+      /<command> - Open the live auction browser.
+      /<command> sell - Open the live auction sell menu.
+    permission: ezauction.auction.live
+    permission-message: You do not have permission to view live auctions.
+permissions:
+  ezauction.auction:
+    description: Allows players to access the /auction command.
+    default: true
+  ezauction.auction.buy:
+    description: Allows players to purchase listings from the auction house.
+    default: true
+  ezauction.auction.sell:
+    description: Allows players to create auction listings.
+    default: true
+  ezauction.auction.order:
+    description: Allows players to create auction buy orders.
+    default: true
+  ezauction.auction.fulfill:
+    description: Allows players to fulfill buy orders.
+    default: true
+  ezauction.auction.history:
+    description: Allows players to review their auction transaction history.
+    default: true
+  ezauction.auction.live:
+    description: Allows players to view the live auction queue.
+    default: true
+  ezauction.hologram:
+    description: Allows administrators to place and remove EzAuction holograms.
+    default: op
+  ezauction.auction.live.sell:
+    description: Allows players to open the live auction sell menu.
+    default: true
