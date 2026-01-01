@@ -12,16 +12,20 @@
 ---
 
 ## 📑 Table of Contents
-- [Requirements](#-requirements)
-- [Installation](#-installation)
-- [Features](#-features)
-- [Configuration](#-configuration)
-- [Permissions & Commands](#-permissions--commands)
-- [Documentation](#-documentation)
-- [Usage Examples](#-usage-examples)
-- [Contributing](#-contributing)
-- [Support & Community](#-support--community)
-- [License](#-license)
+- [EzAuction](#ezauction)
+  - [📑 Table of Contents](#-table-of-contents)
+  - [📦 Requirements](#-requirements)
+  - [🚀 Installation](#-installation)
+  - [✨ Features](#-features)
+  - [⚙️ Configuration](#️-configuration)
+  - [🛡️ Permissions \& Commands](#️-permissions--commands)
+  - [📚 Documentation](#-documentation)
+  - [🛠️ Usage Examples](#️-usage-examples)
+    - [Creating a Listing](#creating-a-listing)
+    - [Listening for Events](#listening-for-events)
+  - [🤝 Contributing](#-contributing)
+  - [🛡️ Support \& Community](#️-support--community)
+  - [📄 License](#-license)
 
 ---
 
@@ -30,7 +34,7 @@
 - Bukkit/Spigot/Paper server (1.17+ recommended)
 
 ## 🚀 Installation
-1. Download the latest EzAuction JAR from the [releases page](https://github.com/Gyvex/ezauction/releases).
+1. Download the latest EzAuction JAR from the [releases page](https://github.com/ez-plugins/ezauction/releases).
 2. Place the JAR in your server's `plugins/` directory.
 3. Start or reload your server.
 4. Configure the plugin as needed (see below).
