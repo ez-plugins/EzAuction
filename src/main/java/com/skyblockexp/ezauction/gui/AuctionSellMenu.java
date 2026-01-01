@@ -592,8 +592,8 @@ public class AuctionSellMenu {
             return;
         }
         double value;
-        try { value = Double.parseDouble(input); }
-        catch (NumberFormatException ex) {
+        try { value = com.skyblockexp.ezauction.util.NumberShortcutParser.parse(input); }
+        catch (IllegalArgumentException ex) {
             sendMessage(player, messages.priceInvalidNumber());
             openSellMenu(player, state, target);
             return;

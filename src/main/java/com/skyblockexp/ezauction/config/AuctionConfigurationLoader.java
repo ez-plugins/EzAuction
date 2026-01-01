@@ -247,7 +247,7 @@ public final class AuctionConfigurationLoader {
         }
         double amount;
         try {
-            amount = Double.parseDouble(numericPortion.trim());
+            amount = com.skyblockexp.ezauction.util.NumberShortcutParser.parse(numericPortion.trim());
         } catch (NumberFormatException ex) {
             return null;
         }
