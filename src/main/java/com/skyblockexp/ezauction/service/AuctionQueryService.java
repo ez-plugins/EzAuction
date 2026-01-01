@@ -31,7 +31,9 @@ public class AuctionQueryService {
         long now = System.currentTimeMillis();
         active.removeIf(l -> l.expiryEpochMillis() <= now);
         active.sort(Comparator.comparingLong(AuctionListing::expiryEpochMillis));
-        System.out.println("[EzAuction][DEBUG] listActiveListings: " + active.size() + " listings: " + active);
+        if (configuration != null && configuration.debug()) {
+            System.out.println("[EzAuction][DEBUG] listActiveListings: " + active.size() + " listings: " + active);
+        }
         return Collections.unmodifiableList(active);
     }
 
