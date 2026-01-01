@@ -158,7 +158,7 @@ public class AuctionMenu implements Listener {
         List<AuctionListing> listings = view == BrowserView.LISTINGS
             ? new ArrayList<>(auctionManager.listActiveListings())
             : Collections.emptyList();
-        if (view == BrowserView.LISTINGS) {
+        if (view == BrowserView.LISTINGS && auctionManager != null && auctionManager.configuration != null && auctionManager.configuration.debug()) {
             System.out.println("[EzAuction][DEBUG] AuctionMenu.openBrowser: listings.size() = " + listings.size() + ", listings = " + listings);
         }
         if (view == BrowserView.LISTINGS) {
