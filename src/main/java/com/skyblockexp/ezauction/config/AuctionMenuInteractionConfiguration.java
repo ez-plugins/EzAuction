@@ -87,11 +87,11 @@ public final class AuctionMenuInteractionConfiguration {
                 return null;
             }
             try {
-                double parsed = Double.parseDouble(trimmed);
+                double parsed = com.skyblockexp.ezauction.util.NumberShortcutParser.parse(trimmed);
                 if (Double.isFinite(parsed)) {
                     return parsed;
                 }
-            } catch (NumberFormatException ex) {
+            } catch (IllegalArgumentException ex) {
                 return null;
             }
         }
@@ -118,20 +118,16 @@ public final class AuctionMenuInteractionConfiguration {
                 return null;
             }
             try {
-                return Integer.parseInt(trimmed);
-            } catch (NumberFormatException first) {
-                try {
-                    double parsed = Double.parseDouble(trimmed);
-                    if (!Double.isFinite(parsed) || Math.floor(parsed) != parsed) {
-                        return null;
-                    }
-                    if (parsed < Integer.MIN_VALUE || parsed > Integer.MAX_VALUE) {
-                        return null;
-                    }
-                    return (int) parsed;
-                } catch (NumberFormatException ignored) {
+                double parsed = com.skyblockexp.ezauction.util.NumberShortcutParser.parse(trimmed);
+                if (!Double.isFinite(parsed) || Math.floor(parsed) != parsed) {
                     return null;
                 }
+                if (parsed < Integer.MIN_VALUE || parsed > Integer.MAX_VALUE) {
+                    return null;
+                }
+                return (int) parsed;
+            } catch (IllegalArgumentException ignored) {
+                return null;
             }
         }
         return null;

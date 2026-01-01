@@ -625,8 +625,8 @@ public class AuctionOrderMenu implements Listener {
         if (updatingPrice) {
             double value;
             try {
-                value = Double.parseDouble(input);
-            } catch (NumberFormatException ex) {
+                value = com.skyblockexp.ezauction.util.NumberShortcutParser.parse(input);
+            } catch (IllegalArgumentException ex) {
                 sendMessage(player, messages.invalidNumber());
                 openOrderMenu(player, state);
                 return;
@@ -646,8 +646,8 @@ public class AuctionOrderMenu implements Listener {
         } else {
             int quantity;
             try {
-                quantity = Integer.parseInt(input);
-            } catch (NumberFormatException ex) {
+                quantity = (int) com.skyblockexp.ezauction.util.NumberShortcutParser.parse(input);
+            } catch (IllegalArgumentException ex) {
                 sendMessage(player, messages.wholeNumberRequired());
                 openOrderMenu(player, state);
                 return;
