@@ -1,6 +1,7 @@
 [CENTER][SIZE=6][B]EzAuction[/B][/SIZE]
+
 [SIZE=3]Menu-first marketplace with listings, buy orders, and async safety nets[/SIZE]
-[SIZE=2]Paper/Purpur 1.21+ • Vault economy • YAML fallback + MySQL/HikariCP • English/Dutch/Spanish/Chinese menus included • PlaceholderAPI stats
+[SIZE=2]Paper / Spigot / Purpur / Bukkit 1.7 - 1.21.* • Vault economy • YAML fallback + MySQL • English/Dutch/Spanish/Chinese menus included • PlaceholderAPI stats
 [COLOR=#ff6600]Requires Vault and a compatible economy plugin to process currency.[/COLOR][/SIZE][/CENTER]
 
 [SIZE=4][B]Why EzAuction?[/B][/SIZE]
@@ -20,7 +21,7 @@
 [SIZE=4][B]Feature Highlights[/B][/SIZE]
 [LIST]
 [*][B]Configurable menus & translations[/B] – Override browser/confirm layouts, filler glass, and button text across the bundled English, Dutch, Spanish, and Chinese menu files.
-[*][B]Flexible storage[/B] – Start on lightweight YAML or flip to production-ready MySQL with SSL flags, table prefixes, and shaded HikariCP pooling.
+[*][B]Flexible storage[/B] – Start on lightweight YAML or flip to production-ready MySQL with SSL flags and table prefixes.
 [*][B]Asynchronous history[/B] – Background save queues batch player history writes to keep gameplay responsive, even during heavy auction traffic.
 [*][B]Player protections[/B] – Deposit refunds, balance checks, expiry sweeps, and inventory-aware delivery prevent dupes and lost currency.
 [*][B]PlaceholderAPI hooks[/B] – Drop `%ezauction_*%` placeholders into scoreboards or holograms to surface active listings, orders, limits, or pending returns.
@@ -81,6 +82,9 @@ holograms:
 [/table]
 
 [SIZE=4][B]Setup Guide[/B][/SIZE]
+[spoiler="Full Configuration Guide"]
+[B]Need more details?[/B] See the [URL='https://github.com/ez-plugins/EzAuction/blob/main/docs/configuration.md']full configuration guide[/URL] for all YAML, MySQL, menu, and advanced settings options.
+[/spoiler]
 [spoiler="Installation & Configuration"]
 [B]Requirements[/B]
 [table]

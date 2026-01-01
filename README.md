@@ -18,6 +18,7 @@
   - [🚀 Installation](#-installation)
   - [✨ Features](#-features)
   - [⚙️ Configuration](#️-configuration)
+    - [Configuration Guide](https://github.com/ez-plugins/EzAuction/blob/main/docs/configuration.md)
   - [🛡️ Permissions \& Commands](#️-permissions--commands)
   - [📚 Documentation](#-documentation)
   - [🛠️ Usage Examples](#️-usage-examples)
