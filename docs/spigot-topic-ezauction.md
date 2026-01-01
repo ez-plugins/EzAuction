@@ -10,6 +10,8 @@
 [*][B]Listings + buy orders[/B] – Run timed sales, reserve balance for buy requests, and fulfill either side straight from the GUI or command flow.
 [IMG]https://i.ibb.co/27hNgZgx/ez-auction-buy-orders.png[/IMG]
 [IMG]https://i.ibb.co/KxyrpHQk/ez-auction-listing.png[/IMG]
+[*][B]Shulker previews - [/B]Watch the items in Shulkers before you buy
+[IMG]https://i.ibb.co/5xS8T77Q/image.png[/IMG]
 [*][B]Async persistence & fallbacks[/B] – Listings and history write through dedicated executors, automatically falling back to YAML storage if MySQL is unreachable.
 [*][B]Offline-safe returns[/B] – Expired or undeliverable items go to a claimable stash with login reminders and `/auction claim` recovery.
 [*][B]Rank-aware limits[/B] – Plug in a custom `AuctionListingLimitResolver` service to scale slot caps with ranks, islands, or progression data.
@@ -284,3 +286,5 @@ materials:
 
 [CENTER][SIZE=4][B]Ready to modernize your marketplace?[/B]
 Deploy EzAuction today and give your players a polished, automated trading hub![/SIZE][/CENTER]
+
+[URL='https://www.spigotmc.org/resources/authors/shadow48402.25936/'][IMG]https://i.ibb.co/PzfjNjh0/ezplugins-try-other-plugins.png[/IMG][/URL]
