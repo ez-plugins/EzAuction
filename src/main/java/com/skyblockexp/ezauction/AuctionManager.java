@@ -333,4 +333,13 @@ public class AuctionManager {
     public long countActiveOrders() {
         return queryService.countActiveOrders();
     }
+
+    /**
+     * Returns the auction configuration.
+     * 
+     * @return the {@link AuctionConfiguration} instance
+     */
+    public AuctionConfiguration getConfiguration() {
+        return configuration;
+    }
 }
