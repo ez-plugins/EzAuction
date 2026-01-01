@@ -1,0 +1,77 @@
+# Java/Maven
+/target/
+*.class
+*.log
+*.jar
+*.war
+*.ear
+hs_err_pid*
+
+# Eclipse
+.project
+.classpath
+.settings/
+
+# IntelliJ
+.idea/
+*.iml
+out/
+
+# VS Code
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Build output
+bin/
+
+# Test output
+/test-output/
+
+# Misc
+*.swp
+*.swo
+
+# Environment files
+.env
+
+# Generated files
+/generated-sources/
+
+# Maven status
+/maven-status/
+
+# Backup files
+*~
+
+# Logs
+*.log
+
+# Ignore node_modules if any JS tooling
+node_modules/
+
+# Ignore coverage reports
+coverage/
+
+# Ignore dependency directories
+/.gradle/
+/.mvn/
+
+# Ignore temp files
+*.tmp
+*.temp
+
+# Ignore lock files
+*.lock
+
+# Ignore package managers
+package-lock.json
+yarn.lock
+
+# Ignore IDE workspace files
+*.workspace
+
+# Ignore annotation processors
+/annotations/

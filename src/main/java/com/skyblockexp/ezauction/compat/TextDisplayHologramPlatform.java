@@ -6,15 +6,10 @@ import java.util.List;
 import java.util.UUID;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.World;
-import org.bukkit.entity.Display;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.TextDisplay;
-import org.bukkit.persistence.PersistentDataContainer;
-import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
 
 /**
@@ -28,9 +23,26 @@ public final class TextDisplayHologramPlatform implements HologramPlatform {
         this.plugin = plugin;
     }
 
+    /**
+     * Checks if TextDisplay is supported on this server version.
+     * Uses reflection to verify presence of required classes and methods.
+     */
     @Override
     public boolean isSupported() {
-        return true;
+        try {
+            Class<?> textDisplayClass = Class.forName("org.bukkit.entity.TextDisplay");
+            textDisplayClass.getMethod("text", Component.class);
+            return true;
+        } catch (ClassNotFoundException | NoSuchMethodException e) {
+            try {
+                Class<?> textDisplayClass = Class.forName("org.bukkit.entity.TextDisplay");
+                textDisplayClass.getMethod("setText", String.class);
+                return true;
+            } catch (Exception ignored) {
+            }
+        } catch (Exception e) {
+        }
+        return false;
     }
 
     @Override
@@ -42,8 +54,15 @@ public final class TextDisplayHologramPlatform implements HologramPlatform {
         if (world == null) {
             return null;
         }
-        TextDisplay display = world.spawn(location, TextDisplay.class);
-        return new TextDisplayWrapper(display);
+        try {
+            Class<?> textDisplayClass = Class.forName("org.bukkit.entity.TextDisplay");
+            Entity entity = world.spawn(location, (Class<Entity>) textDisplayClass);
+            if (textDisplayClass.isInstance(entity)) {
+                return new TextDisplayWrapper(entity);
+            }
+        } catch (Exception e) {
+        }
+        return null;
     }
 
     @Override
@@ -51,11 +70,17 @@ public final class TextDisplayHologramPlatform implements HologramPlatform {
         if (world == null) {
             return List.of();
         }
-        return world.getEntitiesByClass(TextDisplay.class)
-                .stream()
-                .map(TextDisplayWrapper::new)
-                .map(HologramDisplay.class::cast)
-                .toList();
+        try {
+            Class<?> textDisplayClass = Class.forName("org.bukkit.entity.TextDisplay");
+            return world.getEntitiesByClass((Class<Entity>) textDisplayClass)
+                    .stream()
+                    .map(entity -> textDisplayClass.isInstance(entity) ? new TextDisplayWrapper(entity) : null)
+                    .filter(e -> e != null)
+                    .map(HologramDisplay.class::cast)
+                    .toList();
+        } catch (Exception e) {
+        }
+        return List.of();
     }
 
     @Override
@@ -67,23 +92,39 @@ public final class TextDisplayHologramPlatform implements HologramPlatform {
         if (world == null) {
             return List.of();
         }
-        return world.getNearbyEntities(location, radius, radius, radius, entity -> entity instanceof TextDisplay)
-                .stream()
-                .map(entity -> (TextDisplay) entity)
-                .map(TextDisplayWrapper::new)
-                .map(HologramDisplay.class::cast)
-                .toList();
+        try {
+            Class<?> textDisplayClass = Class.forName("org.bukkit.entity.TextDisplay");
+            return world.getNearbyEntities(location, radius, radius, radius, entity -> textDisplayClass.isInstance(entity))
+                    .stream()
+                    .map(entity -> textDisplayClass.isInstance(entity) ? new TextDisplayWrapper(entity) : null)
+                    .filter(e -> e != null)
+                    .map(HologramDisplay.class::cast)
+                    .toList();
+        } catch (Exception e) {
+        }
+        return List.of();
     }
 
     @Override
     public boolean isDisplayEntity(Entity entity) {
-        return entity instanceof TextDisplay;
+        try {
+            Class<?> textDisplayClass = Class.forName("org.bukkit.entity.TextDisplay");
+            return textDisplayClass.isInstance(entity);
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     @Override
     public HologramDisplay wrap(Entity entity) {
-        if (entity instanceof TextDisplay display) {
-            return new TextDisplayWrapper(display);
+        try {
+            if (entity != null) {
+                Class<?> textDisplayClass = Class.forName("org.bukkit.entity.TextDisplay");
+                if (textDisplayClass.isInstance(entity)) {
+                    return new TextDisplayWrapper(entity);
+                }
+            }
+        } catch (Exception e) {
         }
         return null;
     }
@@ -93,18 +134,41 @@ public final class TextDisplayHologramPlatform implements HologramPlatform {
         if (!(display instanceof TextDisplayWrapper wrapper)) {
             return;
         }
-        TextDisplay handle = wrapper.handle();
+        Entity handle = wrapper.handle();
         if (handle == null) {
             return;
         }
-        handle.setBillboard(Display.Billboard.CENTER);
-        handle.setPersistent(true);
-        handle.setShadowed(false);
-        handle.setSeeThrough(true);
-        handle.setAlignment(TextDisplay.TextAlignment.CENTER);
-        handle.setViewRange(48.0F);
-        handle.setLineWidth(160);
-        handle.setBackgroundColor(Color.fromARGB(0, 0, 0, 0));
+        try {
+            // Use reflection for all method calls
+            Class<?> displayClass = handle.getClass();
+            Method setBillboard = displayClass.getMethod("setBillboard", displayClass.getClass().getClassLoader().loadClass("org.bukkit.entity.Display$Billboard"));
+            Object centerBillboard = displayClass.getClass().getClassLoader().loadClass("org.bukkit.entity.Display$Billboard").getField("CENTER").get(null);
+            setBillboard.invoke(handle, centerBillboard);
+
+            Method setPersistent = displayClass.getMethod("setPersistent", boolean.class);
+            setPersistent.invoke(handle, true);
+
+            Method setShadowed = displayClass.getMethod("setShadowed", boolean.class);
+            setShadowed.invoke(handle, false);
+
+            Method setSeeThrough = displayClass.getMethod("setSeeThrough", boolean.class);
+            setSeeThrough.invoke(handle, true);
+
+            Method setAlignment = displayClass.getMethod("setAlignment", displayClass.getClass().getClassLoader().loadClass("org.bukkit.entity.TextDisplay$TextAlignment"));
+            Object centerAlignment = displayClass.getClass().getClassLoader().loadClass("org.bukkit.entity.TextDisplay$TextAlignment").getField("CENTER").get(null);
+            setAlignment.invoke(handle, centerAlignment);
+
+            Method setViewRange = displayClass.getMethod("setViewRange", float.class);
+            setViewRange.invoke(handle, 48.0F);
+
+            Method setLineWidth = displayClass.getMethod("setLineWidth", int.class);
+            setLineWidth.invoke(handle, 160);
+
+            Method setBackgroundColor = displayClass.getMethod("setBackgroundColor", int.class);
+            setBackgroundColor.invoke(handle, 0);
+        } catch (Exception e) {
+            // Some methods may not exist on legacy versions
+        }
     }
 
     @Override
@@ -112,12 +176,21 @@ public final class TextDisplayHologramPlatform implements HologramPlatform {
         if (!(display instanceof TextDisplayWrapper wrapper) || key == null || value == null) {
             return;
         }
-        TextDisplay handle = wrapper.handle();
+        Entity handle = wrapper.handle();
         if (handle == null) {
             return;
         }
-        PersistentDataContainer container = handle.getPersistentDataContainer();
-        container.set(new NamespacedKey(plugin, key), PersistentDataType.STRING, value);
+        try {
+            Method getPDC = handle.getClass().getMethod("getPersistentDataContainer");
+            Object container = getPDC.invoke(handle);
+            Class<?> namespacedKeyClass = Class.forName("org.bukkit.NamespacedKey");
+            Object namespacedKey = namespacedKeyClass.getConstructor(JavaPlugin.class, String.class).newInstance(plugin, key);
+            Class<?> persistentDataTypeClass = Class.forName("org.bukkit.persistence.PersistentDataType");
+            Object stringType = persistentDataTypeClass.getField("STRING").get(null);
+            Method setMethod = container.getClass().getMethod("set", namespacedKeyClass, persistentDataTypeClass, Object.class);
+            setMethod.invoke(container, namespacedKey, stringType, value);
+        } catch (Exception e) {
+        }
     }
 
     @Override
@@ -125,46 +198,81 @@ public final class TextDisplayHologramPlatform implements HologramPlatform {
         if (!(display instanceof TextDisplayWrapper wrapper) || key == null) {
             return null;
         }
-        TextDisplay handle = wrapper.handle();
+        Entity handle = wrapper.handle();
         if (handle == null) {
             return null;
         }
-        PersistentDataContainer container = handle.getPersistentDataContainer();
-        return container.get(new NamespacedKey(plugin, key), PersistentDataType.STRING);
+        try {
+            Method getPDC = handle.getClass().getMethod("getPersistentDataContainer");
+            Object container = getPDC.invoke(handle);
+            Class<?> namespacedKeyClass = Class.forName("org.bukkit.NamespacedKey");
+            Object namespacedKey = namespacedKeyClass.getConstructor(JavaPlugin.class, String.class).newInstance(plugin, key);
+            Class<?> persistentDataTypeClass = Class.forName("org.bukkit.persistence.PersistentDataType");
+            Object stringType = persistentDataTypeClass.getField("STRING").get(null);
+            Method getMethod = container.getClass().getMethod("get", namespacedKeyClass, persistentDataTypeClass);
+            Object result = getMethod.invoke(container, namespacedKey, stringType);
+            return result != null ? result.toString() : null;
+        } catch (Exception e) {
+        }
+        return null;
     }
 
     private static final class TextDisplayWrapper implements HologramDisplay {
 
-        private final TextDisplay display;
+        private final Entity display;
 
-        private TextDisplayWrapper(TextDisplay display) {
+        private TextDisplayWrapper(Entity display) {
             this.display = display;
         }
 
-        private TextDisplay handle() {
+        private Entity handle() {
             return display;
         }
 
         @Override
         public UUID uniqueId() {
-            return display.getUniqueId();
+            try {
+                Method getUniqueId = display.getClass().getMethod("getUniqueId");
+                return (UUID) getUniqueId.invoke(display);
+            } catch (Exception e) {
+                return null;
+            }
         }
 
         @Override
         public Location location() {
-            return display.getLocation();
+            try {
+                Method getLocation = display.getClass().getMethod("getLocation");
+                return (Location) getLocation.invoke(display);
+            } catch (Exception e) {
+                return null;
+            }
         }
 
         @Override
         public boolean isValid() {
-            return display.isValid() && !display.isDead();
+            try {
+                Method isValid = display.getClass().getMethod("isValid");
+                Method isDead = display.getClass().getMethod("isDead");
+                return (Boolean) isValid.invoke(display) && !(Boolean) isDead.invoke(display);
+            } catch (Exception e) {
+                return false;
+            }
         }
 
         @Override
         public void remove() {
-            display.remove();
+            try {
+                Method remove = display.getClass().getMethod("remove");
+                remove.invoke(display);
+            } catch (Exception e) {
+            }
         }
 
+        /**
+         * Sets the text for the hologram display, using reflection to support both modern and legacy APIs.
+         * Falls back to legacy string serialization if necessary.
+         */
         @Override
         public void setText(Component text) {
             if (text == null) {
@@ -179,10 +287,8 @@ public final class TextDisplayHologramPlatform implements HologramPlatform {
                     String legacy = LegacyComponentSerializer.legacySection().serialize(text);
                     setTextMethod.invoke(display, legacy);
                 } catch (Exception ignored) {
-                    // No compatible method found
                 }
             } catch (Exception ex) {
-                // Ignore reflection failures
             }
         }
     }
