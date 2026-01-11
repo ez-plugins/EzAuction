@@ -157,6 +157,14 @@ public class AuctionSellMenu {
         openSellMenu(player, state, target);
     }
 
+    /**
+     * Opens the sell menu for the live auction target.
+     * Used by the /liveauction sell command.
+     */
+    public void openLive(Player player) {
+        openSellMenu(player, SellMenuHolder.Target.LIVE);
+    }
+
     private void openSellMenu(Player player, SellMenuState state, Target target) {
         if (player == null || state == null) return;
 

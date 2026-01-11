@@ -123,6 +123,17 @@ public final class AuctionConfiguration {
                 AuctionHologramConfiguration.defaults(), LiveAuctionConfiguration.defaults(), List.of(), false);
     }
 
+    /**
+     * Returns whether the history GUI is enabled in the configuration.
+     * Looks for a 'history-gui.enabled' field in the menu configuration if available.
+     */
+    public boolean isHistoryGuiEnabled() {
+        if (menuConfiguration != null) {
+            return menuConfiguration.historyGuiEnabled();
+        }
+        return true;
+    }
+
     @Override
     public String toString() {
         return "AuctionConfiguration{"

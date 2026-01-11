@@ -1,5 +1,9 @@
 package com.skyblockexp.ezauction.bootstrap;
 
+import com.skyblockexp.ezauction.gui.AuctionReturnListener;
+import com.skyblockexp.ezauction.gui.AuctionSellMenuListener;
+import com.skyblockexp.ezauction.live.LiveAuctionCommand;
+
 import com.skyblockexp.ezauction.*;
 import com.skyblockexp.ezauction.transaction.AuctionTransactionService;
 import com.skyblockexp.ezauction.transaction.AuctionTransactionHistory;
@@ -13,6 +17,23 @@ import com.skyblockexp.ezauction.live.*;
 import com.skyblockexp.ezauction.placeholder.*;
 import com.skyblockexp.ezauction.storage.*;
 import com.skyblockexp.ezauction.util.*;
+import com.skyblockexp.ezauction.AuctionListing;
+import com.skyblockexp.ezauction.AuctionOrder;
+import com.skyblockexp.ezauction.storage.AuctionStorageSnapshot;
+import com.skyblockexp.ezauction.storage.DistributedAuctionListingStorage;
+import com.skyblockexp.ezauction.compat.ItemTagStorage;
+import com.skyblockexp.ezauction.compat.HologramPlatform;
+import com.skyblockexp.ezauction.config.AuctionBackendMessages;
+import com.skyblockexp.ezauction.config.AuctionMenuInteractionConfiguration;
+import com.skyblockexp.ezauction.config.AuctionValueConfiguration;
+import com.skyblockexp.ezauction.config.AuctionMessageConfiguration;
+import com.skyblockexp.ezauction.config.AuctionCommandMessageConfiguration;
+import com.skyblockexp.ezauction.config.AuctionHologramConfiguration;
+import com.skyblockexp.ezauction.util.EzShopsItemValueProvider;
+import com.skyblockexp.ezauction.util.ConfiguredItemValueProvider;
+import com.skyblockexp.ezauction.util.ItemValueProvider;
+import com.skyblockexp.ezauction.live.LiveAuctionEnqueueListener;
+import com.skyblockexp.ezauction.hologram.AuctionHologramListener;
 import java.util.logging.Level;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.plugin.Plugin;
@@ -91,6 +112,14 @@ public class PluginRegistry {
     public final Metrics metrics;
     /** Service for live auction events. */
     public final LiveAuctionService liveAuctionService;
+    /**
+     * Stores pending item returns for auction claims.
+     * <p>
+     * This map is populated from persistent storage on startup and is shared with
+     * the AuctionClaimService and AuctionReturnListener to ensure players can reclaim items.
+     * </p>
+     */
+    private final Map<UUID, List<org.bukkit.inventory.ItemStack>> pendingReturns;
 
     /**
      * Initializes and wires all plugin components, managers, GUIs, and integrations.
@@ -99,6 +128,8 @@ public class PluginRegistry {
      */
     public PluginRegistry(EzAuctionPlugin plugin) {
         this.plugin = plugin;
+        this.configuration = AuctionConfigurationLoader.load(plugin);
+
         // 1. Setup economy
         Economy tempEconomy = null;
         if (plugin.getServer().getPluginManager().getPlugin("Vault") == null) {
@@ -122,9 +153,9 @@ public class PluginRegistry {
         // Determine if history GUI is enabled
         boolean guiEnabled = false;
         try {
-            guiEnabled = configuration != null &&
-                configuration.config().getConfigurationSection("history-gui") != null &&
-                configuration.config().getBoolean("history-gui.enabled", true);
+            if (configuration != null) {
+                guiEnabled = configuration.isHistoryGuiEnabled();
+            }
         } catch (Exception ignored) {}
         this.historyGuiEnabled = guiEnabled;
 
@@ -132,7 +163,6 @@ public class PluginRegistry {
         this.compatibilityFacade = CompatibilityFacade.create(plugin);
         ItemTagStorage itemTagStorage = compatibilityFacade.itemTagStorage();
         HologramPlatform hologramPlatform = compatibilityFacade.hologramPlatform();
-        this.configuration = AuctionConfigurationLoader.load(plugin);
         boolean hologramSupportAvailable = hologramPlatform.isSupported();
         if (!hologramSupportAvailable && configuration.hologramConfiguration().enabled()) {
             plugin.getLogger().warning("TextDisplay entities are unavailable on this server version. EzAuction holograms will be disabled.");
@@ -142,8 +172,8 @@ public class PluginRegistry {
         this.historyStorage = storageBundle.historyStorage();
 
         AuctionBackendMessages backendMessages = configuration.backendMessages();
-        this.transactionService = new com.skyblockexp.ezauction.transaction.AuctionTransactionService(plugin, economy, backendMessages.economy(), backendMessages.fallback());
-        this.transactionHistory = new com.skyblockexp.ezauction.transaction.AuctionTransactionHistory(plugin, historyStorage);
+        this.transactionService = new AuctionTransactionService(plugin, economy, backendMessages.economy(), backendMessages.fallback());
+        this.transactionHistory = new AuctionTransactionHistory(plugin, historyStorage);
         this.transactionHistory.enable();
 
         AuctionListingLimitResolver listingLimitResolver;
@@ -160,10 +190,22 @@ public class PluginRegistry {
         // Shared state for listings, orders, and returns
         Map<String, AuctionListing> listings = new java.util.concurrent.ConcurrentHashMap<>();
         Map<String, AuctionOrder> orders = new java.util.concurrent.ConcurrentHashMap<>();
-        Map<UUID, List<org.bukkit.inventory.ItemStack>> pendingReturns = new java.util.concurrent.ConcurrentHashMap<>();
+        this.pendingReturns = new java.util.concurrent.ConcurrentHashMap<>();
 
         // Services
-        AuctionPersistenceManager persistenceManager = new AuctionPersistenceManager(listingStorage, (listingStorage instanceof com.skyblockexp.ezauction.storage.DistributedAuctionListingStorage d) ? d : null, java.util.concurrent.Executors.newSingleThreadExecutor(r -> { Thread t = new Thread(r, "EzAuction-Persistence"); t.setDaemon(true); return t; }));
+        DistributedAuctionListingStorage distributedStorage =
+            (listingStorage instanceof DistributedAuctionListingStorage d) ? d : null;
+        java.util.concurrent.ExecutorService persistenceExecutor =
+            java.util.concurrent.Executors.newSingleThreadExecutor(r -> {
+                Thread t = new Thread(r, "EzAuction-Persistence");
+                t.setDaemon(true);
+                return t;
+            });
+        AuctionPersistenceManager persistenceManager = new AuctionPersistenceManager(
+            listingStorage,
+            distributedStorage,
+            persistenceExecutor
+        );
         // Ensure persistence is enabled
         persistenceManager.setStorageReady(true);
 
@@ -173,7 +215,7 @@ public class PluginRegistry {
             listings.putAll(snapshot.listings());
             orders.putAll(snapshot.orders());
             if (snapshot.pendingReturns() != null) {
-                pendingReturns.putAll(snapshot.pendingReturns());
+                this.pendingReturns.putAll(snapshot.pendingReturns());
             }
         }
 
@@ -265,12 +307,16 @@ public class PluginRegistry {
         plugin.getServer().getPluginManager().registerEvents(auctionMenu, plugin);
         plugin.getServer().getPluginManager().registerEvents(liveAuctionMenu, plugin);
         plugin.getServer().getPluginManager().registerEvents(auctionOrderMenu, plugin);
-        plugin.getServer().getPluginManager().registerEvents(new AuctionReturnListener(auctionManager), plugin);
+        // Register AuctionReturnListener with the shared pendingReturns map for claim handling
+        plugin.getServer().getPluginManager().registerEvents(new AuctionReturnListener(new AuctionClaimService(
+            pendingReturns,
+            configuration.backendMessages()
+        )), plugin);
         plugin.getServer().getPluginManager().registerEvents(new AuctionSellMenuListener(auctionSellMenu), plugin);
 
         // Register AuctionHistoryListener only if history GUI is enabled
         if (historyGuiEnabled) {
-            plugin.getServer().getPluginManager().registerEvents(new com.skyblockexp.ezauction.gui.AuctionHistoryListener(), plugin);
+            plugin.getServer().getPluginManager().registerEvents(new AuctionHistoryListener(), plugin);
         }
 
         if (liveAuctionService != null && liveAuctionService.isEnabled()) {
@@ -296,7 +342,7 @@ public class PluginRegistry {
             } else {
                 plugin.getLogger().warning("Plugin command 'auctionhologram' is not defined; hologram placement will be unavailable.");
             }
-            plugin.getServer().getPluginManager().registerEvents(new com.skyblockexp.ezauction.hologram.AuctionHologramListener(hologramManager), plugin);
+            plugin.getServer().getPluginManager().registerEvents(new AuctionHologramListener(hologramManager), plugin);
         }
 
         // Update checker
@@ -319,10 +365,6 @@ public class PluginRegistry {
             if (listingStorage != null) listingStorage.close();
         } catch (Exception ex) {
             plugin.getLogger().log(Level.SEVERE, "Failed to close EzAuction listing storage.", ex);
-
-        // Register AuctionHistoryListener only if history GUI is enabled
-        if (historyGuiEnabled) {
-            plugin.getServer().getPluginManager().registerEvents(new com.skyblockexp.ezauction.gui.AuctionHistoryListener(), plugin);
         }
 
         try {
