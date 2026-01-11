@@ -315,6 +315,11 @@ public class PluginRegistry {
         if (hologramManager != null) hologramManager.disable();
         if (placeholderExpansion != null) placeholderExpansion.unregister();
         
+        try {
+            if (listingStorage != null) listingStorage.close();
+        } catch (Exception ex) {
+            plugin.getLogger().log(Level.SEVERE, "Failed to close EzAuction listing storage.", ex);
+
         // Register AuctionHistoryListener only if history GUI is enabled
         if (historyGuiEnabled) {
             plugin.getServer().getPluginManager().registerEvents(new com.skyblockexp.ezauction.gui.AuctionHistoryListener(), plugin);
