@@ -230,7 +230,11 @@ public class PluginRegistry {
         AuctionOrderService orderService = new AuctionOrderService(
             transactionService, configuration.listingRules(), persistenceManager, notificationService, transactionHistoryService, claimService, pendingReturns, listings
         );
-        AuctionReturnService returnService = new AuctionReturnService(persistenceManager);
+        AuctionReturnService returnService = new AuctionReturnService(
+            pendingReturns,
+            persistenceManager,
+            finalMessages
+        );
         AuctionExpiryService expiryService = new AuctionExpiryService(plugin, listings, orders, persistenceManager, notificationService, transactionHistoryService, claimService, transactionService, pendingReturns);
         AuctionQueryService queryService = new AuctionQueryService(listings, orders, liveAuctionService, configuration);
         this.auctionManager = new AuctionManager(plugin, listingService, orderService, returnService, expiryService, queryService, configuration, listingLimitResolver);
