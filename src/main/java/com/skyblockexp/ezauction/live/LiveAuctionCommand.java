@@ -18,7 +18,7 @@ import java.util.List;
  * Handles the /liveauction command for opening the live auction browser or sell menu.
  * Provides tab completion for subcommands.
  *
- * @author SkyblockExperience Team
+ * @author Shadow48402
  * @since 1.1.0
  */
 public class LiveAuctionCommand implements CommandExecutor, TabCompleter {
