@@ -14,9 +14,16 @@ commands:
       /<command> order <price> <amount> [duration]
       /<command> claim - Retrieve returned auction items.
       /<command> live - View upcoming live auctions.
+      /<command> history [player] - View your auction history (or another player's, if permitted).
     aliases: [ah]
     permission: ezauction.auction
     permission-message: You do not have permission to use this command.
+  auctionhistory:
+    description: View your auction transaction history in a professional GUI.
+    usage: |
+      /<command> [player] - Open the auction history GUI for yourself or another player (if permitted).
+    permission: ezauction.auction.history
+    permission-message: You do not have permission to view auction history.
   auctionhologram:
     description: Place or remove EzAuction holographic displays.
     usage: |
@@ -50,6 +57,9 @@ permissions:
   ezauction.auction.history:
     description: Allows players to review their auction transaction history.
     default: true
+  ezauction.auction.history.others:
+    description: Allows players to view other players' auction history via the GUI.
+    default: op
   ezauction.auction.live:
     description: Allows players to view the live auction queue.
     default: true
