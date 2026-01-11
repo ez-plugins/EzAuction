@@ -44,7 +44,7 @@ public class AuctionHistoryListener implements Listener {
         Inventory inv = event.getInventory();
         if (inv == null || inv.getHolder() != null) return;
         if (!(event.getWhoClicked() instanceof Player player)) return;
-        String title = inv.getTitle();
+        String title = event.getView().getTitle();
         if (!title.startsWith("Auction History")) return;
         int slot = event.getRawSlot();
         event.setCancelled(true);
@@ -69,7 +69,7 @@ public class AuctionHistoryListener implements Listener {
         if (!(event.getPlayer() instanceof Player player)) return;
         Inventory inv = event.getInventory();
         if (inv == null || inv.getHolder() != null) return;
-        String title = inv.getTitle();
+        String title = event.getView().getTitle();
         if (!title.startsWith("Auction History")) return;
         unregisterGUI(player);
     }

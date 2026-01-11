@@ -93,10 +93,16 @@ public final class AuctionMenuConfiguration {
 
     private final BrowserMenuConfiguration browser;
     private final ConfirmMenuConfiguration confirm;
+    private final boolean historyGuiEnabled;
 
     public AuctionMenuConfiguration(BrowserMenuConfiguration browser, ConfirmMenuConfiguration confirm) {
+        this(browser, confirm, true);
+    }
+
+    public AuctionMenuConfiguration(BrowserMenuConfiguration browser, ConfirmMenuConfiguration confirm, boolean historyGuiEnabled) {
         this.browser = browser != null ? browser : DEFAULT_BROWSER;
         this.confirm = confirm != null ? confirm : DEFAULT_CONFIRM;
+        this.historyGuiEnabled = historyGuiEnabled;
     }
 
     public BrowserMenuConfiguration browser() {
@@ -116,10 +122,19 @@ public final class AuctionMenuConfiguration {
             return defaults();
         }
         BrowserMenuConfiguration browserConfiguration = BrowserMenuConfiguration
-                .from(section.getConfigurationSection("browser"));
+            .from(section.getConfigurationSection("browser"));
         ConfirmMenuConfiguration confirmConfiguration = ConfirmMenuConfiguration
-                .from(section.getConfigurationSection("confirm"));
-        return new AuctionMenuConfiguration(browserConfiguration, confirmConfiguration);
+            .from(section.getConfigurationSection("confirm"));
+        boolean historyGuiEnabled = true;
+        if (section.contains("history-gui.enabled")) {
+            historyGuiEnabled = section.getBoolean("history-gui.enabled", true);
+        }
+
+        return new AuctionMenuConfiguration(browserConfiguration, confirmConfiguration, historyGuiEnabled);
+    }
+    
+    public boolean historyGuiEnabled() {
+        return historyGuiEnabled;
     }
 
     @Override
