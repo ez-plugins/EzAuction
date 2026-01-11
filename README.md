@@ -72,7 +72,6 @@ After editing, reload the plugin or restart the server to apply changes.
 | `/auction sell <price>`| List held item for sale            | `ezauction.sell`          |
 | `/auction cancel`      | Cancel your active listing         | `ezauction.cancel`        |
 | `/auction reload`      | Reload plugin configuration        | `ezauction.admin.reload`  |
-
 | `/auction history [player]` | View your auction history (or another player's, if permitted) | `ezauction.auction.history` / `ezauction.auction.history.others` |
 
 **Key Permissions:**
