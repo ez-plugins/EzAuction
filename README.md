@@ -1,6 +1,3 @@
-
-
-
 # EzAuction
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
@@ -18,7 +15,6 @@
   - [🚀 Installation](#-installation)
   - [✨ Features](#-features)
   - [⚙️ Configuration](#️-configuration)
-    - [Configuration Guide](https://github.com/ez-plugins/EzAuction/blob/main/docs/configuration.md)
   - [🛡️ Permissions \& Commands](#️-permissions--commands)
   - [📚 Documentation](#-documentation)
   - [🛠️ Usage Examples](#️-usage-examples)
@@ -77,6 +73,8 @@ After editing, reload the plugin or restart the server to apply changes.
 | `/auction cancel`      | Cancel your active listing         | `ezauction.cancel`        |
 | `/auction reload`      | Reload plugin configuration        | `ezauction.admin.reload`  |
 
+| `/auction history [player]` | View your auction history (or another player's, if permitted) | `ezauction.auction.history` / `ezauction.auction.history.others` |
+
 **Key Permissions:**
 
 - `ezauction.use`: Access the auction GUI
@@ -84,7 +82,10 @@ After editing, reload the plugin or restart the server to apply changes.
 - `ezauction.cancel`: Cancel own listings
 - `ezauction.admin.*`: All admin permissions
 
-See the [docs/permissions.md](../docs/permissions.md) for a full list.
+- `ezauction.auction.history`: View your own auction history in the GUI
+- `ezauction.auction.history.others`: View other players' auction history (if permitted)
+
+See the [docs/permissions.md](docs/permissions.md) for a full list.
 
 ## 📚 Documentation
 - [API Reference](docs/api.md): Public classes, methods, and code samples

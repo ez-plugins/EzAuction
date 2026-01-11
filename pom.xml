@@ -6,7 +6,7 @@
 
     <groupId>com.skyblockexp</groupId>
     <artifactId>ezauction</artifactId>
-    <version>1.1.1</version>
+    <version>1.2.0</version>
     <name>EzAuction Plugin</name>
     <description>Standalone auction house plugin for many of your advanced auction features.</description>
     <packaging>jar</packaging>

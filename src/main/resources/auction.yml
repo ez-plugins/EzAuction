@@ -35,3 +35,6 @@ live-auctions:
   display-in-chat: true
   # Interval (in ticks) between live auction broadcasts when chat display is enabled.
   announcement-interval-ticks: 200
+
+history-gui:
+  enabled: true # Set to false to disable the auction history GUI and related commands.

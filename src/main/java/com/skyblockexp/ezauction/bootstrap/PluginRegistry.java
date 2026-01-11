@@ -49,6 +49,8 @@ import com.skyblockexp.ezauction.history.AuctionTransactionHistoryService;
 public class PluginRegistry {
     /** The main plugin instance. */
     private final EzAuctionPlugin plugin;
+    /** Whether the auction history GUI is enabled. */
+    public final boolean historyGuiEnabled;
     /** Vault economy provider. */
     public final Economy economy;
     /** Handles all auction transactions. */
@@ -116,6 +118,15 @@ public class PluginRegistry {
             }
         }
         this.economy = tempEconomy;
+
+        // Determine if history GUI is enabled
+        boolean guiEnabled = false;
+        try {
+            guiEnabled = configuration != null &&
+                configuration.config().getConfigurationSection("history-gui") != null &&
+                configuration.config().getBoolean("history-gui.enabled", true);
+        } catch (Exception ignored) {}
+        this.historyGuiEnabled = guiEnabled;
 
         // 2. Compatibility and config
         this.compatibilityFacade = CompatibilityFacade.create(plugin);
@@ -257,6 +268,11 @@ public class PluginRegistry {
         plugin.getServer().getPluginManager().registerEvents(new AuctionReturnListener(auctionManager), plugin);
         plugin.getServer().getPluginManager().registerEvents(new AuctionSellMenuListener(auctionSellMenu), plugin);
 
+        // Register AuctionHistoryListener only if history GUI is enabled
+        if (historyGuiEnabled) {
+            plugin.getServer().getPluginManager().registerEvents(new com.skyblockexp.ezauction.gui.AuctionHistoryListener(), plugin);
+        }
+
         if (liveAuctionService != null && liveAuctionService.isEnabled()) {
             plugin.getServer().getPluginManager().registerEvents(new LiveAuctionEnqueueListener(liveAuctionService), plugin);
             LiveAuctionCommand liveCmd = new LiveAuctionCommand(auctionManager, liveAuctionMenu, auctionSellMenu, configuration.commandMessageConfiguration());
@@ -298,11 +314,17 @@ public class PluginRegistry {
         if (transactionHistory != null) transactionHistory.disable();
         if (hologramManager != null) hologramManager.disable();
         if (placeholderExpansion != null) placeholderExpansion.unregister();
+        
         try {
             if (listingStorage != null) listingStorage.close();
         } catch (Exception ex) {
             plugin.getLogger().log(Level.SEVERE, "Failed to close EzAuction listing storage.", ex);
+
+        // Register AuctionHistoryListener only if history GUI is enabled
+        if (historyGuiEnabled) {
+            plugin.getServer().getPluginManager().registerEvents(new com.skyblockexp.ezauction.gui.AuctionHistoryListener(), plugin);
         }
+
         try {
             if (historyStorage != null && historyStorage != listingStorage) historyStorage.close();
         } catch (Exception ex) {
