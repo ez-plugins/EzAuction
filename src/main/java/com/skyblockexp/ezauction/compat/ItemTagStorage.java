@@ -18,4 +18,13 @@ public interface ItemTagStorage {
     void setInt(ItemStack item, String key, int value);
 
     Integer getInt(ItemStack item, String key);
+
+    // Convenience methods for generic set/get
+    default void set(ItemStack item, String key, String value) {
+        setString(item, key, value);
+    }
+
+    default String get(ItemStack item, String key) {
+        return getString(item, key);
+    }
 }

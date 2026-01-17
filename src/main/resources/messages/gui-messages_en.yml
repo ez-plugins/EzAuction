@@ -22,6 +22,9 @@ browser:
   sort-orders: "&aSorting orders by &b{sort}&a."
   shulker-preview-hint: "&dShift-click to preview contents."
   shulker-preview-title: "&5Shulker Contents"
+  search-tips-title: "&eSearch Tips"
+  claims-title: "&6Pending Returns"
+  no-claims: "&7You have no items to claim."
 sell:
   item-required: "&cYou must hold the item you want to list in your main hand."
   price-prompt: "&eEnter the listing price in chat.&7 (type 'cancel' to abort)"
@@ -47,3 +50,10 @@ order:
 live:
   disabled: "&cLive auctions are currently disabled."
   queue-instant: "&eLive auction announcements are broadcast instantly; no queue is available."
+activity:
+  no-listings: "You have no active listings."
+  no-orders: "You have no active buy orders."
+  no-returns: "You have no pending returns."
+  no-history: "No transaction history."
+  claim-prompt-line1: "You have {count} items waiting."
+  claim-prompt-line2: "Click the claim button below to retrieve them."

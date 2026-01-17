@@ -17,6 +17,29 @@ browser:
     display-name: "&bSearch"
     lore:
       - "&7Find items by name."
+  sort:
+    slot: 51
+    material: HOPPER
+    display-name: "&bSort"
+    lore:
+      - "&7Change how listings are ordered."
+  search-tips:
+    slot: 50
+    material: KNOWLEDGE_BOOK
+    display-name: "&eSearch Tips"
+    lore:
+      - "&7Supported patterns:"
+      - "&e• &7Item name: &ffortune"
+      - "&e• &7With level: &ffortune 3"
+      - "&e• &7Roman numerals: &fsharpness v"
+      - "&e• &7Material ID: &fminecraft:diamond_sword"
+      - "&7Click to close this help."
+  claims:
+    slot: 47
+    material: ENDER_CHEST
+    display-name: "&6Pending Returns"
+    lore:
+      - "&7Click to claim items."
   toggles:
     listings:
       slot: 46

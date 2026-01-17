@@ -80,7 +80,9 @@ public class AuctionTransactionHistory {
             return;
         }
         double normalizedPrice = EconomyUtils.normalizeCurrency(price);
+        String transactionId = UUID.randomUUID().toString();
         AuctionTransactionHistoryEntry entry = new AuctionTransactionHistoryEntry(
+                transactionId,
                 type,
                 counterpartId,
                 counterpartName,

@@ -414,8 +414,9 @@ public class AuctionOrderMenu implements Listener {
                 meta.setDisplayName(colorize(displayName));
             }
             List<String> lore = new ArrayList<>();
-            lore.add(ChatColor.GRAY + "Request: " + ChatColor.AQUA + describeItem(holder.state().item()));
+            lore.add(ChatColor.GRAY + "Item Template: " + ChatColor.AQUA + describeItem(holder.state().item()));
             lore.add(ChatColor.GRAY + "Quantity: " + ChatColor.AQUA + holder.state().quantity());
+            lore.add(ChatColor.GRAY + "Price per Item: " + ChatColor.GOLD + formatPrice(holder.state().pricePerItem()));
             lore.add(ChatColor.GRAY + "Total Offer: " + ChatColor.GOLD + formatPrice(holder.state().totalPrice()));
             Double recommended = holder.state().recommendedPricePerItem();
             if (recommended != null) {
@@ -424,6 +425,8 @@ public class AuctionOrderMenu implements Listener {
                 lore.add(ChatColor.GRAY + "Recommended Total: " + ChatColor.GOLD + formatPrice(recommendedTotal));
             }
             lore.add(ChatColor.GRAY + "Duration: " + ChatColor.YELLOW + formatDuration(holder.state().duration()));
+            lore.add(" ");
+            lore.add(ChatColor.GREEN + "Click to create this buy order.");
             meta.setLore(lore);
             item.setItemMeta(meta);
         }
@@ -439,7 +442,7 @@ public class AuctionOrderMenu implements Listener {
             if (displayName != null && !displayName.isEmpty()) {
                 meta.setDisplayName(colorize(displayName));
             }
-            meta.setLore(List.of(ChatColor.GRAY + "Return to the previous menu."));
+            meta.setLore(List.of(ChatColor.GRAY + "Return to the auction browser."));
             item.setItemMeta(meta);
         }
         return item;

@@ -8,6 +8,7 @@ import org.bukkit.inventory.ItemStack;
  * Represents a single entry in a player's auction transaction history.
  */
 public record AuctionTransactionHistoryEntry(
+        String transactionId,
         AuctionTransactionType type,
         UUID counterpartId,
         String counterpartName,
@@ -16,6 +17,7 @@ public record AuctionTransactionHistoryEntry(
         ItemStack item) {
 
     public AuctionTransactionHistoryEntry {
+        Objects.requireNonNull(transactionId, "transactionId");
         Objects.requireNonNull(type, "type");
         if (price < 0) {
             price = 0.0D;

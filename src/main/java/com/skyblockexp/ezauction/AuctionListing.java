@@ -34,4 +34,13 @@ public record AuctionListing(
     public boolean isExpired(long currentTimeMillis) {
         return currentTimeMillis >= expiryEpochMillis;
     }
+
+    // Compatibility aliases for alternative naming conventions
+    public UUID seller() {
+        return sellerId;
+    }
+
+    public long expiresAt() {
+        return expiryEpochMillis;
+    }
 }

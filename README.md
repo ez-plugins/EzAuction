@@ -6,6 +6,8 @@
 
 **EzAuction** is a modern, extensible Minecraft auction plugin for Bukkit/Spigot servers. It features a user-friendly GUI, robust API, and comprehensive event system for both server owners and plugin developers.
 
+**Version 2.0.0** introduces enhanced GUI navigation, detailed confirmation dialogs, and full compatibility with EzShops 2.0.0+.
+
 ---
 
 ## 📑 Table of Contents
@@ -31,6 +33,8 @@
 - Bukkit/Spigot/Paper server (1.17+ recommended)
 
 ## 🚀 Installation
+
+### New Installation
 1. Download the latest EzAuction JAR from the [releases page](https://github.com/ez-plugins/ezauction/releases).
 2. Place the JAR in your server's `plugins/` directory.
 3. Start or reload your server.
@@ -45,6 +49,11 @@
 - Customizable messages and GUI appearance
 - Full event and API support for developers
 - Multi-language support (via config)
+- **NEW in 2.0**: EzShops 2.0.0+ integration support
+- **NEW in 2.0**: Enhanced navigation with Back buttons and search tips
+- **NEW in 2.0**: Quick access to pending returns via Claims button
+- **NEW in 2.0**: Low-price warnings in confirmation dialogs
+- **NEW in 2.0**: Consolidated "My Activity" menu
 - Actively maintained and open source
 
 ## ⚙️ Configuration

@@ -41,6 +41,7 @@ public final class LiveAuctionMenu implements Listener {
     private static final String ACTION_CLOSE = "close";
     private static final String ACTION_REFRESH = "refresh";
     private static final String ACTION_BROWSE = "browse";
+    private static final String ACTION_BACK = "back";
 
     private static final int INVENTORY_SIZE = 45;
     private static final String INVENTORY_TITLE = ChatColor.GOLD + "Live Auctions";
@@ -49,6 +50,7 @@ public final class LiveAuctionMenu implements Listener {
     private static final int REFRESH_SLOT = 42;
     private static final int BROWSE_SLOT = 38;
     private static final int EMPTY_SLOT = 22;
+    private static final int BACK_SLOT = 36;
 
     private static final int[] QUEUE_SLOTS = {
         10, 11, 12, 13, 14, 15, 16,
@@ -73,6 +75,7 @@ public final class LiveAuctionMenu implements Listener {
     private final ItemStack closeButton;
     private final ItemStack refreshButton;
     private final ItemStack browseButton;
+    private final ItemStack backButton;
     private final ItemStack infoButton;
 
     public LiveAuctionMenu(JavaPlugin plugin, AuctionManager auctionManager,
@@ -100,6 +103,8 @@ public final class LiveAuctionMenu implements Listener {
                 List.of(ChatColor.GRAY + "Update the live auction queue."));
         this.browseButton = createButton(Material.CHEST, ChatColor.GREEN + "Browse Auctions",
                 List.of(ChatColor.GRAY + "Open the main auction house."));
+        this.backButton = createButton(Material.ARROW, ChatColor.YELLOW + "Back to Browser",
+                List.of(ChatColor.GRAY + "Return to the auction browser."));
         this.infoButton = createButton(Material.WRITABLE_BOOK, ChatColor.AQUA + "Live Auction Queue",
                 List.of(ChatColor.GRAY + "View upcoming live announcements.",
                         ChatColor.GRAY + "Listings are broadcast from first to last.",
@@ -145,6 +150,10 @@ public final class LiveAuctionMenu implements Listener {
         ItemStack browse = browseButton.clone();
         setAction(browse, ACTION_BROWSE);
         inventory.setItem(BROWSE_SLOT, browse);
+
+        ItemStack back = backButton.clone();
+        setAction(back, ACTION_BACK);
+        inventory.setItem(BACK_SLOT, back);
 
         List<LiveAuctionEntry> queue = new ArrayList<>(auctionManager.listQueuedLiveAuctions());
         if (queue.isEmpty()) {
@@ -347,6 +356,10 @@ public final class LiveAuctionMenu implements Listener {
             case ACTION_CLOSE -> player.closeInventory();
             case ACTION_REFRESH -> reopenAsync(player);
             case ACTION_BROWSE -> {
+                player.closeInventory();
+                plugin.getServer().getScheduler().runTask(plugin, () -> auctionMenu.openBrowser(player));
+            }
+            case ACTION_BACK -> {
                 player.closeInventory();
                 plugin.getServer().getScheduler().runTask(plugin, () -> auctionMenu.openBrowser(player));
             }

@@ -68,7 +68,8 @@ public class AuctionHistoryGUI {
      * @param tab The tab to display (SALES or PURCHASES)
      */
     private void createGUI(Tab tab) {
-        String title = tab == Tab.SALES ? "Auction History - Sales" : "Auction History - Purchases";
+        String tabLabel = tab == Tab.SALES ? "Sales" : "Purchases";
+        String title = "Auction History (" + tabLabel + ")";
         gui = Bukkit.createInventory(null, 54, title);
         currentTab = tab;
         List<AuctionTransactionHistoryEntry> entries = historyService.getHistory(target.getUniqueId());
@@ -114,6 +115,16 @@ public class AuctionHistoryGUI {
             close.setItemMeta(closeMeta);
         }
         gui.setItem(49, close);
+
+        // Back button to auction browser
+        ItemStack back = new ItemStack(Material.ARROW);
+        ItemMeta backMeta = back.getItemMeta();
+        if (backMeta != null) {
+            backMeta.setDisplayName("§eBack to Browser");
+            backMeta.setLore(List.of("§7Return to the auction house."));
+            back.setItemMeta(backMeta);
+        }
+        gui.setItem(45, back);
     }
 
     /**
