@@ -34,4 +34,26 @@ public record AuctionOrder(
     public boolean isExpired(long currentTimeMillis) {
         return currentTimeMillis >= expiryEpochMillis;
     }
+
+    // Compatibility aliases for alternative naming conventions
+    public UUID buyer() {
+        return buyerId;
+    }
+
+    public long expiresAt() {
+        return expiryEpochMillis;
+    }
+
+    public ItemStack itemTemplate() {
+        return requestedItem();
+    }
+
+    public double pricePerItem() {
+        return offeredPrice;
+    }
+
+    public int quantity() {
+        ItemStack item = requestedItem();
+        return item != null ? item.getAmount() : 0;
+    }
 }

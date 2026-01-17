@@ -16,7 +16,10 @@ import org.bukkit.plugin.java.JavaPlugin;
  */
 public final class EzShopsItemValueProvider implements ItemValueProvider {
 
-    private static final String SHOP_PRICE_SERVICE_CLASS_NAME = "com.skyblockexp.shop.api.ShopPriceService";
+    // EzShops 2.0.0+ uses the full package name (check first as it's more common)
+    private static final String SHOP_PRICE_SERVICE_CLASS_NAME_V2 = "com.skyblockexp.ezshops.shop.api.ShopPriceService";
+    // EzShops 1.x uses the shorter package name (legacy)
+    private static final String SHOP_PRICE_SERVICE_CLASS_NAME_V1 = "com.skyblockexp.shop.api.ShopPriceService";
 
     private final Logger logger;
     private final Object priceService;
@@ -49,17 +52,29 @@ public final class EzShopsItemValueProvider implements ItemValueProvider {
 
         Class<?> serviceClass = findShopPriceServiceClass(servicesManager);
         if (serviceClass == null) {
+            plugin.getLogger().info("EzShops price service not found. EzAuction will function without shop price integration.");
             return null;
         }
 
+        // Log which version of EzShops was detected
+        String detectedVersion = "unknown";
+        if (SHOP_PRICE_SERVICE_CLASS_NAME_V2.equals(serviceClass.getName())) {
+            detectedVersion = "2.0.0+";
+        } else if (SHOP_PRICE_SERVICE_CLASS_NAME_V1.equals(serviceClass.getName())) {
+            detectedVersion = "1.x";
+        }
+        plugin.getLogger().info("EzShops integration enabled (detected version: " + detectedVersion + ")");
+
         RegisteredServiceProvider<?> registration = findRegistration(servicesManager, serviceClass);
         if (registration == null || registration.getProvider() == null) {
+            plugin.getLogger().warning("EzShops price service found but not registered. Price integration will be unavailable.");
             return null;
         }
 
         Method buyMethod = findMethod(serviceClass, "findBuyPrice");
         Method sellMethod = findMethod(serviceClass, "findSellPrice");
         if (buyMethod == null || sellMethod == null) {
+            plugin.getLogger().warning("EzShops price service methods not found. Price integration will be unavailable.");
             return null;
         }
 
@@ -73,8 +88,16 @@ public final class EzShopsItemValueProvider implements ItemValueProvider {
                 return null;
             }
             for (Class<?> serviceClass : knownServices) {
-                if (serviceClass != null && SHOP_PRICE_SERVICE_CLASS_NAME.equals(serviceClass.getName())) {
-                    return serviceClass;
+                if (serviceClass != null) {
+                    String className = serviceClass.getName();
+                    // Check V2 first (more likely in current installations)
+                    if (SHOP_PRICE_SERVICE_CLASS_NAME_V2.equals(className)) {
+                        return serviceClass;
+                    }
+                    // Then check V1 for backwards compatibility
+                    if (SHOP_PRICE_SERVICE_CLASS_NAME_V1.equals(className)) {
+                        return serviceClass;
+                    }
                 }
             }
         } catch (RuntimeException ignored) {

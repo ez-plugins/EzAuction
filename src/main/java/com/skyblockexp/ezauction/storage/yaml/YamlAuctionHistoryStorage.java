@@ -203,10 +203,16 @@ public final class YamlAuctionHistoryStorage implements AuctionHistoryStorage {
         if (item != null) {
             item = item.clone();
         }
-        return new AuctionTransactionHistoryEntry(type, counterpartId, counterpartName, price, timestamp, item);
+        // Read transaction ID or generate one for backward compatibility
+        String transactionId = section.getString("transaction-id");
+        if (transactionId == null || transactionId.isEmpty()) {
+            transactionId = UUID.randomUUID().toString();
+        }
+        return new AuctionTransactionHistoryEntry(transactionId, type, counterpartId, counterpartName, price, timestamp, item);
     }
 
     private void writeEntry(AuctionTransactionHistoryEntry entry, ConfigurationSection section) {
+        section.set("transaction-id", entry.transactionId());
         section.set("type", entry.type().name());
         section.set("timestamp", entry.timestamp());
         section.set("price", entry.price());

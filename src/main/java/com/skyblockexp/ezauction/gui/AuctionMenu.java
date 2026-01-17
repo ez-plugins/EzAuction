@@ -65,6 +65,9 @@ public class AuctionMenu implements Listener {
     private static final String ACTION_TOGGLE_ORDERS = "toggle_orders";
     private static final String ACTION_SEARCH = "search";
     private static final String ACTION_SORT = "sort";
+    private static final String ACTION_SEARCH_TIPS = "search_tips";
+    private static final String ACTION_CLAIMS = "claims";
+    private static final String ACTION_ACTIVITY = "activity";
 
     private static final int MAX_SEARCH_LENGTH = 48;
 
@@ -79,6 +82,8 @@ public class AuctionMenu implements Listener {
     private final AuctionMenuConfiguration.ToggleButtonConfiguration ordersToggleConfig;
     private final AuctionMenuConfiguration.BrowserMenuConfiguration.SearchButtonConfiguration searchButtonConfig;
     private final AuctionMenuConfiguration.BrowserMenuConfiguration.SortButtonConfiguration sortButtonConfig;
+    private final AuctionMenuConfiguration.BrowserMenuConfiguration.SearchTipsButtonConfiguration searchTipsButtonConfig;
+    private final AuctionMenuConfiguration.BrowserMenuConfiguration.ClaimsButtonConfiguration claimsButtonConfig;
     private final AuctionMenuConfiguration.ConfirmMenuConfiguration.ButtonConfiguration confirmButtonConfig;
     private final AuctionMenuConfiguration.ConfirmMenuConfiguration.ButtonConfiguration cancelButtonConfig;
     private final AuctionValueConfiguration valueConfiguration;
@@ -102,6 +107,8 @@ public class AuctionMenu implements Listener {
     private final ConcurrentMap<UUID, SearchPrompt> pendingSearchInputs;
     private final ConcurrentMap<UUID, ListingSort> activeListingSorts;
     private final ConcurrentMap<UUID, OrderSort> activeOrderSorts;
+    
+    private AuctionActivityMenu activityMenu;
 
     public AuctionMenu(JavaPlugin plugin, AuctionManager auctionManager,
             AuctionTransactionService transactionService, AuctionMenuConfiguration menuConfiguration,
@@ -119,6 +126,8 @@ public class AuctionMenu implements Listener {
         this.ordersToggleConfig = this.browserConfig.ordersToggle();
         this.searchButtonConfig = this.browserConfig.searchButton();
         this.sortButtonConfig = this.browserConfig.sortButton();
+        this.searchTipsButtonConfig = this.browserConfig.searchTipsButton();
+        this.claimsButtonConfig = this.browserConfig.claimsButton();
         this.confirmButtonConfig = this.confirmConfig.confirmButton();
         this.cancelButtonConfig = this.confirmConfig.cancelButton();
         this.valueConfiguration = valueConfiguration != null ? valueConfiguration : AuctionValueConfiguration.defaults();
@@ -141,6 +150,13 @@ public class AuctionMenu implements Listener {
         this.pendingSearchInputs = new ConcurrentHashMap<>();
         this.activeListingSorts = new ConcurrentHashMap<>();
         this.activeOrderSorts = new ConcurrentHashMap<>();
+    }
+
+    /**
+     * Sets the activity menu reference (to avoid circular dependency during construction).
+     */
+    public void setActivityMenu(AuctionActivityMenu activityMenu) {
+        this.activityMenu = activityMenu;
     }
 
     /**
@@ -186,7 +202,7 @@ public class AuctionMenu implements Listener {
         int currentPage = Math.max(0, Math.min(page, totalPages - 1));
 
         BrowserMenuHolder holder = new BrowserMenuHolder(playerId, currentPage, view);
-        String title = formatBrowserTitle(view, currentPage, totalPages);
+        String title = formatBrowserTitle(player, view, currentPage, totalPages);
         Inventory inventory = Bukkit.createInventory(holder, browserConfig.size(), title);
         holder.setInventory(inventory);
 
@@ -308,6 +324,32 @@ public class AuctionMenu implements Listener {
             if (sortSlot >= 0 && sortSlot < inventory.getSize()) {
                 inventory.setItem(sortSlot, sortButton);
             }
+        }
+
+        if (searchTipsButtonConfig != null) {
+            ItemStack searchTipsButton = createSearchTipsButton();
+            setPersistent(searchTipsButton, actionKey, ACTION_SEARCH_TIPS);
+            int searchTipsSlot = searchTipsButtonConfig.slot();
+            if (searchTipsSlot >= 0 && searchTipsSlot < inventory.getSize()) {
+                inventory.setItem(searchTipsSlot, searchTipsButton);
+            }
+        }
+
+        if (claimsButtonConfig != null) {
+            ItemStack claimsButton = createClaimsButton(player);
+            setPersistent(claimsButton, actionKey, ACTION_CLAIMS);
+            int claimsSlot = claimsButtonConfig.slot();
+            if (claimsSlot >= 0 && claimsSlot < inventory.getSize()) {
+                inventory.setItem(claimsSlot, claimsButton);
+            }
+        }
+
+        // Add activity menu button (consolidated view)
+        ItemStack activityButton = createActivityButton();
+        setPersistent(activityButton, actionKey, ACTION_ACTIVITY);
+        int activitySlot = 44; // Bottom left corner before prev button
+        if (activitySlot >= 0 && activitySlot < inventory.getSize()) {
+            inventory.setItem(activitySlot, activityButton);
         }
 
         player.openInventory(inventory);
@@ -612,7 +654,7 @@ public class AuctionMenu implements Listener {
         return createButton(configuration.material(), configuration.displayName(), lore);
     }
 
-    private String formatBrowserTitle(BrowserView view, int page, int totalPages) {
+    private String formatBrowserTitle(Player player, BrowserView view, int page, int totalPages) {
         String rawTitle = browserConfig.title();
         if (rawTitle == null || rawTitle.isEmpty()) {
             rawTitle = "&2Auction House &7({page}/{total_pages})";
@@ -621,6 +663,13 @@ public class AuctionMenu implements Listener {
                 .replace("{total_pages}", String.valueOf(Math.max(1, totalPages)));
         if (formatted.contains("{view}")) {
             formatted = formatted.replace("{view}", view == BrowserView.ORDERS ? "Orders" : "Listings");
+        }
+        // Add search indicator if this player has an active search
+        if (player != null) {
+            String searchQuery = getSearchQuery(player.getUniqueId());
+            if (searchQuery != null && !searchQuery.isEmpty()) {
+                formatted = formatted + ChatColor.YELLOW + " [Searching]";
+            }
         }
         return colorize(formatted);
     }
@@ -814,6 +863,23 @@ public class AuctionMenu implements Listener {
         }
         if (ACTION_SORT.equalsIgnoreCase(action)) {
             handleSortClick(player, holder, event);
+            return;
+        }
+        if (ACTION_SEARCH_TIPS.equalsIgnoreCase(action)) {
+            return;
+        }
+        if (ACTION_CLAIMS.equalsIgnoreCase(action)) {
+            player.closeInventory();
+            player.performCommand("auction claim");
+            return;
+        }
+        if (ACTION_ACTIVITY.equalsIgnoreCase(action)) {
+            player.closeInventory();
+            if (activityMenu != null) {
+                activityMenu.openActivityMenu(player, ActivityTab.MY_LISTINGS);
+            } else {
+                player.sendMessage(ChatColor.RED + "Activity menu is not available.");
+            }
             return;
         }
         if (!ACTION_LISTING.equalsIgnoreCase(action)) {
@@ -1854,5 +1920,48 @@ public class AuctionMenu implements Listener {
             }
         }
         return button;
+    }
+
+    private ItemStack createSearchTipsButton() {
+        AuctionMenuConfiguration.MenuButtonConfiguration configuration = searchTipsButtonConfig != null
+                ? searchTipsButtonConfig.button()
+                : null;
+        Material material = configuration != null ? configuration.material() : Material.KNOWLEDGE_BOOK;
+        String displayName = configuration != null ? configuration.displayName() : "&eSearch Tips";
+        List<String> lore = configuration != null && configuration.lore() != null
+                ? new ArrayList<>(configuration.lore())
+                : new ArrayList<>();
+        return createButton(material, displayName, lore);
+    }
+
+    private ItemStack createClaimsButton(Player player) {
+        AuctionMenuConfiguration.MenuButtonConfiguration configuration = claimsButtonConfig != null
+                ? claimsButtonConfig.button()
+                : null;
+        Material material = configuration != null ? configuration.material() : Material.ENDER_CHEST;
+        String displayName = configuration != null ? configuration.displayName() : "&6Pending Returns";
+        List<String> lore = configuration != null && configuration.lore() != null
+                ? new ArrayList<>(configuration.lore())
+                : new ArrayList<>();
+        int claimCount = auctionManager.countPendingReturnItems(player.getUniqueId());
+        if (claimCount > 0) {
+            lore.add(ChatColor.GRAY + "Pending items: " + ChatColor.YELLOW + claimCount);
+        }
+        return createButton(material, displayName, lore);
+    }
+
+    private ItemStack createActivityButton() {
+        Material material = Material.NETHER_STAR;
+        String displayName = "&d&lMy Activity";
+        List<String> lore = List.of(
+                ChatColor.GRAY + "View all your auction activities:",
+                ChatColor.YELLOW + "• Active Listings",
+                ChatColor.YELLOW + "• Buy Orders", 
+                ChatColor.YELLOW + "• Pending Returns",
+                ChatColor.YELLOW + "• Recent History",
+                "",
+                ChatColor.GREEN + "Click to open!"
+        );
+        return createButton(material, displayName, lore);
     }
 }

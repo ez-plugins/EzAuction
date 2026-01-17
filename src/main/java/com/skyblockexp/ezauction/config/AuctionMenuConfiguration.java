@@ -45,11 +45,27 @@ public final class AuctionMenuConfiguration {
                     List.of("&7Find items by name.")));
         private static final BrowserMenuConfiguration.SortButtonConfiguration DEFAULT_BROWSER_SORT_BUTTON =
             new BrowserMenuConfiguration.SortButtonConfiguration(
-                50,
+                51,
                 new MenuButtonConfiguration(
                     Material.HOPPER,
                     "&bSort",
                     List.of("&7Change how listings are ordered.")));
+        private static final BrowserMenuConfiguration.SearchTipsButtonConfiguration DEFAULT_BROWSER_SEARCH_TIPS_BUTTON =
+            new BrowserMenuConfiguration.SearchTipsButtonConfiguration(
+                50,
+                new MenuButtonConfiguration(
+                    Material.KNOWLEDGE_BOOK,
+                    "&eSearch Tips",
+                    List.of("&7Supported patterns:", "&e• &7Item name: &ffortune",
+                            "&e• &7With level: &ffortune 3", "&e• &7Roman numerals: &fsharpness v",
+                            "&e• &7Material ID: &fminecraft:diamond_sword", "&7Click to close this help.")));
+        private static final BrowserMenuConfiguration.ClaimsButtonConfiguration DEFAULT_BROWSER_CLAIMS_BUTTON =
+            new BrowserMenuConfiguration.ClaimsButtonConfiguration(
+                47,
+                new MenuButtonConfiguration(
+                    Material.ENDER_CHEST,
+                    "&6Pending Returns",
+                    List.of("&7Click to claim items.")));
 
     private static final String DEFAULT_CONFIRM_TITLE = "&2Confirm Purchase";
     private static final int DEFAULT_CONFIRM_SIZE = 27;
@@ -82,7 +98,9 @@ public final class AuctionMenuConfiguration {
             DEFAULT_BROWSER_LISTINGS_TOGGLE,
             DEFAULT_BROWSER_ORDERS_TOGGLE,
             DEFAULT_BROWSER_SEARCH_BUTTON,
-            DEFAULT_BROWSER_SORT_BUTTON);
+            DEFAULT_BROWSER_SORT_BUTTON,
+            DEFAULT_BROWSER_SEARCH_TIPS_BUTTON,
+            DEFAULT_BROWSER_CLAIMS_BUTTON);
     private static final ConfirmMenuConfiguration DEFAULT_CONFIRM = new ConfirmMenuConfiguration(
             DEFAULT_CONFIRM_TITLE,
             DEFAULT_CONFIRM_SIZE,
@@ -300,11 +318,14 @@ public final class AuctionMenuConfiguration {
         private final ToggleButtonConfiguration ordersToggle;
         private final SearchButtonConfiguration searchButton;
         private final SortButtonConfiguration sortButton;
+        private final SearchTipsButtonConfiguration searchTipsButton;
+        private final ClaimsButtonConfiguration claimsButton;
 
         private BrowserMenuConfiguration(String title, int size, MenuButtonConfiguration filler, int previousSlot,
                 int closeSlot, int nextSlot, int emptyListingSlot, ToggleButtonConfiguration listingsToggle,
                 ToggleButtonConfiguration ordersToggle, SearchButtonConfiguration searchButton,
-                SortButtonConfiguration sortButton) {
+                SortButtonConfiguration sortButton, SearchTipsButtonConfiguration searchTipsButton,
+                ClaimsButtonConfiguration claimsButton) {
             this.title = title != null ? title : DEFAULT_BROWSER_TITLE;
             int sanitizedSize = sanitizeInventorySize(size, DEFAULT_BROWSER_SIZE);
             this.size = sanitizedSize;
@@ -317,6 +338,8 @@ public final class AuctionMenuConfiguration {
             this.ordersToggle = sanitizeToggle(ordersToggle, sanitizedSize, DEFAULT_BROWSER_ORDERS_TOGGLE);
             this.searchButton = sanitizeSearchButton(searchButton, sanitizedSize, DEFAULT_BROWSER_SEARCH_BUTTON);
             this.sortButton = sanitizeSortButton(sortButton, sanitizedSize, DEFAULT_BROWSER_SORT_BUTTON);
+            this.searchTipsButton = searchTipsButton != null ? searchTipsButton : DEFAULT_BROWSER_SEARCH_TIPS_BUTTON;
+            this.claimsButton = claimsButton != null ? claimsButton : DEFAULT_BROWSER_CLAIMS_BUTTON;
         }
 
         public static BrowserMenuConfiguration from(ConfigurationSection section) {
@@ -344,8 +367,12 @@ public final class AuctionMenuConfiguration {
                     section.getConfigurationSection("search"), size, DEFAULT_BROWSER.searchButton);
             SortButtonConfiguration sortButton = SortButtonConfiguration.from(
                     section.getConfigurationSection("sort"), size, DEFAULT_BROWSER.sortButton);
+            SearchTipsButtonConfiguration searchTipsButton = SearchTipsButtonConfiguration.from(
+                    section.getConfigurationSection("search-tips"), size, DEFAULT_BROWSER.searchTipsButton);
+            ClaimsButtonConfiguration claimsButton = ClaimsButtonConfiguration.from(
+                    section.getConfigurationSection("claims"), size, DEFAULT_BROWSER.claimsButton);
             return new BrowserMenuConfiguration(title, size, filler, previous, close, next, emptySlot, listingsToggle,
-                    ordersToggle, searchButton, sortButton);
+                    ordersToggle, searchButton, sortButton, searchTipsButton, claimsButton);
         }
 
         public String title() {
@@ -392,6 +419,14 @@ public final class AuctionMenuConfiguration {
             return sortButton;
         }
 
+        public SearchTipsButtonConfiguration searchTipsButton() {
+            return searchTipsButton;
+        }
+
+        public ClaimsButtonConfiguration claimsButton() {
+            return claimsButton;
+        }
+
         @Override
         public String toString() {
             return "BrowserMenuConfiguration{"
@@ -406,6 +441,8 @@ public final class AuctionMenuConfiguration {
                     + ", ordersToggle=" + ordersToggle
                     + ", searchButton=" + searchButton
                     + ", sortButton=" + sortButton
+                    + ", searchTipsButton=" + searchTipsButton
+                    + ", claimsButton=" + claimsButton
                     + '}';
         }
 
@@ -427,13 +464,15 @@ public final class AuctionMenuConfiguration {
                     && Objects.equals(listingsToggle, that.listingsToggle)
                     && Objects.equals(ordersToggle, that.ordersToggle)
                     && Objects.equals(searchButton, that.searchButton)
-                    && Objects.equals(sortButton, that.sortButton);
+                    && Objects.equals(sortButton, that.sortButton)
+                    && Objects.equals(searchTipsButton, that.searchTipsButton)
+                    && Objects.equals(claimsButton, that.claimsButton);
         }
 
         @Override
         public int hashCode() {
             return Objects.hash(title, size, filler, previousSlot, closeSlot, nextSlot, emptyListingSlot, listingsToggle,
-                    ordersToggle, searchButton, sortButton);
+                    ordersToggle, searchButton, sortButton, searchTipsButton, claimsButton);
         }
 
         public static final class SearchButtonConfiguration {
@@ -536,6 +575,111 @@ public final class AuctionMenuConfiguration {
                 if (!(o instanceof SortButtonConfiguration that)) {
                     return false;
                 }
+                return slot == that.slot && Objects.equals(button, that.button);
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hash(slot, button);
+            }
+        }
+
+        public static final class SearchTipsButtonConfiguration {
+
+            private final int slot;
+            private final MenuButtonConfiguration button;
+
+            private SearchTipsButtonConfiguration(int slot, MenuButtonConfiguration button) {
+                this.slot = slot;
+                this.button = button != null ? button : DEFAULT_BROWSER_FILLER_BUTTON;
+            }
+
+            public static SearchTipsButtonConfiguration from(ConfigurationSection section, int inventorySize,
+                    SearchTipsButtonConfiguration fallback) {
+                if (fallback == null) {
+                    fallback = new SearchTipsButtonConfiguration(50,
+                            new MenuButtonConfiguration(Material.KNOWLEDGE_BOOK, "&eSearch Tips",
+                                    List.of("&7Supported patterns:", "&e• &7Item name: &ffortune",
+                                            "&e• &7With level: &ffortune 3", "&e• &7Roman numerals: &fsharpness v",
+                                            "&e• &7Material ID: &fminecraft:diamond_sword",
+                                            "&7Click to close this help.")));
+                }
+                if (section == null) {
+                    return fallback;
+                }
+                int slot = sanitizeSlot(section.getInt("slot", fallback.slot), inventorySize, fallback.slot);
+                MenuButtonConfiguration button = parseMenuButton(section, fallback.button);
+                return new SearchTipsButtonConfiguration(slot, button);
+            }
+
+            public int slot() {
+                return slot;
+            }
+
+            public MenuButtonConfiguration button() {
+                return button;
+            }
+
+            @Override
+            public String toString() {
+                return "SearchTipsButtonConfiguration{" + "slot=" + slot + ", button=" + button + '}';
+            }
+
+            @Override
+            public boolean equals(Object o) {
+                if (this == o) return true;
+                if (!(o instanceof SearchTipsButtonConfiguration that)) return false;
+                return slot == that.slot && Objects.equals(button, that.button);
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hash(slot, button);
+            }
+        }
+
+        public static final class ClaimsButtonConfiguration {
+
+            private final int slot;
+            private final MenuButtonConfiguration button;
+
+            private ClaimsButtonConfiguration(int slot, MenuButtonConfiguration button) {
+                this.slot = slot;
+                this.button = button != null ? button : DEFAULT_BROWSER_FILLER_BUTTON;
+            }
+
+            public static ClaimsButtonConfiguration from(ConfigurationSection section, int inventorySize,
+                    ClaimsButtonConfiguration fallback) {
+                if (fallback == null) {
+                    fallback = new ClaimsButtonConfiguration(47,
+                            new MenuButtonConfiguration(Material.ENDER_CHEST, "&6Pending Returns",
+                                    List.of("&7Click to claim items.")));
+                }
+                if (section == null) {
+                    return fallback;
+                }
+                int slot = sanitizeSlot(section.getInt("slot", fallback.slot), inventorySize, fallback.slot);
+                MenuButtonConfiguration button = parseMenuButton(section, fallback.button);
+                return new ClaimsButtonConfiguration(slot, button);
+            }
+
+            public int slot() {
+                return slot;
+            }
+
+            public MenuButtonConfiguration button() {
+                return button;
+            }
+
+            @Override
+            public String toString() {
+                return "ClaimsButtonConfiguration{" + "slot=" + slot + ", button=" + button + '}';
+            }
+
+            @Override
+            public boolean equals(Object o) {
+                if (this == o) return true;
+                if (!(o instanceof ClaimsButtonConfiguration that)) return false;
                 return slot == that.slot && Objects.equals(button, that.button);
             }
 

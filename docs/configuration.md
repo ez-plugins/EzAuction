@@ -108,4 +108,56 @@ notification-sound: "ENTITY_EXPERIENCE_ORB_PICKUP"
 
 ---
 
+## Version 2.0.0 Updates
+
+### New GUI Features
+
+Version 2.0.0 introduces several new buttons and navigation improvements. These are configured in `messages/menu-layout_en.yml`:
+
+#### Search Tips Button
+Displays helpful search patterns to users:
+```yaml
+search-tips:
+  slot: 50
+  material: KNOWLEDGE_BOOK
+  display-name: "&eSearch Tips"
+  lore:
+    - "&7Supported patterns:"
+    - "&e• &7Item name: &ffortune"
+    - "&e• &7With level: &ffortune 3"
+    - "&e• &7Roman numerals: &fsharpness v"
+    - "&e• &7Material ID: &fminecraft:diamond_sword"
+```
+
+#### Claims/Returns Button
+Quick access to pending item returns:
+```yaml
+claims:
+  slot: 47
+  material: ENDER_CHEST
+  display-name: "&6Pending Returns"
+  lore:
+    - "&7Click to claim items."
+```
+
+#### Sort Button Relocated
+The sort button has moved from slot 50 to slot 51 to accommodate the search tips button. Update your custom layouts if needed.
+
+### EzShops Integration
+
+Version 2.0.0 adds support for EzShops 2.0.0+ while maintaining backwards compatibility with 1.x:
+
+- **Automatic Detection:** The plugin detects which EzShops version is installed
+- **Price Recommendations:** Shop prices appear in confirmation dialogs when enabled
+- **Low-Price Warnings:** Listings below 50% of recommended price show warnings
+- **Configuration:** Set up in `auction-values.yml` under `shop-price` section
+
+### Migration from 1.x
+
+**Good news:** No configuration changes are required! Version 2.0.0 is fully backwards compatible.
+
+**Optional:** If you have custom `menu-layout_en.yml` configurations, consider adding the new button definitions to take advantage of new features.
+
+---
+
 For further help, see the README or open an issue on GitHub.

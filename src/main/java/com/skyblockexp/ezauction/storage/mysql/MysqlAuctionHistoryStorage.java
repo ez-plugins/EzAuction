@@ -53,6 +53,7 @@ public class MysqlAuctionHistoryStorage implements AuctionHistoryStorage {
             statement.executeUpdate("CREATE TABLE IF NOT EXISTS `" + historyTable + "` ("
                     + "player_uuid CHAR(36) NOT NULL,"
                     + "entry_index INT NOT NULL,"
+                    + "transaction_id CHAR(36) NULL,"
                     + "type VARCHAR(16) NOT NULL,"
                     + "timestamp BIGINT NOT NULL,"
                     + "price DOUBLE NOT NULL,"
@@ -61,6 +62,32 @@ public class MysqlAuctionHistoryStorage implements AuctionHistoryStorage {
                     + "item LONGTEXT NULL,"
                     + "PRIMARY KEY (player_uuid, entry_index)"
                     + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+            
+            // Migration: Add transaction_id column if it doesn't exist (for existing tables)
+            try {
+                // Check if column exists by querying information_schema
+                try (PreparedStatement checkColumn = connection.prepareStatement(
+                        "SELECT COUNT(*) FROM information_schema.COLUMNS "
+                        + "WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? AND COLUMN_NAME = 'transaction_id'")) {
+                    checkColumn.setString(1, mysql.database());
+                    checkColumn.setString(2, historyTable);
+                    try (ResultSet rs = checkColumn.executeQuery()) {
+                        if (rs.next() && rs.getInt(1) == 0) {
+                            // Column doesn't exist, add it
+                            statement.executeUpdate("ALTER TABLE `" + historyTable 
+                                    + "` ADD COLUMN transaction_id CHAR(36) NULL AFTER entry_index");
+                            logger.info("Added transaction_id column to existing " + historyTable + " table.");
+                        }
+                    }
+                }
+            } catch (SQLException migrationEx) {
+                logger.log(Level.WARNING, 
+                        "Could not check/add transaction_id column to " + historyTable + ". "
+                        + "If you have an existing table, please add the column manually: "
+                        + "ALTER TABLE `" + historyTable + "` ADD COLUMN transaction_id CHAR(36) NULL AFTER entry_index;",
+                        migrationEx);
+            }
+            
             return true;
         } catch (SQLException ex) {
             logger.log(Level.SEVERE,
@@ -96,7 +123,12 @@ public class MysqlAuctionHistoryStorage implements AuctionHistoryStorage {
                 UUID counterpartId = parseUuid(resultSet.getString("counterpart_uuid"));
                 String counterpartName = resultSet.getString("counterpart_name");
                 ItemStack item = ItemStackSerialization.deserialize(resultSet.getString("item"), logger);
-                AuctionTransactionHistoryEntry entry = new AuctionTransactionHistoryEntry(type, counterpartId,
+                // Read transaction ID or generate one for backward compatibility
+                String transactionId = resultSet.getString("transaction_id");
+                if (transactionId == null || transactionId.isEmpty()) {
+                    transactionId = UUID.randomUUID().toString();
+                }
+                AuctionTransactionHistoryEntry entry = new AuctionTransactionHistoryEntry(transactionId, type, counterpartId,
                         counterpartName, price, timestamp, item);
                 grouped.computeIfAbsent(playerId, key -> new LinkedHashMap<>()).put(index, entry);
             }
@@ -123,8 +155,8 @@ public class MysqlAuctionHistoryStorage implements AuctionHistoryStorage {
         historyWriteLock.lock();
         String delete = "DELETE FROM `" + historyTable + "`";
         String insert = "INSERT INTO `" + historyTable
-                + "` (player_uuid, entry_index, type, timestamp, price, counterpart_uuid, counterpart_name, item)"
-                + " VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                + "` (player_uuid, entry_index, transaction_id, type, timestamp, price, counterpart_uuid, counterpart_name, item)"
+                + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection connection = getConnection()) {
             connection.setAutoCommit(false);
             try (Statement deleteStatement = connection.createStatement()) {
@@ -153,8 +185,8 @@ public class MysqlAuctionHistoryStorage implements AuctionHistoryStorage {
         historyWriteLock.lock();
         String delete = "DELETE FROM `" + historyTable + "` WHERE player_uuid = ?";
         String insert = "INSERT INTO `" + historyTable
-                + "` (player_uuid, entry_index, type, timestamp, price, counterpart_uuid, counterpart_name, item)"
-                + " VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                + "` (player_uuid, entry_index, transaction_id, type, timestamp, price, counterpart_uuid, counterpart_name, item)"
+                + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection connection = getConnection()) {
             connection.setAutoCommit(false);
             try (PreparedStatement deleteStatement = connection.prepareStatement(delete)) {
@@ -220,20 +252,21 @@ public class MysqlAuctionHistoryStorage implements AuctionHistoryStorage {
         for (AuctionTransactionHistoryEntry entry : history) {
             statement.setString(1, playerId.toString());
             statement.setInt(2, index++);
-            statement.setString(3, entry.type().name());
-            statement.setLong(4, entry.timestamp());
-            statement.setDouble(5, entry.price());
+            statement.setString(3, entry.transactionId());
+            statement.setString(4, entry.type().name());
+            statement.setLong(5, entry.timestamp());
+            statement.setDouble(6, entry.price());
             if (entry.counterpartId() != null) {
-                statement.setString(6, entry.counterpartId().toString());
-            } else {
-                statement.setNull(6, java.sql.Types.VARCHAR);
-            }
-            if (entry.counterpartName() != null && !entry.counterpartName().isEmpty()) {
-                statement.setString(7, entry.counterpartName());
+                statement.setString(7, entry.counterpartId().toString());
             } else {
                 statement.setNull(7, java.sql.Types.VARCHAR);
             }
-            statement.setString(8, ItemStackSerialization.serialize(entry.item(), logger));
+            if (entry.counterpartName() != null && !entry.counterpartName().isEmpty()) {
+                statement.setString(8, entry.counterpartName());
+            } else {
+                statement.setNull(8, java.sql.Types.VARCHAR);
+            }
+            statement.setString(9, ItemStackSerialization.serialize(entry.item(), logger));
             statement.addBatch();
         }
     }

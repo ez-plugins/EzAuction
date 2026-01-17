@@ -96,6 +96,8 @@ public class PluginRegistry {
     public final AuctionOrderMenu auctionOrderMenu;
     /** GUI for selling items in auctions. */
     public final AuctionSellMenu auctionSellMenu;
+    /** Consolidated activity menu. */
+    public final AuctionActivityMenu auctionActivityMenu;
     /** Main /auction command handler. */
     public final AuctionCommand auctionCommand;
     /** GUI for live auctions. */
@@ -106,6 +108,8 @@ public class PluginRegistry {
     public final AuctionHologramCommand hologramCommand;
     /** Handles version/platform compatibility. */
     public final CompatibilityFacade compatibilityFacade;
+    /** Item tag storage for persistent item data. */
+    public final ItemTagStorage itemTagStorage;
     /** PlaceholderAPI expansion for EzAuction. */
     public final EzAuctionPlaceholderExpansion placeholderExpansion;
     /** bStats metrics instance. */
@@ -161,7 +165,7 @@ public class PluginRegistry {
 
         // 2. Compatibility and config
         this.compatibilityFacade = CompatibilityFacade.create(plugin);
-        ItemTagStorage itemTagStorage = compatibilityFacade.itemTagStorage();
+        this.itemTagStorage = compatibilityFacade.itemTagStorage();
         HologramPlatform hologramPlatform = compatibilityFacade.hologramPlatform();
         boolean hologramSupportAvailable = hologramPlatform.isSupported();
         if (!hologramSupportAvailable && configuration.hologramConfiguration().enabled()) {
@@ -263,6 +267,10 @@ public class PluginRegistry {
         AuctionMenuInteractionConfiguration menuInteractions = configuration.menuInteractionConfiguration();
         this.auctionOrderMenu = new AuctionOrderMenu(plugin, auctionManager, transactionService, configuration.listingRules(), configuration.durationOptions(), menuInteractions.orderMenu(), recommendationProvider, messageConfiguration.order(), itemTagStorage);
         this.auctionSellMenu = new AuctionSellMenu(plugin, auctionManager, transactionService, configuration.listingRules(), configuration.durationOptions(), menuInteractions.sellMenu(), recommendationProvider, messageConfiguration.sell(), itemTagStorage);
+        this.auctionActivityMenu = new AuctionActivityMenu(plugin, auctionManager, transactionService, transactionHistory, auctionMenu, itemTagStorage, messageConfiguration.browser(), AuctionActivityMenu.ActivityMessages.defaults());
+        
+        // Set bidirectional reference to avoid circular dependency
+        this.auctionMenu.setActivityMenu(this.auctionActivityMenu);
 
         this.auctionCommand = new AuctionCommand(auctionManager, auctionMenu, auctionSellMenu, auctionOrderMenu, transactionHistory, transactionService, configuration.listingRules(), liveAuctionMenu, commandMessageConfiguration);
 
@@ -311,6 +319,7 @@ public class PluginRegistry {
         plugin.getServer().getPluginManager().registerEvents(auctionMenu, plugin);
         plugin.getServer().getPluginManager().registerEvents(liveAuctionMenu, plugin);
         plugin.getServer().getPluginManager().registerEvents(auctionOrderMenu, plugin);
+        plugin.getServer().getPluginManager().registerEvents(new AuctionActivityMenuListener(auctionActivityMenu, auctionMenu, itemTagStorage), plugin);
         // Register AuctionReturnListener with the shared pendingReturns map for claim handling
         plugin.getServer().getPluginManager().registerEvents(new AuctionReturnListener(new AuctionClaimService(
             pendingReturns,

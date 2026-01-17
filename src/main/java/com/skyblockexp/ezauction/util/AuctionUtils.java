@@ -3,6 +3,7 @@ package com.skyblockexp.ezauction.util;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.Material;
 import java.time.Duration;
+import java.time.Instant;
 
 /**
  * Utility methods for formatting durations, pluralization, and other common auction-related helpers.
@@ -34,6 +35,50 @@ public class AuctionUtils {
         if (minutes > 0 && parts.size() < 2) parts.add(minutes + "m");
         if (parts.isEmpty()) parts.add("0m");
         return String.join(" ", parts);
+    }
+
+    /**
+     * Formats the time remaining until an instant in a compact format (e.g., "2h 30m", "45m").
+     *
+     * @param expiresAt The instant when something expires
+     * @return A formatted string representing the time remaining, or "Never" if null, or "Expired" if in the past
+     */
+    public static String formatTimeRemaining(Instant expiresAt) {
+        if (expiresAt == null) return "Never";
+        Duration remaining = Duration.between(Instant.now(), expiresAt);
+        if (remaining.isNegative()) return "Expired";
+        
+        long hours = remaining.toHours();
+        long minutes = remaining.toMinutes() % 60;
+        
+        if (hours > 0) {
+            return hours + "h " + minutes + "m";
+        } else {
+            return minutes + "m";
+        }
+    }
+
+    /**
+     * Formats a timestamp as a relative time ago (e.g., "2d ago", "3h ago", "15m ago").
+     *
+     * @param timestamp The instant to format
+     * @return A formatted string representing how long ago the instant was, or "Unknown" if null
+     */
+    public static String formatTimeAgo(Instant timestamp) {
+        if (timestamp == null) return "Unknown";
+        Duration ago = Duration.between(timestamp, Instant.now());
+        
+        long days = ago.toDays();
+        long hours = ago.toHours() % 24;
+        long minutes = ago.toMinutes() % 60;
+        
+        if (days > 0) {
+            return days + "d ago";
+        } else if (hours > 0) {
+            return hours + "h ago";
+        } else {
+            return minutes + "m ago";
+        }
     }
 
     /**

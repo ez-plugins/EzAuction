@@ -347,11 +347,16 @@ public class AuctionSellMenu {
             Double recommended = holder.state().recommendedPrice();
             if (recommended != null) {
                 lore.add(ChatColor.GRAY + "Recommended Price: " + ChatColor.GOLD + formatPrice(recommended));
+                double percentOfRecommended = (holder.state().price() / recommended) * 100;
+                if (percentOfRecommended < 50) {
+                    lore.add(ChatColor.RED + "⚠ Warning: Price is " + String.format(Locale.ENGLISH, "%.0f%%", percentOfRecommended) + " of recommended!");
+                    lore.add(ChatColor.RED + "This may be significantly underpriced.");
+                }
             }
             lore.add(ChatColor.GRAY + "Duration: " + ChatColor.YELLOW + formatDuration(holder.state().duration()));
             double depositAmount = EconomyUtils.normalizeCurrency(listingRules.depositAmount(holder.state().price()));
             if (depositAmount > 0.0D) {
-                lore.add(ChatColor.GRAY + "Deposit Charged: " + ChatColor.GOLD + formatPrice(depositAmount)
+                lore.add(ChatColor.GRAY + "Listing Fee: " + ChatColor.GOLD + formatPrice(depositAmount)
                         + ChatColor.GRAY + " (" + String.format(Locale.ENGLISH, "%.1f%%", listingRules.depositPercent()) + ")");
             }
             lore.add(" ");
@@ -371,7 +376,7 @@ public class AuctionSellMenu {
             if (displayName != null && !displayName.isEmpty()) {
                 meta.setDisplayName(colorize(displayName));
             }
-            meta.setLore(List.of(ChatColor.GRAY + "Return to the previous menu."));
+            meta.setLore(List.of(ChatColor.GRAY + "Return to the auction browser."));
             item.setItemMeta(meta);
         }
         return item;
