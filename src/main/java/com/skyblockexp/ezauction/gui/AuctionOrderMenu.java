@@ -9,6 +9,7 @@ import com.skyblockexp.ezauction.component.gui.order.OrderMenuHolder;
 import com.skyblockexp.ezauction.config.AuctionListingRules;
 import com.skyblockexp.ezauction.config.AuctionMenuInteractionConfiguration;
 import com.skyblockexp.ezauction.config.AuctionMessageConfiguration;
+import com.skyblockexp.ezauction.util.DateUtil;
 import com.skyblockexp.ezauction.util.EconomyUtils;
 import com.skyblockexp.ezauction.util.ItemValueProvider;
 import java.time.Duration;
@@ -24,6 +25,7 @@ import java.util.concurrent.ConcurrentMap;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -209,12 +211,14 @@ public class AuctionOrderMenu implements Listener {
             if (item != null) {
                 ItemMeta meta = item.getItemMeta();
                 List<String> lore = new ArrayList<>();
-                lore.add(ChatColor.GOLD + "Order ID: " + order.id());
+                OfflinePlayer buyer = Bukkit.getOfflinePlayer(order.buyer());
+                String buyerName = buyer.getName() != null ? buyer.getName() : order.buyer().toString();
+
                 lore.add(ChatColor.GRAY + "Price per Item: " + ChatColor.GOLD + order.pricePerItem());
                 lore.add(ChatColor.GRAY + "Quantity: " + ChatColor.AQUA + order.quantity());
                 lore.add(ChatColor.GRAY + "Total Price: " + ChatColor.GOLD + order.offeredPrice());
-                lore.add(ChatColor.GRAY + "Expires: " + ChatColor.YELLOW + new java.util.Date(order.expiryEpochMillis()));
-                lore.add(ChatColor.GRAY + "Buyer: " + ChatColor.AQUA + Bukkit.getOfflinePlayer(order.buyerId()).getName());
+                lore.add(ChatColor.GRAY + "Expires: " + ChatColor.YELLOW + DateUtil.formatDate(order.expiryEpochMillis()));
+                lore.add(ChatColor.GRAY + "Buyer: " + ChatColor.AQUA + buyerName);
                 if (meta != null) {
                     meta.setLore(lore);
                     item.setItemMeta(meta);
@@ -664,7 +668,10 @@ public class AuctionOrderMenu implements Listener {
             return;
         }
         if (EzAuctionPlugin.getStaticRegistry().getConfiguration().debug()) {
-            System.out.println("[EzAuction][DEBUG] GUI triggering createOrder: player=" + player.getName() + ", item=" + state.item() + ", price=" + total + ", duration=" + state.duration());
+            ItemStack item = state.item();
+            plugin.getLogger().fine("[EzAuction][DEBUG] GUI triggering createOrder: player=" + player.getName() 
+                + ", item=" + (item != null ? item.getType() + "x" + item.getAmount() : "null") 
+                + ", price=" + total + ", duration=" + state.duration());
         }
         AuctionOperationResult result = auctionManager.createOrder(player, state.item(), total, state.duration(), total);
         if (result.message() != null && !result.message().isEmpty()) {

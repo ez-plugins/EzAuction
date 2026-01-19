@@ -1,7 +1,6 @@
 package com.skyblockexp.ezauction;
 
 import com.skyblockexp.ezauction.bootstrap.PluginRegistry;
-import com.skyblockexp.ezauction.config.OrdersOnlyConfig;
 import com.skyblockexp.ezauction.bootstrap.PluginConfigs;
 import java.io.File;
 import java.util.Locale;
@@ -33,8 +32,6 @@ public final class EzAuctionPlugin extends JavaPlugin {
 
     public static final String DISPLAY_NAME = "EzAuction";
     private PluginRegistry registry;
-    private static EzAuctionPlugin instance;
-    private static PluginRegistry staticRegistry;
 
     /**
      * Called when the plugin is enabled by the server.
@@ -46,16 +43,10 @@ public final class EzAuctionPlugin extends JavaPlugin {
      */
     @Override
     public void onEnable() {
-        instance = this;
-
         logStartupHeader();
         ensureDefaultConfig();
-        // Load orders-only config before registry
-        OrdersOnlyConfig.load(this);
         // PluginRegistry will handle all initialization and registration
-        registry = new PluginRegistry(instance);
-        staticRegistry = registry;
-        registry.load();
+        registry = new PluginRegistry(this);
         registry.enableAll();
         getLogger().info(DISPLAY_NAME + " plugin enabled.");
     }
@@ -116,27 +107,4 @@ public final class EzAuctionPlugin extends JavaPlugin {
         getLogger().info(DISPLAY_NAME + " v" + version + " starting up.");
     }
 
-    /**
-     * Gets the plugin's registry containing all managers and services.
-     * @return
-     */
-    public PluginRegistry getRegistry() {
-        return registry;
-    }
-
-    /**
-     * Gets the static plugin registry (for global access).
-     * @return
-     */
-    public static PluginRegistry getStaticRegistry() {
-        return staticRegistry;
-    }
-
-    /**
-     * Gets the singleton instance of the EzAuctionPlugin.
-     * @return
-     */
-    public static EzAuctionPlugin getInstance() {
-        return instance;
-    }
 }

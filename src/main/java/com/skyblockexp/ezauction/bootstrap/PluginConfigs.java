@@ -16,7 +16,6 @@ public final class PluginConfigs {
         "auction.yml",
         "auction-storage.yml",
         "messages.yml",
-        "orders-only.yml",
         "messages/messages_en.yml",
         "messages/messages_es.yml",
         "messages/messages_nl.yml",

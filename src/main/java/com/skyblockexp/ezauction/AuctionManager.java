@@ -28,6 +28,7 @@ import com.skyblockexp.ezauction.service.AuctionReturnService;
 import com.skyblockexp.ezauction.service.AuctionExpiryService;
 import com.skyblockexp.ezauction.service.AuctionQueryService;
 import com.skyblockexp.ezauction.util.AuctionValidationUtils;
+import com.skyblockexp.ezauction.util.DateUtil;
 
 public class AuctionManager {
     // Services
@@ -366,7 +367,7 @@ public class AuctionManager {
                     lore.add(ChatColor.GRAY + "Price per Item: " + ChatColor.GOLD + order.pricePerItem());
                     lore.add(ChatColor.GRAY + "Quantity: " + ChatColor.AQUA + order.quantity());
                     lore.add(ChatColor.GRAY + "Total Price: " + ChatColor.GOLD + order.offeredPrice());
-                    lore.add(ChatColor.GRAY + "Expires: " + ChatColor.YELLOW + new java.util.Date(order.expiryEpochMillis()));
+                    lore.add(ChatColor.GRAY + "Expires: " + ChatColor.YELLOW + DateUtil.formatDate(order.expiryEpochMillis()));
                     if (meta != null) {
                         meta.setLore(lore);
                         item.setItemMeta(meta);

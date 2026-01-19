@@ -9,6 +9,7 @@ import com.skyblockexp.ezauction.compat.ItemTagStorage;
 import com.skyblockexp.ezauction.config.AuctionMenuConfiguration;
 import com.skyblockexp.ezauction.config.AuctionMessageConfiguration;
 import com.skyblockexp.ezauction.config.AuctionValueConfiguration;
+import com.skyblockexp.ezauction.util.DateUtil;
 import com.skyblockexp.ezauction.util.ItemValueProvider;
 import java.time.Duration;
 import java.time.Instant;
@@ -529,7 +530,7 @@ public class AuctionMenu implements Listener {
         lore.add(ChatColor.GRAY + "Price: " + ChatColor.GOLD + transactionService.formatCurrency(listing.price()));
         appendEstimatedValue(display, lore);
         appendShopPrice(display, lore);
-        lore.add(ChatColor.GRAY + "Expires: " + ChatColor.YELLOW + formatExpiry(listing.expiryEpochMillis()));
+        lore.add(ChatColor.GRAY + "Expires: " + ChatColor.YELLOW + DateUtil.formatDate(listing.expiryEpochMillis()));
         lore.add(" ");
         if (isShulkerBox(display)) {
             lore.add(colorize(messages.shulkerPreviewHint()));
@@ -566,7 +567,7 @@ public class AuctionMenu implements Listener {
         lore.add(ChatColor.GRAY + "Offer: " + ChatColor.GOLD + transactionService.formatCurrency(order.offeredPrice()));
         appendEstimatedValue(requested, lore);
         appendShopPrice(requested, lore);
-        lore.add(ChatColor.GRAY + "Expires: " + ChatColor.YELLOW + formatExpiry(order.expiryEpochMillis()));
+        lore.add(ChatColor.GRAY + "Expires: " + ChatColor.YELLOW + com.skyblockexp.ezauction.util.DateUtil.formatDate(order.expiryEpochMillis()));
         lore.add(" ");
         if (isShulkerBox(requested)) {
             lore.add(colorize(messages.shulkerPreviewHint()));
@@ -580,32 +581,6 @@ public class AuctionMenu implements Listener {
         meta.addItemFlags(org.bukkit.inventory.ItemFlag.HIDE_ATTRIBUTES);
         icon.setItemMeta(meta);
         return icon;
-    }
-
-    private String formatExpiry(long expiryEpochMillis) {
-        long now = System.currentTimeMillis();
-        if (expiryEpochMillis <= now) {
-            return "Expired";
-        }
-        Duration remaining = Duration.ofMillis(expiryEpochMillis - now);
-        long days = remaining.toDays();
-        remaining = remaining.minusDays(days);
-        long hours = remaining.toHours();
-        remaining = remaining.minusHours(hours);
-        long minutes = remaining.toMinutes();
-
-        StringBuilder builder = new StringBuilder();
-        if (days > 0) {
-            builder.append(days).append("d ");
-        }
-        if (hours > 0 || days > 0) {
-            builder.append(hours).append("h ");
-        }
-        builder.append(minutes).append("m");
-        builder.append(ChatColor.GRAY).append(" (")
-                .append(DATE_FORMAT.format(Instant.ofEpochMilli(expiryEpochMillis).atZone(ZoneId.systemDefault())))
-                .append(")");
-        return builder.toString();
     }
 
     private AuctionListing findListing(String listingId) {

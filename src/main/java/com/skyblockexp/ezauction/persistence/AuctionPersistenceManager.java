@@ -8,7 +8,6 @@ import java.util.concurrent.ExecutorService;
 
 import com.skyblockexp.ezauction.AuctionListing;
 import com.skyblockexp.ezauction.AuctionOrder;
-import com.skyblockexp.ezauction.EzAuctionPlugin;
 import com.skyblockexp.ezauction.storage.AuctionStorage;
 import com.skyblockexp.ezauction.storage.DistributedAuctionListingStorage;
 import com.skyblockexp.ezauction.storage.AuctionStorageSnapshot;
@@ -105,26 +104,13 @@ public class AuctionPersistenceManager {
         }
         try {
             chain.get();
-        } catch (Exception ex) {
-            if (EzAuctionPlugin.getStaticRegistry().getConfiguration().debug()) {
-                System.err.println("[EzAuction][ERROR] Persistence completion error: " + ex.getMessage());
-                ex.printStackTrace();
-            }
+        } catch (Exception ignored) {
         }
     }
 
     private void schedulePersistenceTask(Runnable task) {
         synchronized (persistenceLock) {
-            persistenceChain = persistenceChain.thenRunAsync(() -> {
-                try {
-                    task.run();
-                } catch (Exception ex) {
-                    if (EzAuctionPlugin.getStaticRegistry().getConfiguration().debug()) {
-                        System.err.println("[EzAuction][ERROR] Persistence task error: " + ex.getMessage());
-                        ex.printStackTrace();
-                    }
-                }
-            }, executor);
+            persistenceChain = persistenceChain.thenRunAsync(task, executor);
         }
     }
 
