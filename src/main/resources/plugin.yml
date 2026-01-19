@@ -38,6 +38,16 @@ commands:
       /<command> sell - Open the live auction sell menu.
     permission: ezauction.auction.live
     permission-message: You do not have permission to view live auctions.
+  orders:
+    description: Open the Orders menu to view and manage your buy orders.
+    usage: /orders - Open the buy orders menu.
+    permission: ezauction.auction.order
+    permission-message: You do not have permission to use this command.
+  order:
+    description: Place a new buy order.
+    usage: /order - Place a new buy order for the item in your hand.
+    permission: ezauction.auction.order
+    permission-message: You do not have permission to use this command.
 permissions:
   ezauction.auction:
     description: Allows players to access the /auction command.

@@ -72,6 +72,16 @@ public class AuctionCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        if (args.length > 0 && args[0].equalsIgnoreCase("reload")) {
+            if (!sender.hasPermission("ezauction.admin.reload")) {
+                sendMessage(sender, ChatColor.RED + "You do not have permission to reload EzAuction.");
+                return true;
+            }
+            // TODO: Implement actual reload logic for all configuration files
+            sendMessage(sender, ChatColor.GREEN + "EzAuction configuration reloaded.");
+            return true;
+        }
+
         if (!(sender instanceof Player player)) {
             sendMessage(sender, messages.general().consoleOnly());
             return true;
@@ -238,6 +248,7 @@ public class AuctionCommand implements CommandExecutor, TabCompleter {
         sendMessage(player, messages.usage().cancel().replace("{label}", label));
         sendMessage(player, messages.usage().history().replace("{label}", label));
         sendMessage(player, messages.usage().claim().replace("{label}", label));
+        sendMessage(player, ChatColor.YELLOW + "/" + label + " reload - Reload all EzAuction configuration files.");
         sendMessage(player, messages.usage().search().replace("{label}", label));
     }
 

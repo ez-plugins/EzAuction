@@ -11,6 +11,11 @@ import com.skyblockexp.ezauction.api.AuctionListingLimitResolver;
 import com.skyblockexp.ezauction.command.*;
 import com.skyblockexp.ezauction.compat.*;
 import com.skyblockexp.ezauction.config.*;
+import com.skyblockexp.ezauction.bootstrap.component.ConfigurationLoaderComponent;
+import com.skyblockexp.ezauction.bootstrap.component.EconomySetupComponent;
+import com.skyblockexp.ezauction.bootstrap.component.CompatibilityAndStorageComponent;
+import com.skyblockexp.ezauction.bootstrap.component.ServiceSetupComponent;
+import com.skyblockexp.ezauction.bootstrap.component.GuiAndCommandSetupComponent;
 import com.skyblockexp.ezauction.gui.*;
 import com.skyblockexp.ezauction.hologram.*;
 import com.skyblockexp.ezauction.live.*;
@@ -71,51 +76,51 @@ public class PluginRegistry {
     /** The main plugin instance. */
     private final EzAuctionPlugin plugin;
     /** Whether the auction history GUI is enabled. */
-    public final boolean historyGuiEnabled;
+    public boolean historyGuiEnabled;
     /** Vault economy provider. */
-    public final Economy economy;
+    public Economy economy;
     /** Handles all auction transactions. */
-    public final AuctionTransactionService transactionService;
+    public AuctionTransactionService transactionService;
     /** Stores and manages auction transaction history. */
-    public final AuctionTransactionHistory transactionHistory;
+    public AuctionTransactionHistory transactionHistory;
     /** Main auction manager for listings and logic. */
-    public final AuctionManager auctionManager;
+    public AuctionManager auctionManager;
     /** Storage for active auction listings. */
-    public final AuctionStorage listingStorage;
+    public AuctionStorage listingStorage;
     /** Storage for auction history. */
-    public final AuctionHistoryStorage historyStorage;
+    public AuctionHistoryStorage historyStorage;
     /** Main configuration for the plugin. */
-    public final AuctionConfiguration configuration;
+    public AuctionConfiguration configuration;
     /** Main auction browser GUI. */
-    public final AuctionMenu auctionMenu;
+    public AuctionMenu auctionMenu;
     /** Provider for item value recommendations. */
-    public final ItemValueProvider itemValueProvider;
+    public ItemValueProvider itemValueProvider;
     /** Provider for shop price overlays. */
-    public final ItemValueProvider shopPriceValueProvider;
+    public ItemValueProvider shopPriceValueProvider;
     /** GUI for managing auction orders. */
-    public final AuctionOrderMenu auctionOrderMenu;
+    public AuctionOrderMenu auctionOrderMenu;
     /** GUI for selling items in auctions. */
-    public final AuctionSellMenu auctionSellMenu;
+    public AuctionSellMenu auctionSellMenu;
     /** Consolidated activity menu. */
-    public final AuctionActivityMenu auctionActivityMenu;
+    public AuctionActivityMenu auctionActivityMenu;
     /** Main /auction command handler. */
-    public final AuctionCommand auctionCommand;
+    public AuctionCommand auctionCommand;
     /** GUI for live auctions. */
-    public final LiveAuctionMenu liveAuctionMenu;
+    public LiveAuctionMenu liveAuctionMenu;
     /** Hologram manager for auction displays. */
-    public final AuctionHologramManager hologramManager;
+    public AuctionHologramManager hologramManager;
     /** Command handler for auction holograms. */
-    public final AuctionHologramCommand hologramCommand;
+    public AuctionHologramCommand hologramCommand;
     /** Handles version/platform compatibility. */
-    public final CompatibilityFacade compatibilityFacade;
+    public CompatibilityFacade compatibilityFacade;
     /** Item tag storage for persistent item data. */
-    public final ItemTagStorage itemTagStorage;
+    public ItemTagStorage itemTagStorage;
     /** PlaceholderAPI expansion for EzAuction. */
-    public final EzAuctionPlaceholderExpansion placeholderExpansion;
+    public Object placeholderExpansion;
     /** bStats metrics instance. */
-    public final Metrics metrics;
+    public Metrics metrics;
     /** Service for live auction events. */
-    public final LiveAuctionService liveAuctionService;
+    public LiveAuctionService liveAuctionService;
     /**
      * Stores pending item returns for auction claims.
      * <p>
@@ -132,182 +137,111 @@ public class PluginRegistry {
      */
     public PluginRegistry(EzAuctionPlugin plugin) {
         this.plugin = plugin;
-        this.configuration = AuctionConfigurationLoader.load(plugin);
+        this.configuration = null;
+        this.economy = null;
+        this.compatibilityFacade = null;
+        this.itemTagStorage = null;
+        this.listingStorage = null;
+        this.historyStorage = null;
+        this.historyGuiEnabled = false;
+        this.transactionService = null;
+        this.transactionHistory = null;
+        this.liveAuctionService = null;
+        this.auctionManager = null;
+        this.pendingReturns = null;
+        this.auctionMenu = null;
+        this.liveAuctionMenu = null;
+        this.auctionOrderMenu = null;
+        this.auctionSellMenu = null;
+        this.auctionActivityMenu = null;
+        this.auctionCommand = null;
+        this.hologramManager = null;
+        this.hologramCommand = null;
+        this.itemValueProvider = null;
+        this.shopPriceValueProvider = null;
+        this.placeholderExpansion = null;
+        this.metrics = null;
+    }
 
-        // 1. Setup economy
-        Economy tempEconomy = null;
-        if (plugin.getServer().getPluginManager().getPlugin("Vault") == null) {
-            plugin.getLogger().severe("Vault plugin not found. EzAuction requires Vault and an economy provider to process currency.");
-            plugin.getServer().getPluginManager().disablePlugin(plugin);
-        } else {
-            RegisteredServiceProvider<Economy> registration = plugin.getServer().getServicesManager().getRegistration(Economy.class);
-            if (registration == null) {
-                plugin.getLogger().severe("No Vault economy provider found. EzAuction cannot function without an economy bridge.");
-                plugin.getServer().getPluginManager().disablePlugin(plugin);
-            } else {
-                tempEconomy = registration.getProvider();
-                if (tempEconomy == null) {
-                    plugin.getLogger().severe("Unable to acquire a Vault economy provider. EzAuction cannot function without an economy bridge.");
-                    plugin.getServer().getPluginManager().disablePlugin(plugin);
-                }
-            }
+    /**
+     * Loads and initializes the PluginRegistry. This should be called after the PluginRegistry object is constructed.
+     */
+    public void load() {
+        // 1. Load configuration
+        ConfigurationLoaderComponent configLoader = new ConfigurationLoaderComponent();
+        AuctionConfiguration configuration = configLoader.load(plugin);
+
+        // 2. Setup economy
+        EconomySetupComponent economySetup = new EconomySetupComponent();
+        Economy economy = economySetup.setup(plugin);
+
+        // 3. Compatibility and storage
+        CompatibilityAndStorageComponent compatAndStorage = new CompatibilityAndStorageComponent();
+        CompatibilityAndStorageComponent.Result compatResult = compatAndStorage.setup(plugin, configuration);
+        CompatibilityFacade compatibilityFacade = compatResult.compatibilityFacade;
+        ItemTagStorage itemTagStorage = compatResult.compatibilityFacade.itemTagStorage();
+        HologramPlatform hologramPlatform = compatibilityFacade.hologramPlatform();
+        boolean hologramSupportAvailable = hologramPlatform.isSupported();
+        if (!hologramSupportAvailable && configuration.hologramConfiguration().enabled()) {
+            plugin.getLogger().warning("TextDisplay entities are unavailable on this server version. EzAuction holograms will be disabled.");
         }
-        this.economy = tempEconomy;
+        AuctionStorage listingStorage = compatResult.listingStorage;
+        AuctionHistoryStorage historyStorage = compatResult.historyStorage;
 
-        // Determine if history GUI is enabled
+        // 4. Determine if history GUI is enabled
         boolean guiEnabled = false;
         try {
             if (configuration != null) {
                 guiEnabled = configuration.isHistoryGuiEnabled();
             }
         } catch (Exception ignored) {}
-        this.historyGuiEnabled = guiEnabled;
 
-        // 2. Compatibility and config
-        this.compatibilityFacade = CompatibilityFacade.create(plugin);
-        this.itemTagStorage = compatibilityFacade.itemTagStorage();
-        HologramPlatform hologramPlatform = compatibilityFacade.hologramPlatform();
-        boolean hologramSupportAvailable = hologramPlatform.isSupported();
-        if (!hologramSupportAvailable && configuration.hologramConfiguration().enabled()) {
-            plugin.getLogger().warning("TextDisplay entities are unavailable on this server version. EzAuction holograms will be disabled.");
-        }
-        AuctionStorageBundle storageBundle = AuctionStorageFactory.create(plugin, configuration);
-        this.listingStorage = storageBundle.listingStorage();
-        this.historyStorage = storageBundle.historyStorage();
-
-        AuctionBackendMessages backendMessages = configuration.backendMessages();
-        this.transactionService = new AuctionTransactionService(plugin, economy, backendMessages.economy(), backendMessages.fallback());
-        this.transactionHistory = new AuctionTransactionHistory(plugin, historyStorage);
-        this.transactionHistory.enable();
-
-        AuctionListingLimitResolver listingLimitResolver;
-        RegisteredServiceProvider<AuctionListingLimitResolver> limitProvider = plugin.getServer().getServicesManager().getRegistration(AuctionListingLimitResolver.class);
-        if (limitProvider != null && limitProvider.getProvider() != null) {
-            listingLimitResolver = limitProvider.getProvider();
-        } else {
-            listingLimitResolver = AuctionListingLimitResolver.useBaseLimit();
-        }
-
-        this.liveAuctionService = new LiveAuctionService(plugin, transactionService, configuration.liveAuctionConfiguration(), backendMessages.live(), backendMessages.fallback());
-
-
-        // Shared state for listings, orders, and returns
-        Map<String, AuctionListing> listings = new java.util.concurrent.ConcurrentHashMap<>();
-        Map<String, AuctionOrder> orders = new java.util.concurrent.ConcurrentHashMap<>();
-        this.pendingReturns = new java.util.concurrent.ConcurrentHashMap<>();
-
-        // Services
-        DistributedAuctionListingStorage distributedStorage =
-            (listingStorage instanceof DistributedAuctionListingStorage d) ? d : null;
-        java.util.concurrent.ExecutorService persistenceExecutor =
-            java.util.concurrent.Executors.newSingleThreadExecutor(r -> {
-                Thread t = new Thread(r, "EzAuction-Persistence");
-                t.setDaemon(true);
-                return t;
-            });
-        AuctionPersistenceManager persistenceManager = new AuctionPersistenceManager(
-            listingStorage,
-            distributedStorage,
-            persistenceExecutor
+        // 5. Service and manager setup
+        ServiceSetupComponent.ServiceSetupResult serviceResult = ServiceSetupComponent.setupAll(
+            plugin, configuration, economy, listingStorage, historyStorage, compatibilityFacade
         );
-        // Ensure persistence is enabled
-        persistenceManager.setStorageReady(true);
 
-        // Load persisted listings, orders, and returns from storage
-        AuctionStorageSnapshot snapshot = persistenceManager.loadFromStorage();
-        if (snapshot != null) {
-            listings.putAll(snapshot.listings());
-            orders.putAll(snapshot.orders());
-            if (snapshot.pendingReturns() != null) {
-                this.pendingReturns.putAll(snapshot.pendingReturns());
-            }
-        }
-
-        AuctionBackendMessages finalMessages = backendMessages != null ? backendMessages : AuctionBackendMessages.defaults();
-        AuctionNotificationService notificationService = new AuctionNotificationService(finalMessages, transactionService);
-        AuctionClaimService claimService = new AuctionClaimService(pendingReturns, finalMessages);
-        AuctionTransactionHistoryService transactionHistoryService = new AuctionTransactionHistoryService(transactionHistory, plugin, finalMessages.fallback());
-
-        AuctionListingService listingService = new AuctionListingService(
-            transactionService, listingLimitResolver, configuration, configuration.listingRules(), liveAuctionService, persistenceManager, notificationService, claimService, transactionHistoryService, pendingReturns, listings, orders
+        // 6. GUI and command setup
+        GuiAndCommandSetupComponent.GuiSetupResult guiResult = GuiAndCommandSetupComponent.setupAll(
+            plugin, configuration, serviceResult.auctionManager, serviceResult.transactionService, serviceResult.transactionHistory, serviceResult.liveAuctionService, compatibilityFacade, itemTagStorage
         );
-        AuctionOrderService orderService = new AuctionOrderService(
-            transactionService, configuration.listingRules(), persistenceManager, notificationService, transactionHistoryService, claimService, pendingReturns, listings
-        );
-        AuctionReturnService returnService = new AuctionReturnService(
-            pendingReturns,
-            persistenceManager,
-            finalMessages
-        );
-        AuctionExpiryService expiryService = new AuctionExpiryService(plugin, listings, orders, persistenceManager, notificationService, transactionHistoryService, claimService, transactionService, pendingReturns);
-        AuctionQueryService queryService = new AuctionQueryService(listings, orders, liveAuctionService, configuration);
-        this.auctionManager = new AuctionManager(plugin, listingService, orderService, returnService, expiryService, queryService, configuration, listingLimitResolver);
-        this.auctionManager.enable();
-        if (liveAuctionService != null) {
-            liveAuctionService.enable();
-        }
 
-        AuctionValueConfiguration valueConfiguration = configuration.valueConfiguration();
-        AuctionMessageConfiguration messageConfiguration = configuration.messageConfiguration();
-        AuctionCommandMessageConfiguration commandMessageConfiguration = configuration.commandMessageConfiguration();
-        AuctionValueConfiguration.ShopPriceConfiguration shopPriceConfiguration = valueConfiguration != null ? valueConfiguration.shopPriceConfiguration() : null;
-        this.itemValueProvider = resolveItemValueProvider(plugin, valueConfiguration);
-        boolean shopPriceOverlayEnabled = shouldEnableShopPriceOverlay(plugin, shopPriceConfiguration);
-        this.shopPriceValueProvider = shopPriceOverlayEnabled ? resolveShopPriceValueProvider(plugin, shopPriceConfiguration) : ItemValueProvider.none();
-        if (shopPriceOverlayEnabled && shopPriceValueProvider == ItemValueProvider.none()) {
-            shopPriceOverlayEnabled = false;
-        }
-        ItemValueProvider recommendationProvider = itemValueProvider;
-        if ((valueConfiguration == null || !valueConfiguration.enabled()) && shopPriceOverlayEnabled) {
-            recommendationProvider = shopPriceValueProvider;
-        }
+        // Assign all fields via reflection (Java limitation workaround for staged init)
+        setField("configuration", configuration);
+        setField("economy", economy);
+        setField("compatibilityFacade", compatibilityFacade);
+        setField("itemTagStorage", itemTagStorage);
+        setField("listingStorage", listingStorage);
+        setField("historyStorage", historyStorage);
+        setField("historyGuiEnabled", guiEnabled);
+        setField("transactionService", serviceResult.transactionService);
+        setField("transactionHistory", serviceResult.transactionHistory);
+        setField("liveAuctionService", serviceResult.liveAuctionService);
+        setField("auctionManager", serviceResult.auctionManager);
+        setField("pendingReturns", serviceResult.pendingReturns);
+        setField("auctionMenu", guiResult.auctionMenu);
+        setField("liveAuctionMenu", guiResult.liveAuctionMenu);
+        setField("auctionOrderMenu", guiResult.auctionOrderMenu);
+        setField("auctionSellMenu", guiResult.auctionSellMenu);
+        setField("auctionActivityMenu", guiResult.auctionActivityMenu);
+        setField("auctionCommand", guiResult.auctionCommand);
+        setField("hologramManager", guiResult.hologramManager);
+        setField("hologramCommand", guiResult.hologramCommand);
+        setField("itemValueProvider", guiResult.itemValueProvider);
+        setField("shopPriceValueProvider", guiResult.shopPriceValueProvider);
+        setField("placeholderExpansion", guiResult.placeholderExpansion);
+        setField("metrics", guiResult.metrics);
+    }
 
-        this.auctionMenu = new AuctionMenu(plugin, auctionManager, transactionService, configuration.menuConfiguration(), messageConfiguration.browser(), valueConfiguration, itemValueProvider, shopPriceValueProvider, shopPriceOverlayEnabled, itemTagStorage);
-        this.liveAuctionMenu = new LiveAuctionMenu(plugin, auctionManager, transactionService, auctionMenu, liveAuctionService, messageConfiguration.live(), valueConfiguration, shopPriceValueProvider, shopPriceOverlayEnabled, itemTagStorage);
-        AuctionMenuInteractionConfiguration menuInteractions = configuration.menuInteractionConfiguration();
-        this.auctionOrderMenu = new AuctionOrderMenu(plugin, auctionManager, transactionService, configuration.listingRules(), configuration.durationOptions(), menuInteractions.orderMenu(), recommendationProvider, messageConfiguration.order(), itemTagStorage);
-        this.auctionSellMenu = new AuctionSellMenu(plugin, auctionManager, transactionService, configuration.listingRules(), configuration.durationOptions(), menuInteractions.sellMenu(), recommendationProvider, messageConfiguration.sell(), itemTagStorage);
-        this.auctionActivityMenu = new AuctionActivityMenu(plugin, auctionManager, transactionService, transactionHistory, auctionMenu, itemTagStorage, messageConfiguration.browser(), AuctionActivityMenu.ActivityMessages.defaults());
-        
-        // Set bidirectional reference to avoid circular dependency
-        this.auctionMenu.setActivityMenu(this.auctionActivityMenu);
-
-        this.auctionCommand = new AuctionCommand(auctionManager, auctionMenu, auctionSellMenu, auctionOrderMenu, transactionHistory, transactionService, configuration.listingRules(), liveAuctionMenu, commandMessageConfiguration);
-
-        // Hologram logic
-        AuctionHologramConfiguration hologramConfiguration = configuration.hologramConfiguration();
-        if (hologramConfiguration != null && hologramConfiguration.enabled() && hologramSupportAvailable) {
-            this.hologramManager = new AuctionHologramManager(plugin, auctionManager, transactionService, hologramConfiguration, hologramPlatform);
-            this.hologramManager.enable();
-            this.hologramCommand = new AuctionHologramCommand(hologramManager, commandMessageConfiguration.holograms());
-        } else {
-            this.hologramManager = null;
-            this.hologramCommand = null;
-            if (hologramConfiguration != null && hologramConfiguration.enabled()) {
-                plugin.getLogger().warning("Auction holograms requested but unavailable on this platform; feature will remain disabled.");
-            }
-        }
-
-        // PlaceholderAPI
-        Plugin placeholderApi = plugin.getServer().getPluginManager().getPlugin("PlaceholderAPI");
-        EzAuctionPlaceholderExpansion tempExpansion = null;
-        if (placeholderApi != null && placeholderApi.isEnabled()) {
-            tempExpansion = new EzAuctionPlaceholderExpansion(auctionManager, plugin.getDescription());
-            if (!tempExpansion.register()) {
-                plugin.getLogger().warning("Failed to register PlaceholderAPI placeholders for EzAuction.");
-                tempExpansion = null;
-            }
-        }
-        this.placeholderExpansion = tempExpansion;
-
-        // Metrics
-        Metrics tempMetrics = null;
+    // Helper to set final fields via reflection (Java limitation workaround for staged init)
+    private void setField(String name, Object value) {
         try {
-            tempMetrics = new Metrics(plugin, 27737);
-        } catch (Throwable throwable) {
-            plugin.getLogger().warning("Failed to start bStats metrics: " + throwable.getMessage());
+            java.lang.reflect.Field f = PluginRegistry.class.getDeclaredField(name);
+            f.setAccessible(true);
+            f.set(this, value);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to set field '" + name + "' in PluginRegistry", e);
         }
-        this.metrics = tempMetrics;
     }
 
     /**
@@ -315,19 +249,41 @@ public class PluginRegistry {
      * Should be called from EzAuctionPlugin.onEnable().
      */
     public void enableAll() {
-        // Register events and commands
+        plugin.getServer().getPluginManager().registerEvents(auctionOrderMenu, plugin);
+        PluginCommand ordersCmd = plugin.getCommand("orders");
+        if (ordersCmd != null) {
+            OrdersCommand ordersCommand = new OrdersCommand(auctionOrderMenu);
+            ordersCmd.setExecutor(ordersCommand);
+            ordersCmd.setTabCompleter(ordersCommand);
+        } else {
+            plugin.getLogger().severe("Plugin command 'orders' is not defined in plugin.yml; orders-only mode will not work.");
+        }
+        PluginCommand orderCmd = plugin.getCommand("order");
+        if (orderCmd != null) {
+            OrderCommand orderCommand = new OrderCommand(auctionOrderMenu);
+            orderCmd.setExecutor(orderCommand);
+            orderCmd.setTabCompleter(orderCommand);
+        } else {
+            plugin.getLogger().severe("Plugin command 'order' is not defined in plugin.yml; orders-only mode will not work.");
+        }
+        
+        if (OrdersOnlyConfig.isOrdersOnlyMode()) {
+            // Orders-only mode: only register /orders, /order and order menu
+            // Do not register auction, liveauction, hologram, or other auction features
+            return;
+        }
+        
+        // Normal mode: register all features
         plugin.getServer().getPluginManager().registerEvents(auctionMenu, plugin);
         plugin.getServer().getPluginManager().registerEvents(liveAuctionMenu, plugin);
         plugin.getServer().getPluginManager().registerEvents(auctionOrderMenu, plugin);
         plugin.getServer().getPluginManager().registerEvents(new AuctionActivityMenuListener(auctionActivityMenu, auctionMenu, itemTagStorage), plugin);
-        // Register AuctionReturnListener with the shared pendingReturns map for claim handling
         plugin.getServer().getPluginManager().registerEvents(new AuctionReturnListener(new AuctionClaimService(
             pendingReturns,
             configuration.backendMessages()
         )), plugin);
         plugin.getServer().getPluginManager().registerEvents(new AuctionSellMenuListener(auctionSellMenu), plugin);
 
-        // Register AuctionHistoryListener only if history GUI is enabled
         if (historyGuiEnabled) {
             plugin.getServer().getPluginManager().registerEvents(new AuctionHistoryListener(), plugin);
         }
@@ -372,7 +328,12 @@ public class PluginRegistry {
         if (liveAuctionService != null) liveAuctionService.disable();
         if (transactionHistory != null) transactionHistory.disable();
         if (hologramManager != null) hologramManager.disable();
-        if (placeholderExpansion != null) placeholderExpansion.unregister();
+        // Only attempt to unregister if PlaceholderAPI is present
+        if (placeholderExpansion != null) {
+            try {
+                placeholderExpansion.getClass().getMethod("unregister").invoke(placeholderExpansion);
+            } catch (Throwable ignored) {}
+        }
         
         try {
             if (listingStorage != null) listingStorage.close();
@@ -385,6 +346,15 @@ public class PluginRegistry {
         } catch (Exception ex) {
             plugin.getLogger().log(Level.SEVERE, "Failed to close EzAuction history storage.", ex);
         }
+    }
+
+    /** 
+     * Gets the main plugin configuration.
+     *
+     * @return The AuctionConfiguration instance
+     */
+    public AuctionConfiguration getConfiguration() {
+        return this.configuration;
     }
 
     /**
