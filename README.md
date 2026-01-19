@@ -15,6 +15,7 @@
   - [📑 Table of Contents](#-table-of-contents)
   - [📦 Requirements](#-requirements)
   - [🚀 Installation](#-installation)
+    - [New Installation](#new-installation)
   - [✨ Features](#-features)
   - [⚙️ Configuration](#️-configuration)
   - [🛡️ Permissions \& Commands](#️-permissions--commands)
@@ -55,6 +56,8 @@
 - **NEW in 2.0**: Low-price warnings in confirmation dialogs
 - **NEW in 2.0**: Consolidated "My Activity" menu
 - Actively maintained and open source
+- **NEW in 2.0.1** Orders-Only Mode
+  If you only want the Orders feature (buy orders, no auction house), set `orders-only-mode: true` in `orders-only.yml`. This disables all auction house features and enables the `/orders` and `/order` commands for players to create and manage buy orders.
 
 ## ⚙️ Configuration
 Default configuration files are generated on first run in `plugins/EzAuction/`.
@@ -72,6 +75,14 @@ Default configuration files are generated on first run in `plugins/EzAuction/`.
 After editing, reload the plugin or restart the server to apply changes.
 
 ## 🛡️ Permissions & Commands
+
+**Orders-Only Mode Command:**
+
+| Command   | Description                        | Permission                |
+|-----------|------------------------------------|---------------------------|
+| `/orders` | Open the Orders (buy orders) menu  | `ezauction.auction.order` |
+
+When `orders-only-mode` is enabled, all other auction commands are disabled.
 
 **Main Commands:**
 

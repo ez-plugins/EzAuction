@@ -5,9 +5,12 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import com.skyblockexp.ezauction.AuctionListing;
 import com.skyblockexp.ezauction.AuctionOrder;
+import com.skyblockexp.ezauction.EzAuctionPlugin;
 import com.skyblockexp.ezauction.storage.AuctionStorage;
 import com.skyblockexp.ezauction.storage.DistributedAuctionListingStorage;
 import com.skyblockexp.ezauction.storage.AuctionStorageSnapshot;
@@ -17,6 +20,8 @@ import org.bukkit.inventory.ItemStack;
  * Handles persistence logic for auction listings, orders, and returns.
  */
 public class AuctionPersistenceManager {
+    private static final Logger LOGGER = Logger.getLogger(AuctionPersistenceManager.class.getName());
+    
     private final AuctionStorage storage;
     private final DistributedAuctionListingStorage distributedStorage;
     private final ExecutorService executor;
@@ -104,13 +109,26 @@ public class AuctionPersistenceManager {
         }
         try {
             chain.get();
-        } catch (Exception ignored) {
+        } catch (Exception ex) {
+            com.skyblockexp.ezauction.bootstrap.PluginRegistry registry = EzAuctionPlugin.getStaticRegistry();
+            if (registry != null && registry.getConfiguration() != null && registry.getConfiguration().debug()) {
+                LOGGER.log(Level.SEVERE, "[EzAuction][ERROR] Persistence completion error", ex);
+            }
         }
     }
 
     private void schedulePersistenceTask(Runnable task) {
         synchronized (persistenceLock) {
-            persistenceChain = persistenceChain.thenRunAsync(task, executor);
+            persistenceChain = persistenceChain.thenRunAsync(() -> {
+                try {
+                    task.run();
+                } catch (Exception ex) {
+                    com.skyblockexp.ezauction.bootstrap.PluginRegistry registry = EzAuctionPlugin.getStaticRegistry();
+                    if (registry != null && registry.getConfiguration() != null && registry.getConfiguration().debug()) {
+                        LOGGER.log(Level.SEVERE, "[EzAuction][ERROR] Persistence task error", ex);
+                    }
+                }
+            }, executor);
         }
     }
 
