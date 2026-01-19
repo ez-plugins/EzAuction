@@ -7,6 +7,8 @@ import org.bukkit.Bukkit;
 import com.skyblockexp.ezauction.transaction.AuctionTransactionHistory;
 import com.skyblockexp.ezauction.transaction.AuctionTransactionHistoryEntry;
 import com.skyblockexp.ezauction.transaction.AuctionTransactionType;
+import com.skyblockexp.ezauction.util.DateUtil;
+
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -84,7 +86,7 @@ public class AuctionHistoryGUI {
                 meta.setDisplayName((tab == Tab.SALES ? "Sold to " : "Bought from ") + entry.counterpartName());
                 meta.setLore(List.of(
                     "Price: " + entry.price(),
-                    "Date: " + new java.text.SimpleDateFormat("MMM d, h:mm a").format(new java.util.Date(entry.timestamp()))
+                    "Date: " + DateUtil.formatDate(entry.timestamp())
                 ));
                 item.setItemMeta(meta);
             }

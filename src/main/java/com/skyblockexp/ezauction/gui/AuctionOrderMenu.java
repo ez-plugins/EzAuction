@@ -4,9 +4,12 @@ import com.skyblockexp.ezauction.AuctionManager;
 import com.skyblockexp.ezauction.AuctionOperationResult;
 import com.skyblockexp.ezauction.transaction.AuctionTransactionService;
 import com.skyblockexp.ezauction.compat.ItemTagStorage;
+import com.skyblockexp.ezauction.component.gui.order.OrderMenuState;
+import com.skyblockexp.ezauction.component.gui.order.OrderMenuHolder;
 import com.skyblockexp.ezauction.config.AuctionListingRules;
 import com.skyblockexp.ezauction.config.AuctionMenuInteractionConfiguration;
 import com.skyblockexp.ezauction.config.AuctionMessageConfiguration;
+import com.skyblockexp.ezauction.util.DateUtil;
 import com.skyblockexp.ezauction.util.EconomyUtils;
 import com.skyblockexp.ezauction.util.ItemValueProvider;
 import java.time.Duration;
@@ -22,6 +25,7 @@ import java.util.concurrent.ConcurrentMap;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -34,12 +38,13 @@ import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
+import com.skyblockexp.ezauction.AuctionOrder;
+import com.skyblockexp.ezauction.EzAuctionPlugin;
 
 /**
  * Interactive menu that guides players through creating auction buy orders.
  */
 public class AuctionOrderMenu implements Listener {
-
     private static final String ACTION_PRICE_ADJUST = "price_adjust";
     private static final String ACTION_PRICE_CUSTOM = "price_custom";
     private static final String ACTION_QUANTITY_ADJUST = "quantity_adjust";
@@ -62,9 +67,9 @@ public class AuctionOrderMenu implements Listener {
     private final AuctionMenuInteractionConfiguration.OrderMenuLayoutConfiguration layout;
     private final ItemStack fillerPane;
 
+    // These are now managed externally for listeners
     private final ConcurrentMap<UUID, OrderMenuState> pendingPriceInputs;
     private final ConcurrentMap<UUID, OrderMenuState> pendingQuantityInputs;
-
     private final Duration[] durationOptions;
     private final int defaultDurationIndex;
     private final double minimumPricePerItem;
@@ -92,7 +97,11 @@ public class AuctionOrderMenu implements Listener {
         this.itemTagStorage = Objects.requireNonNull(itemTagStorage, "itemTagStorage");
         this.pendingPriceInputs = new ConcurrentHashMap<>();
         this.pendingQuantityInputs = new ConcurrentHashMap<>();
-        this.durationOptions = buildDurationOptions(listingRules, configuredDurationOptions);
+        Duration[] options = buildDurationOptions(listingRules, configuredDurationOptions);
+        if (options == null) {
+            options = new Duration[] { listingRules.defaultDuration() };
+        }
+        this.durationOptions = options;
         this.defaultDurationIndex = resolveDefaultDurationIndex(durationOptions, listingRules.defaultDuration());
         this.minimumPricePerItem = Math.max(0.0D, listingRules.minimumPrice());
         this.longestDurationOption = resolveLongestDuration(durationOptions, listingRules);
@@ -149,9 +158,80 @@ public class AuctionOrderMenu implements Listener {
                 }
             }
         }
-        OrderMenuState state = new OrderMenuState(base, startingPrice, base.getAmount(), defaultDurationIndex,
-                recommendedPricePerItem);
+        Duration[] options = (durationOptions != null) ? durationOptions : new Duration[] { listingRules.defaultDuration() };
+        OrderMenuState state = new OrderMenuState(
+            base,
+            startingPrice,
+            base.getAmount(),
+            defaultDurationIndex,
+            recommendedPricePerItem,
+            options,
+            defaultDurationIndex
+        );
         openOrderMenu(player, state);
+    }
+
+    /**
+     * Opens the overview menu listing all open orders for the player.
+     */
+    public void openOrdersOverview(Player player) {
+        if (player == null) {
+            return;
+        }
+        if (!player.hasPermission("ezauction.auction.order")) {
+            sendMessage(player, messages.noPermission());
+            return;
+        }
+        // Fetch all open orders from the auctionManager
+        List<ItemStack> openOrders = auctionManager.getOpenOrdersForPlayer(player);
+        int size = Math.max(27, ((openOrders.size() + 8) / 9) * 9); // fit items in rows
+        Inventory overview = Bukkit.createInventory(player, size, colorize("&eYour Open Orders"));
+        for (int i = 0; i < openOrders.size() && i < size; i++) {
+            overview.setItem(i, openOrders.get(i));
+        }
+        player.openInventory(overview);
+    }
+
+    /**
+     * Opens the overview menu listing all open orders in the auction house.
+     * @param player
+     */
+    public void openAllOrdersOverview(Player player) {
+        if (player == null) {
+            return;
+        }
+        if (!player.hasPermission("ezauction.auction.order")) {
+            sendMessage(player, messages.noPermission());
+            return;
+        }
+        List<AuctionOrder> allOrders = auctionManager.listActiveOrders();
+        List<ItemStack> openOrders = new ArrayList<>();
+        for (AuctionOrder order : allOrders) {
+            ItemStack item = order.requestedItem();
+            if (item != null) {
+                ItemMeta meta = item.getItemMeta();
+                List<String> lore = new ArrayList<>();
+                OfflinePlayer buyer = Bukkit.getOfflinePlayer(order.buyer());
+                String buyerName = buyer.getName() != null ? buyer.getName() : order.buyer().toString();
+
+                lore.add(ChatColor.GRAY + "Price per Item: " + ChatColor.GOLD + order.pricePerItem());
+                lore.add(ChatColor.GRAY + "Quantity: " + ChatColor.AQUA + order.quantity());
+                lore.add(ChatColor.GRAY + "Total Price: " + ChatColor.GOLD + order.offeredPrice());
+                lore.add(ChatColor.GRAY + "Expires: " + ChatColor.YELLOW + DateUtil.formatDate(order.expiryEpochMillis()));
+                lore.add(ChatColor.GRAY + "Buyer: " + ChatColor.AQUA + buyerName);
+                if (meta != null) {
+                    meta.setLore(lore);
+                    item.setItemMeta(meta);
+                }
+                openOrders.add(item);
+            }
+        }
+        int size = Math.max(27, ((openOrders.size() + 8) / 9) * 9); // fit items in rows
+        Inventory overview = Bukkit.createInventory(player, size, colorize("&eAll Open Orders"));
+        for (int i = 0; i < openOrders.size() && i < size; i++) {
+            overview.setItem(i, openOrders.get(i));
+        }
+        player.openInventory(overview);
     }
 
     private void openOrderMenu(Player player, OrderMenuState state) {
@@ -587,6 +667,12 @@ public class AuctionOrderMenu implements Listener {
             refreshMenu(holder);
             return;
         }
+        if (EzAuctionPlugin.getStaticRegistry().getConfiguration().debug()) {
+            ItemStack item = state.item();
+            plugin.getLogger().fine("[EzAuction][DEBUG] GUI triggering createOrder: player=" + player.getName() 
+                + ", item=" + (item != null ? item.getType() + "x" + item.getAmount() : "null") 
+                + ", price=" + total + ", duration=" + state.duration());
+        }
         AuctionOperationResult result = auctionManager.createOrder(player, state.item(), total, state.duration(), total);
         if (result.message() != null && !result.message().isEmpty()) {
             player.sendMessage(result.message());
@@ -825,124 +911,4 @@ public class AuctionOrderMenu implements Listener {
         return builder.toString();
     }
 
-    private abstract static class AbstractOrderHolder implements InventoryHolder {
-
-        private final UUID owner;
-        private Inventory inventory;
-
-        protected AbstractOrderHolder(UUID owner) {
-            this.owner = owner;
-        }
-
-        public UUID owner() {
-            return owner;
-        }
-
-        public void setInventory(Inventory inventory) {
-            this.inventory = inventory;
-        }
-
-        @Override
-        public Inventory getInventory() {
-            return inventory;
-        }
-    }
-
-    private static final class OrderMenuHolder extends AbstractOrderHolder {
-
-        private final OrderMenuState state;
-
-        private OrderMenuHolder(UUID owner, OrderMenuState state) {
-            super(owner);
-            this.state = state;
-        }
-
-        public OrderMenuState state() {
-            return state;
-        }
-    }
-
-    private final class OrderMenuState {
-
-        private final ItemStack template;
-        private final int maxQuantity;
-        private double pricePerItem;
-        private int quantity;
-        private int durationIndex;
-        private final Double recommendedPricePerItem;
-
-        private OrderMenuState(ItemStack template, double pricePerItem, int quantity, int durationIndex,
-                Double recommendedPricePerItem) {
-            this.template = template.clone();
-            this.template.setAmount(1);
-            this.maxQuantity = Math.max(1, template.getMaxStackSize());
-            this.pricePerItem = pricePerItem;
-            setQuantity(quantity);
-            this.durationIndex = normalizeIndex(durationIndex);
-            this.recommendedPricePerItem = recommendedPricePerItem;
-        }
-
-        public ItemStack item() {
-            ItemStack clone = template.clone();
-            clone.setAmount(quantity);
-            return clone;
-        }
-
-        public double pricePerItem() {
-            return pricePerItem;
-        }
-
-        public void setPricePerItem(double pricePerItem) {
-            this.pricePerItem = pricePerItem;
-        }
-
-        public Double recommendedPricePerItem() {
-            return recommendedPricePerItem;
-        }
-
-        public int quantity() {
-            return quantity;
-        }
-
-        public void setQuantity(int quantity) {
-            int clamped = Math.max(1, Math.min(quantity, maxQuantity));
-            this.quantity = clamped;
-        }
-
-        public void adjustQuantity(int delta) {
-            setQuantity(quantity + delta);
-        }
-
-        public int maxQuantity() {
-            return maxQuantity;
-        }
-
-        public double totalPrice() {
-            return pricePerItem * quantity;
-        }
-
-        public Duration duration() {
-            if (durationOptions.length == 0) {
-                return listingRules.defaultDuration();
-            }
-            return durationOptions[durationIndex];
-        }
-
-        public void cycleDuration() {
-            if (durationOptions.length == 0) {
-                return;
-            }
-            durationIndex = (durationIndex + 1) % durationOptions.length;
-        }
-
-        private int normalizeIndex(int requested) {
-            if (durationOptions.length == 0) {
-                return 0;
-            }
-            if (requested < 0 || requested >= durationOptions.length) {
-                return Math.min(defaultDurationIndex, durationOptions.length - 1);
-            }
-            return requested;
-        }
-    }
 }

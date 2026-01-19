@@ -10,6 +10,19 @@ Configuration files are generated in the `plugins/EzAuction/` directory on first
 
 ---
 
+
+## Orders-Only Mode (`orders-only.yml`)
+
+To enable only the Orders feature (disabling all auction house functionality), create or edit `orders-only.yml`:
+
+```yaml
+orders-only-mode: true
+```
+
+When enabled, the `/orders` command and its `/order` alias are available for players to create and manage buy orders. All other auction commands and GUIs are disabled.
+
+---
+
 ## Main Configuration (`config.yml`)
 
 | Option                      | Type      | Default         | Description                                                                 |

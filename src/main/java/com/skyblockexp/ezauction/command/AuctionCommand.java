@@ -4,10 +4,12 @@ import com.skyblockexp.ezauction.AuctionListing;
 import com.skyblockexp.ezauction.AuctionManager;
 import com.skyblockexp.ezauction.AuctionOperationResult;
 import com.skyblockexp.ezauction.AuctionOrder;
+import com.skyblockexp.ezauction.EzAuctionPlugin;
 import com.skyblockexp.ezauction.transaction.AuctionTransactionHistory;
 import com.skyblockexp.ezauction.transaction.AuctionTransactionHistoryEntry;
 import com.skyblockexp.ezauction.transaction.AuctionTransactionService;
 import com.skyblockexp.ezauction.transaction.AuctionTransactionType;
+import com.skyblockexp.ezauction.util.DateUtil;
 import com.skyblockexp.ezauction.config.AuctionListingRules;
 import com.skyblockexp.ezauction.config.AuctionCommandMessageConfiguration;
 import com.skyblockexp.ezauction.gui.AuctionMenu;
@@ -72,6 +74,30 @@ public class AuctionCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        if (args.length > 0 && args[0].equalsIgnoreCase("reload")) {
+            if (!sender.hasPermission("ezauction.admin.reload")) {
+                sendMessage(sender, ChatColor.RED + "You do not have permission to reload EzAuction.");
+                return true;
+            }
+            
+            try {
+                // Reload configuration files
+                if (EzAuctionPlugin.getStaticRegistry() != null) {
+                    EzAuctionPlugin.getStaticRegistry().reloadConfiguration();
+                    sendMessage(sender, ChatColor.GREEN + "EzAuction configuration reloaded successfully.");
+                    sendMessage(sender, ChatColor.YELLOW + "Note: Some settings may require a server restart to fully apply.");
+                } else {
+                    sendMessage(sender, ChatColor.RED + "Failed to reload: Plugin registry not initialized.");
+                }
+            } catch (Exception ex) {
+                sendMessage(sender, ChatColor.RED + "Failed to reload configuration: " + ex.getMessage());
+                if (sender.hasPermission("ezauction.admin.debug")) {
+                    ex.printStackTrace();
+                }
+            }
+            return true;
+        }
+
         if (!(sender instanceof Player player)) {
             sendMessage(sender, messages.general().consoleOnly());
             return true;
@@ -238,6 +264,7 @@ public class AuctionCommand implements CommandExecutor, TabCompleter {
         sendMessage(player, messages.usage().cancel().replace("{label}", label));
         sendMessage(player, messages.usage().history().replace("{label}", label));
         sendMessage(player, messages.usage().claim().replace("{label}", label));
+        sendMessage(player, ChatColor.YELLOW + "/" + label + " reload - Reload all EzAuction configuration files.");
         sendMessage(player, messages.usage().search().replace("{label}", label));
     }
 
@@ -274,8 +301,7 @@ public class AuctionCommand implements CommandExecutor, TabCompleter {
                 sendMessage(player, messages.cancel().listingsHeader());
                 for (AuctionListing listing : ownListings) {
                     String priceText = transactionService.formatCurrency(listing.price());
-                    String expiryText = HISTORY_DATE_FORMAT
-                            .format(Instant.ofEpochMilli(listing.expiryEpochMillis()).atZone(ZoneId.systemDefault()));
+                    String expiryText = DateUtil.formatDate(listing.expiryEpochMillis());
                     String message = messages.cancel().listingEntry()
                             .replace("{id}", listing.id())
                             .replace("{item}", describeItem(listing.item()))
@@ -290,7 +316,7 @@ public class AuctionCommand implements CommandExecutor, TabCompleter {
                 for (AuctionOrder order : ownOrders) {
                     String priceText = transactionService.formatCurrency(order.offeredPrice());
                     String expiryText = HISTORY_DATE_FORMAT
-                            .format(Instant.ofEpochMilli(order.expiryEpochMillis()).atZone(ZoneId.systemDefault()));
+                            DateUtil.formatDate(order.expiryEpochMillis());
                     String message = messages.cancel().orderEntry()
                             .replace("{id}", order.id())
                             .replace("{item}", describeItem(order.requestedItem()))

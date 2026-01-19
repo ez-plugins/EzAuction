@@ -15,6 +15,8 @@ import com.skyblockexp.ezauction.claim.AuctionClaimService;
 import com.skyblockexp.ezauction.history.AuctionTransactionHistoryService;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.ChatColor;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -26,6 +28,7 @@ import com.skyblockexp.ezauction.service.AuctionReturnService;
 import com.skyblockexp.ezauction.service.AuctionExpiryService;
 import com.skyblockexp.ezauction.service.AuctionQueryService;
 import com.skyblockexp.ezauction.util.AuctionValidationUtils;
+import com.skyblockexp.ezauction.util.DateUtil;
 
 public class AuctionManager {
     // Services
@@ -341,5 +344,38 @@ public class AuctionManager {
      */
     public AuctionConfiguration getConfiguration() {
         return configuration;
+    }
+
+    /**
+     * Returns a list of ItemStacks representing all active orders placed by the given player.
+     *
+     * @param player the player whose orders to fetch
+     * @return a list of ItemStacks for the player's active orders
+     */
+    public List<ItemStack> getOpenOrdersForPlayer(Player player) {
+        List<ItemStack> result = new ArrayList<>();
+        if (player == null) return result;
+        UUID buyerId = player.getUniqueId();
+        long now = System.currentTimeMillis();
+        for (AuctionOrder order : queryService.listActiveOrders()) {
+            if (buyerId.equals(order.buyerId()) && order.expiryEpochMillis() > now) {
+                ItemStack item = order.requestedItem();
+                if (item != null) {
+                    ItemMeta meta = item.getItemMeta();
+                    List<String> lore = new ArrayList<>();
+                    lore.add(ChatColor.GOLD + "Order ID: " + order.id());
+                    lore.add(ChatColor.GRAY + "Price per Item: " + ChatColor.GOLD + order.pricePerItem());
+                    lore.add(ChatColor.GRAY + "Quantity: " + ChatColor.AQUA + order.quantity());
+                    lore.add(ChatColor.GRAY + "Total Price: " + ChatColor.GOLD + order.offeredPrice());
+                    lore.add(ChatColor.GRAY + "Expires: " + ChatColor.YELLOW + DateUtil.formatDate(order.expiryEpochMillis()));
+                    if (meta != null) {
+                        meta.setLore(lore);
+                        item.setItemMeta(meta);
+                    }
+                    result.add(item);
+                }
+            }
+        }
+        return result;
     }
 }
