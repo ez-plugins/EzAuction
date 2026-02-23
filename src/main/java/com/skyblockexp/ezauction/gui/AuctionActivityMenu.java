@@ -50,47 +50,9 @@ public class AuctionActivityMenu {
     private final AuctionMenu auctionMenu;
     private final ItemTagStorage itemTagStorage;
     private final AuctionMessageConfiguration.BrowserMessages messages;
-    private final ActivityMessages activityMessages;
+    private final AuctionMessageConfiguration.ActivityMessages activityMessages;
 
-    /**
-     * Holds configurable messages for the activity menu.
-     */
-    public static class ActivityMessages {
-        private final String noListings;
-        private final String noOrders;
-        private final String noReturns;
-        private final String noHistory;
-        private final String claimPromptLine1;
-        private final String claimPromptLine2;
-
-        public ActivityMessages(String noListings, String noOrders, String noReturns, String noHistory,
-                                String claimPromptLine1, String claimPromptLine2) {
-            this.noListings = noListings;
-            this.noOrders = noOrders;
-            this.noReturns = noReturns;
-            this.noHistory = noHistory;
-            this.claimPromptLine1 = claimPromptLine1;
-            this.claimPromptLine2 = claimPromptLine2;
-        }
-
-        public static ActivityMessages defaults() {
-            return new ActivityMessages(
-                "You have no active listings.",
-                "You have no active buy orders.",
-                "You have no pending returns.",
-                "No transaction history.",
-                "You have {count} items waiting.",
-                "Click the claim button below to retrieve them."
-            );
-        }
-
-        public String noListings() { return noListings; }
-        public String noOrders() { return noOrders; }
-        public String noReturns() { return noReturns; }
-        public String noHistory() { return noHistory; }
-        public String claimPromptLine1() { return claimPromptLine1; }
-        public String claimPromptLine2() { return claimPromptLine2; }
-    }
+    // Activity messages are supplied by AuctionMessageConfiguration.ActivityMessages
 
     public AuctionActivityMenu(
             JavaPlugin plugin,
@@ -100,7 +62,7 @@ public class AuctionActivityMenu {
             AuctionMenu auctionMenu,
             ItemTagStorage itemTagStorage,
             AuctionMessageConfiguration.BrowserMessages messages,
-            ActivityMessages activityMessages) {
+            AuctionMessageConfiguration.ActivityMessages activityMessages) {
         this.plugin = plugin;
         this.auctionManager = auctionManager;
         this.transactionService = transactionService;
@@ -108,7 +70,7 @@ public class AuctionActivityMenu {
         this.auctionMenu = auctionMenu;
         this.itemTagStorage = itemTagStorage;
         this.messages = messages != null ? messages : AuctionMessageConfiguration.BrowserMessages.defaults();
-        this.activityMessages = activityMessages != null ? activityMessages : ActivityMessages.defaults();
+        this.activityMessages = activityMessages != null ? activityMessages : AuctionMessageConfiguration.ActivityMessages.defaults();
     }
 
     /**
@@ -197,7 +159,7 @@ public class AuctionActivityMenu {
         ItemStack claimPrompt = new ItemStack(Material.ENDER_CHEST);
         ItemMeta meta = claimPrompt.getItemMeta();
         if (meta != null) {
-            meta.setDisplayName(ChatColor.GOLD + "Claim Pending Returns");
+            meta.setDisplayName(ChatColor.GOLD + activityMessages.claimPromptTitle());
             List<String> lore = new ArrayList<>();
             lore.add(ChatColor.GRAY + activityMessages.claimPromptLine1().replace("{count}", String.valueOf(returnCount)));
             lore.add(ChatColor.GRAY + activityMessages.claimPromptLine2());
@@ -234,7 +196,7 @@ public class AuctionActivityMenu {
         ItemStack itemStack = new ItemStack(Material.BARRIER);
         ItemMeta meta = itemStack.getItemMeta();
         if (meta != null) {
-            meta.setDisplayName(ChatColor.RED + "Invalid Item");
+            meta.setDisplayName(ChatColor.RED + activityMessages.invalidItemTitle());
             itemStack.setItemMeta(meta);
         }
         return itemStack;
@@ -250,11 +212,11 @@ public class AuctionActivityMenu {
         if (meta != null) {
             List<String> lore = meta.hasLore() ? new ArrayList<>(meta.getLore()) : new ArrayList<>();
             lore.add("");
-            lore.add(ChatColor.GOLD + "Price: " + ChatColor.WHITE + transactionService.formatCurrency(listing.price()));
-            lore.add(ChatColor.GRAY + "Quantity: " + ChatColor.WHITE + listing.item().getAmount());
-            lore.add(ChatColor.GRAY + "Expires: " + ChatColor.WHITE + AuctionUtils.formatTimeRemaining(Instant.ofEpochMilli(listing.expiresAt())));
+            lore.add(ChatColor.GOLD + activityMessages.labelPrice() + ChatColor.WHITE + transactionService.formatCurrency(listing.price()));
+            lore.add(ChatColor.GRAY + activityMessages.labelQuantity() + ChatColor.WHITE + listing.item().getAmount());
+            lore.add(ChatColor.GRAY + activityMessages.labelExpires() + ChatColor.WHITE + AuctionUtils.formatTimeRemaining(Instant.ofEpochMilli(listing.expiresAt())));
             lore.add("");
-            lore.add(ChatColor.YELLOW + "Your active listing");
+            lore.add(ChatColor.YELLOW + activityMessages.listingTag());
             meta.setLore(lore);
             display.setItemMeta(meta);
         }
@@ -272,12 +234,12 @@ public class AuctionActivityMenu {
         if (meta != null) {
             List<String> lore = meta.hasLore() ? new ArrayList<>(meta.getLore()) : new ArrayList<>();
             lore.add("");
-            lore.add(ChatColor.GOLD + "Price per item: " + ChatColor.WHITE + transactionService.formatCurrency(order.pricePerItem()));
-            lore.add(ChatColor.GRAY + "Quantity wanted: " + ChatColor.WHITE + order.quantity());
-            lore.add(ChatColor.GOLD + "Total: " + ChatColor.WHITE + transactionService.formatCurrency(order.pricePerItem() * order.quantity()));
-            lore.add(ChatColor.GRAY + "Expires: " + ChatColor.WHITE + AuctionUtils.formatTimeRemaining(Instant.ofEpochMilli(order.expiresAt())));
+            lore.add(ChatColor.GOLD + activityMessages.labelPricePerItem() + ChatColor.WHITE + transactionService.formatCurrency(order.pricePerItem()));
+            lore.add(ChatColor.GRAY + activityMessages.labelQuantityWanted() + ChatColor.WHITE + order.quantity());
+            lore.add(ChatColor.GOLD + activityMessages.labelTotal() + ChatColor.WHITE + transactionService.formatCurrency(order.pricePerItem() * order.quantity()));
+            lore.add(ChatColor.GRAY + activityMessages.labelExpires() + ChatColor.WHITE + AuctionUtils.formatTimeRemaining(Instant.ofEpochMilli(order.expiresAt())));
             lore.add("");
-            lore.add(ChatColor.YELLOW + "Your buy order");
+            lore.add(ChatColor.YELLOW + activityMessages.orderTag());
             meta.setLore(lore);
             display.setItemMeta(meta);
         }
@@ -304,11 +266,11 @@ public class AuctionActivityMenu {
             meta.setDisplayName(ChatColor.WHITE + itemName);
             List<String> lore = new ArrayList<>();
             lore.add("");
-            lore.add(ChatColor.GRAY + "Type: " + ChatColor.WHITE + entry.type().name());
-            lore.add(ChatColor.GOLD + "Price: " + ChatColor.WHITE + transactionService.formatCurrency(entry.price()));
-            lore.add(ChatColor.GRAY + "Time: " + ChatColor.WHITE + AuctionUtils.formatTimeAgo(Instant.ofEpochMilli(entry.timestamp())));
+            lore.add(ChatColor.GRAY + activityMessages.labelType() + ChatColor.WHITE + entry.type().name());
+            lore.add(ChatColor.GOLD + activityMessages.labelPrice() + ChatColor.WHITE + transactionService.formatCurrency(entry.price()));
+            lore.add(ChatColor.GRAY + activityMessages.labelTime() + ChatColor.WHITE + AuctionUtils.formatTimeAgo(Instant.ofEpochMilli(entry.timestamp())));
             lore.add("");
-            lore.add(ChatColor.DARK_GRAY + "Transaction ID: " + entry.transactionId().substring(0, 8));
+            lore.add(ChatColor.DARK_GRAY + activityMessages.labelTransactionId() + entry.transactionId().substring(0, 8));
             meta.setLore(lore);
             display.setItemMeta(meta);
         }
@@ -323,23 +285,23 @@ public class AuctionActivityMenu {
         switch (tab) {
             case MY_LISTINGS -> {
                 material = active ? Material.LIME_STAINED_GLASS_PANE : Material.CHEST;
-                displayName = ChatColor.YELLOW + "My Listings";
-                description = "View your active listings";
+                displayName = ChatColor.YELLOW + activityMessages.tabListingsLabel();
+                description = activityMessages.tabListingsDesc();
             }
             case MY_ORDERS -> {
                 material = active ? Material.LIME_STAINED_GLASS_PANE : Material.PAPER;
-                displayName = ChatColor.YELLOW + "My Orders";
-                description = "View your buy orders";
+                displayName = ChatColor.YELLOW + activityMessages.tabOrdersLabel();
+                description = activityMessages.tabOrdersDesc();
             }
             case PENDING_RETURNS -> {
                 material = active ? Material.LIME_STAINED_GLASS_PANE : Material.ENDER_CHEST;
-                displayName = ChatColor.GOLD + "Pending Returns";
-                description = "Items waiting to be claimed";
+                displayName = ChatColor.GOLD + activityMessages.tabReturnsLabel();
+                description = activityMessages.tabReturnsDesc();
             }
             case RECENT_HISTORY -> {
                 material = active ? Material.LIME_STAINED_GLASS_PANE : Material.BOOK;
-                displayName = ChatColor.AQUA + "Recent History";
-                description = "Your transaction history";
+                displayName = ChatColor.AQUA + activityMessages.tabHistoryLabel();
+                description = activityMessages.tabHistoryDesc();
             }
             default -> {
                 material = Material.BARRIER;
@@ -356,10 +318,10 @@ public class AuctionActivityMenu {
             lore.add(ChatColor.GRAY + description);
             if (active) {
                 lore.add("");
-                lore.add(ChatColor.GREEN + "» Currently viewing");
+                lore.add(ChatColor.GREEN + activityMessages.tabActiveSuffix());
             } else {
                 lore.add("");
-                lore.add(ChatColor.YELLOW + "Click to view");
+                lore.add(ChatColor.YELLOW + activityMessages.tabClickText());
             }
             meta.setLore(lore);
             button.setItemMeta(meta);
@@ -381,8 +343,8 @@ public class AuctionActivityMenu {
         ItemStack button = new ItemStack(Material.ARROW);
         ItemMeta meta = button.getItemMeta();
         if (meta != null) {
-            meta.setDisplayName(ChatColor.GRAY + "Back");
-            meta.setLore(List.of(ChatColor.GRAY + "Return to auction browser"));
+            meta.setDisplayName(ChatColor.GRAY + activityMessages.backLabel());
+            meta.setLore(List.of(ChatColor.GRAY + activityMessages.backLore()));
             button.setItemMeta(meta);
         }
         setPersistent(button, ACTION_KEY, ACTION_BACK);
@@ -393,8 +355,8 @@ public class AuctionActivityMenu {
         ItemStack button = new ItemStack(Material.BARRIER);
         ItemMeta meta = button.getItemMeta();
         if (meta != null) {
-            meta.setDisplayName(ChatColor.RED + "Close");
-            meta.setLore(List.of(ChatColor.GRAY + "Close this menu"));
+            meta.setDisplayName(ChatColor.RED + activityMessages.closeLabel());
+            meta.setLore(List.of(ChatColor.GRAY + activityMessages.closeLore()));
             button.setItemMeta(meta);
         }
         return button;
@@ -405,13 +367,13 @@ public class AuctionActivityMenu {
         ItemStack button = new ItemStack(Material.CHEST);
         ItemMeta meta = button.getItemMeta();
         if (meta != null) {
-            meta.setDisplayName(ChatColor.GOLD + "Claim Returns");
+            meta.setDisplayName(ChatColor.GOLD + activityMessages.claimButtonLabel());
             List<String> lore = new ArrayList<>();
             if (count > 0) {
-                lore.add(ChatColor.GRAY + "Pending: " + ChatColor.YELLOW + count);
-                lore.add(ChatColor.GREEN + "Click to claim!");
+                lore.add(ChatColor.GRAY + activityMessages.claimButtonPendingLine().replace("{count}", String.valueOf(count)));
+                lore.add(ChatColor.GREEN + activityMessages.tabClickText());
             } else {
-                lore.add(ChatColor.GRAY + "No pending returns");
+                lore.add(ChatColor.GRAY + activityMessages.claimButtonNoPendingLine());
             }
             meta.setLore(lore);
             button.setItemMeta(meta);
@@ -424,7 +386,7 @@ public class AuctionActivityMenu {
         ItemStack indicator = new ItemStack(Material.BARRIER);
         ItemMeta meta = indicator.getItemMeta();
         if (meta != null) {
-            meta.setDisplayName(ChatColor.RED + "Nothing to show");
+            meta.setDisplayName(ChatColor.RED + activityMessages.emptyIndicatorTitle());
             meta.setLore(List.of(ChatColor.GRAY + message));
             indicator.setItemMeta(meta);
         }
@@ -443,13 +405,13 @@ public class AuctionActivityMenu {
 
     private String formatTitle(ActivityTab tab) {
         String tabName = switch (tab) {
-            case MY_LISTINGS -> "My Listings";
-            case MY_ORDERS -> "My Orders";
-            case PENDING_RETURNS -> "Pending Returns";
-            case RECENT_HISTORY -> "Recent History";
-            default -> "Activity"; // Fallback
+            case MY_LISTINGS -> activityMessages.tabListingsLabel();
+            case MY_ORDERS -> activityMessages.tabOrdersLabel();
+            case PENDING_RETURNS -> activityMessages.tabReturnsLabel();
+            case RECENT_HISTORY -> activityMessages.tabHistoryLabel();
+            default -> activityMessages.titlePrefix(); // Fallback
         };
-        return ChatColor.DARK_GREEN + "My Activity " + ChatColor.DARK_GRAY + "(" + tabName + ")";
+        return ChatColor.DARK_GREEN + activityMessages.titlePrefix() + " " + ChatColor.DARK_GRAY + "(" + tabName + ")";
     }
 
     private void setPersistent(ItemStack item, String key, String value) {

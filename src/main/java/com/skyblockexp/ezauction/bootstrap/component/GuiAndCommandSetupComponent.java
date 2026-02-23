@@ -91,7 +91,7 @@ public class GuiAndCommandSetupComponent {
         AuctionMenuInteractionConfiguration menuInteractions = configuration.menuInteractionConfiguration();
         AuctionOrderMenu auctionOrderMenu = new AuctionOrderMenu(plugin, auctionManager, transactionService, configuration.listingRules(), configuration.durationOptions(), menuInteractions.orderMenu(), recommendationProvider, messageConfiguration.order(), itemTagStorage);
         AuctionSellMenu auctionSellMenu = new AuctionSellMenu(plugin, auctionManager, transactionService, configuration.listingRules(), configuration.durationOptions(), menuInteractions.sellMenu(), recommendationProvider, messageConfiguration.sell(), itemTagStorage);
-        AuctionActivityMenu auctionActivityMenu = new AuctionActivityMenu(plugin, auctionManager, transactionService, transactionHistory, auctionMenu, itemTagStorage, messageConfiguration.browser(), AuctionActivityMenu.ActivityMessages.defaults());
+        AuctionActivityMenu auctionActivityMenu = new AuctionActivityMenu(plugin, auctionManager, transactionService, transactionHistory, auctionMenu, itemTagStorage, messageConfiguration.browser(), messageConfiguration.activity());
         auctionMenu.setActivityMenu(auctionActivityMenu);
         AuctionCommand auctionCommand = new AuctionCommand(auctionManager, auctionMenu, auctionSellMenu, auctionOrderMenu, transactionHistory, transactionService, configuration.listingRules(), liveAuctionMenu, commandMessageConfiguration);
         AuctionHologramConfiguration hologramConfiguration = configuration.hologramConfiguration();
