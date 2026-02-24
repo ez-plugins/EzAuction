@@ -315,8 +315,7 @@ public class AuctionCommand implements CommandExecutor, TabCompleter {
                 sendMessage(player, messages.cancel().ordersHeader());
                 for (AuctionOrder order : ownOrders) {
                     String priceText = transactionService.formatCurrency(order.offeredPrice());
-                    String expiryText = HISTORY_DATE_FORMAT
-                            DateUtil.formatDate(order.expiryEpochMillis());
+                    String expiryText = DateUtil.formatDate(order.expiryEpochMillis());
                     String message = messages.cancel().orderEntry()
                             .replace("{id}", order.id())
                             .replace("{item}", describeItem(order.requestedItem()))

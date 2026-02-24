@@ -267,8 +267,8 @@ public class AuctionMenu implements Listener {
         }
 
         if (currentPage > 0) {
-            ItemStack previous = createButton(Material.ARROW, ChatColor.YELLOW + "Previous Page",
-                    List.of(ChatColor.GRAY + "View earlier listings."));
+            ItemStack previous = createButton(Material.ARROW, ChatColor.YELLOW + messages.previousPageTitle(),
+                    List.of(ChatColor.GRAY + messages.previousPageLore()));
             setPersistent(previous, actionKey, ACTION_PREVIOUS);
             int slot = browserConfig.previousSlot();
             if (slot >= 0 && slot < inventory.getSize()) {
@@ -276,7 +276,7 @@ public class AuctionMenu implements Listener {
             }
         }
 
-        ItemStack close = createButton(Material.BARRIER, ChatColor.RED + "Close", List.of(ChatColor.GRAY + "Exit the auction."));
+        ItemStack close = createButton(Material.BARRIER, ChatColor.RED + messages.closeTitle(), List.of(ChatColor.GRAY + messages.closeLore()));
         setPersistent(close, actionKey, ACTION_CLOSE);
         int closeSlot = browserConfig.closeSlot();
         if (closeSlot >= 0 && closeSlot < inventory.getSize()) {
@@ -284,8 +284,8 @@ public class AuctionMenu implements Listener {
         }
 
         if (currentPage < totalPages - 1) {
-            ItemStack next = createButton(Material.ARROW, ChatColor.YELLOW + "Next Page",
-                    List.of(ChatColor.GRAY + "View more listings."));
+            ItemStack next = createButton(Material.ARROW, ChatColor.YELLOW + messages.nextPageTitle(),
+                    List.of(ChatColor.GRAY + messages.nextPageLore()));
             setPersistent(next, actionKey, ACTION_NEXT);
             int slot = browserConfig.nextSlot();
             if (slot >= 0 && slot < inventory.getSize()) {
@@ -294,7 +294,7 @@ public class AuctionMenu implements Listener {
         }
 
         ItemStack listingsToggle = createToggleButton(view == BrowserView.LISTINGS, listingsToggleConfig,
-                ChatColor.YELLOW + "Currently viewing listings.", ChatColor.GREEN + "Click to view listings.");
+            ChatColor.YELLOW + messages.listingsViewing(), ChatColor.GREEN + messages.listingsClick());
         setPersistent(listingsToggle, actionKey, ACTION_TOGGLE_LISTINGS);
         int listingsToggleSlot = listingsToggleConfig != null ? listingsToggleConfig.slot() : 46;
         if (listingsToggleSlot >= 0 && listingsToggleSlot < inventory.getSize()) {
@@ -302,7 +302,7 @@ public class AuctionMenu implements Listener {
         }
 
         ItemStack ordersToggle = createToggleButton(view == BrowserView.ORDERS, ordersToggleConfig,
-                ChatColor.YELLOW + "Currently viewing orders.", ChatColor.GREEN + "Click to view orders.");
+            ChatColor.YELLOW + messages.ordersViewing(), ChatColor.GREEN + messages.ordersClick());
         setPersistent(ordersToggle, actionKey, ACTION_TOGGLE_ORDERS);
         int ordersToggleSlot = ordersToggleConfig != null ? ordersToggleConfig.slot() : 52;
         if (ordersToggleSlot >= 0 && ordersToggleSlot < inventory.getSize()) {
@@ -1553,272 +1553,59 @@ public class AuctionMenu implements Listener {
         return createButton(material, displayName, lore);
     }
 
-    private static final class SearchPrompt {
-
-        private final BrowserView view;
-        private final int page;
-
-        private SearchPrompt(BrowserView view, int page) {
-            this.view = view;
-            this.page = page;
-        }
-
-        public BrowserView view() {
-            return view;
-        }
-
-        public int page() {
-            return page;
-        }
-    }
-
-    private abstract static class AbstractAuctionHolder implements InventoryHolder {
-
-        private final UUID owner;
-        private Inventory inventory;
-
-        protected AbstractAuctionHolder(UUID owner) {
-            this.owner = owner;
-        }
-
-        public UUID owner() {
-            return owner;
-        }
-
-        public void setInventory(Inventory inventory) {
-            this.inventory = inventory;
-        }
-
-        @Override
-        public Inventory getInventory() {
-            return inventory;
-        }
-    }
-
-    private static final class BrowserMenuHolder extends AbstractAuctionHolder {
-
-        private final int page;
-        private final BrowserView view;
-
-        private BrowserMenuHolder(UUID owner, int page, BrowserView view) {
-            super(owner);
-            this.page = page;
-            this.view = view;
-        }
-
-        public int page() {
-            return page;
-        }
-
-        public BrowserView view() {
-            return view;
-        }
-    }
-
-    private static final class ConfirmMenuHolder extends AbstractAuctionHolder {
-
-        private final int previousPage;
-        private final BrowserView view;
-        private final ConfirmAction action;
-
-        private ConfirmMenuHolder(UUID owner, int previousPage, BrowserView view, ConfirmAction action) {
-            super(owner);
-            this.previousPage = previousPage;
-            this.view = view;
-            this.action = action;
-        }
-
-        public int previousPage() {
-            return previousPage;
-        }
-
-        public BrowserView view() {
-            return view;
-        }
-
-        public ConfirmAction action() {
-            return action;
-        }
-    }
-
-    private static final class PreviewMenuHolder extends AbstractAuctionHolder {
-
-        private final BrowserView originView;
-        private final int originPage;
-        private final ConfirmAction confirmAction;
-        private final String targetId;
-
-        private PreviewMenuHolder(UUID owner, BrowserView originView, int originPage,
-                ConfirmAction confirmAction, String targetId) {
-            super(owner);
-            this.originView = originView;
-            this.originPage = originPage;
-            this.confirmAction = confirmAction;
-            this.targetId = targetId;
-        }
-
-        public BrowserView originView() {
-            return originView;
-        }
-
-        public int originPage() {
-            return originPage;
-        }
-
-        public ConfirmAction confirmAction() {
-            return confirmAction;
-        }
-
-        public String targetId() {
-            return targetId;
-        }
-    }
-
-    private enum BrowserView {
-        LISTINGS,
-        ORDERS
-    }
-
-    private enum ConfirmAction {
-        PURCHASE_LISTING,
-        FULFILL_ORDER
-    }
+    // Nested holder and helper types moved to separate files for clarity.
 
     private enum ListingSort {
-        ENDING_SOON("Ending Soon", Comparator.comparingLong(AuctionListing::expiryEpochMillis)
-                .thenComparingDouble(AuctionListing::price)
-                .thenComparing(AuctionMenu::listingItemSortKey, String.CASE_INSENSITIVE_ORDER)
-                .thenComparing(AuctionListing::id, String.CASE_INSENSITIVE_ORDER)),
-        NEWLY_LISTED("Newly Listed", Comparator.comparingLong(AuctionListing::expiryEpochMillis)
-                .reversed()
-                .thenComparing(AuctionMenu::listingItemSortKey, String.CASE_INSENSITIVE_ORDER)
-                .thenComparingDouble(AuctionListing::price)
-                .thenComparing(AuctionListing::id, String.CASE_INSENSITIVE_ORDER)),
-        PRICE_LOW_HIGH("Lowest Price", Comparator.comparingDouble(AuctionListing::price)
-                .thenComparing(AuctionMenu::listingItemSortKey, String.CASE_INSENSITIVE_ORDER)
-                .thenComparingLong(AuctionListing::expiryEpochMillis)
-                .thenComparing(AuctionListing::id, String.CASE_INSENSITIVE_ORDER)),
-        PRICE_HIGH_LOW("Highest Price", Comparator.comparingDouble(AuctionListing::price)
-                .reversed()
-                .thenComparing(AuctionMenu::listingItemSortKey, String.CASE_INSENSITIVE_ORDER)
-                .thenComparingLong(AuctionListing::expiryEpochMillis)
-                .thenComparing(AuctionListing::id, String.CASE_INSENSITIVE_ORDER)),
-        QUANTITY_HIGH_LOW("Quantity (High-Low)", Comparator.comparingInt(AuctionMenu::listingQuantity)
-                .reversed()
-                .thenComparing(AuctionMenu::listingItemSortKey, String.CASE_INSENSITIVE_ORDER)
-                .thenComparingDouble(AuctionListing::price)
-                .thenComparing(AuctionListing::id, String.CASE_INSENSITIVE_ORDER)),
-        QUANTITY_LOW_HIGH("Quantity (Low-High)", Comparator.comparingInt(AuctionMenu::listingQuantity)
-                .thenComparing(AuctionMenu::listingItemSortKey, String.CASE_INSENSITIVE_ORDER)
-                .thenComparingDouble(AuctionListing::price)
-                .thenComparingLong(AuctionListing::expiryEpochMillis)
-                .thenComparing(AuctionListing::id, String.CASE_INSENSITIVE_ORDER)),
-        ITEM_A_Z("Item Name (A-Z)", Comparator.comparing(AuctionMenu::listingItemSortKey, String.CASE_INSENSITIVE_ORDER)
-                .thenComparingDouble(AuctionListing::price)
-                .thenComparingLong(AuctionListing::expiryEpochMillis)
-                .thenComparing(AuctionListing::id, String.CASE_INSENSITIVE_ORDER)),
-        ITEM_Z_A("Item Name (Z-A)", Comparator.comparing(AuctionMenu::listingItemSortKey, String.CASE_INSENSITIVE_ORDER)
-                .reversed()
-                .thenComparingDouble(AuctionListing::price)
-                .thenComparingLong(AuctionListing::expiryEpochMillis)
-                .thenComparing(AuctionListing::id, String.CASE_INSENSITIVE_ORDER));
-
-        private static final ListingSort[] VALUES = values();
-
-        private final String label;
-        private final Comparator<AuctionListing> comparator;
-
-        ListingSort(String label, Comparator<AuctionListing> comparator) {
-            this.label = label;
-            this.comparator = comparator;
-        }
+        ENDING_SOON,
+        NEWLY_LISTED,
+        PRICE_LOW_HIGH,
+        PRICE_HIGH_LOW,
+        QUANTITY_HIGH_LOW,
+        QUANTITY_LOW_HIGH,
+        ITEM_A_Z,
+        ITEM_Z_A;
 
         public String label() {
-            return label;
+            return com.skyblockexp.ezauction.gui.ListingSort.valueOf(name()).label();
         }
 
-        public void sort(List<AuctionListing> listings) {
-            if (listings == null || listings.size() <= 1) {
-                return;
-            }
-            listings.sort(comparator);
+        public void sort(java.util.List<com.skyblockexp.ezauction.AuctionListing> listings) {
+            com.skyblockexp.ezauction.gui.ListingSort.valueOf(name()).sort(listings);
         }
 
         public ListingSort next() {
-            return VALUES[(ordinal() + 1) % VALUES.length];
+            return ListingSort.valueOf(com.skyblockexp.ezauction.gui.ListingSort.valueOf(name()).next().name());
         }
 
         public ListingSort previous() {
-            return VALUES[(ordinal() + VALUES.length - 1) % VALUES.length];
+            return ListingSort.valueOf(com.skyblockexp.ezauction.gui.ListingSort.valueOf(name()).previous().name());
         }
     }
 
     private enum OrderSort {
-        ENDING_SOON("Ending Soon", Comparator.comparingLong(AuctionOrder::expiryEpochMillis)
-                .thenComparingDouble(AuctionOrder::offeredPrice)
-                .thenComparing(AuctionMenu::orderItemSortKey, String.CASE_INSENSITIVE_ORDER)
-                .thenComparing(AuctionOrder::id, String.CASE_INSENSITIVE_ORDER)),
-        NEWLY_POSTED("Newly Posted", Comparator.comparingLong(AuctionOrder::expiryEpochMillis)
-                .reversed()
-                .thenComparing(AuctionMenu::orderItemSortKey, String.CASE_INSENSITIVE_ORDER)
-                .thenComparingDouble(AuctionOrder::offeredPrice)
-                .thenComparing(AuctionOrder::id, String.CASE_INSENSITIVE_ORDER)),
-        PRICE_HIGH_LOW("Highest Offer", Comparator.comparingDouble(AuctionOrder::offeredPrice)
-                .reversed()
-                .thenComparing(AuctionMenu::orderItemSortKey, String.CASE_INSENSITIVE_ORDER)
-                .thenComparingLong(AuctionOrder::expiryEpochMillis)
-                .thenComparing(AuctionOrder::id, String.CASE_INSENSITIVE_ORDER)),
-        PRICE_LOW_HIGH("Lowest Offer", Comparator.comparingDouble(AuctionOrder::offeredPrice)
-                .thenComparing(AuctionMenu::orderItemSortKey, String.CASE_INSENSITIVE_ORDER)
-                .thenComparingLong(AuctionOrder::expiryEpochMillis)
-                .thenComparing(AuctionOrder::id, String.CASE_INSENSITIVE_ORDER)),
-        QUANTITY_HIGH_LOW("Quantity (High-Low)", Comparator.comparingInt(AuctionMenu::orderQuantity)
-                .reversed()
-                .thenComparing(AuctionMenu::orderItemSortKey, String.CASE_INSENSITIVE_ORDER)
-                .thenComparingDouble(AuctionOrder::offeredPrice)
-                .thenComparing(AuctionOrder::id, String.CASE_INSENSITIVE_ORDER)),
-        QUANTITY_LOW_HIGH("Quantity (Low-High)", Comparator.comparingInt(AuctionMenu::orderQuantity)
-                .thenComparing(AuctionMenu::orderItemSortKey, String.CASE_INSENSITIVE_ORDER)
-                .thenComparingDouble(AuctionOrder::offeredPrice)
-                .thenComparingLong(AuctionOrder::expiryEpochMillis)
-                .thenComparing(AuctionOrder::id, String.CASE_INSENSITIVE_ORDER)),
-        ITEM_A_Z("Item Name (A-Z)", Comparator.comparing(AuctionMenu::orderItemSortKey, String.CASE_INSENSITIVE_ORDER)
-                .thenComparingDouble(AuctionOrder::offeredPrice)
-                .thenComparingLong(AuctionOrder::expiryEpochMillis)
-                .thenComparing(AuctionOrder::id, String.CASE_INSENSITIVE_ORDER)),
-        ITEM_Z_A("Item Name (Z-A)", Comparator.comparing(AuctionMenu::orderItemSortKey, String.CASE_INSENSITIVE_ORDER)
-                .reversed()
-                .thenComparingDouble(AuctionOrder::offeredPrice)
-                .thenComparingLong(AuctionOrder::expiryEpochMillis)
-                .thenComparing(AuctionOrder::id, String.CASE_INSENSITIVE_ORDER));
-
-        private static final OrderSort[] VALUES = values();
-
-        private final String label;
-        private final Comparator<AuctionOrder> comparator;
-
-        OrderSort(String label, Comparator<AuctionOrder> comparator) {
-            this.label = label;
-            this.comparator = comparator;
-        }
+        ENDING_SOON,
+        NEWLY_POSTED,
+        PRICE_HIGH_LOW,
+        PRICE_LOW_HIGH,
+        QUANTITY_HIGH_LOW,
+        QUANTITY_LOW_HIGH,
+        ITEM_A_Z,
+        ITEM_Z_A;
 
         public String label() {
-            return label;
+            return com.skyblockexp.ezauction.gui.OrderSort.valueOf(name()).label();
         }
 
-        public void sort(List<AuctionOrder> orders) {
-            if (orders == null || orders.size() <= 1) {
-                return;
-            }
-            orders.sort(comparator);
+        public void sort(java.util.List<com.skyblockexp.ezauction.AuctionOrder> orders) {
+            com.skyblockexp.ezauction.gui.OrderSort.valueOf(name()).sort(orders);
         }
 
         public OrderSort next() {
-            return VALUES[(ordinal() + 1) % VALUES.length];
+            return OrderSort.valueOf(com.skyblockexp.ezauction.gui.OrderSort.valueOf(name()).next().name());
         }
 
         public OrderSort previous() {
-            return VALUES[(ordinal() + VALUES.length - 1) % VALUES.length];
+            return OrderSort.valueOf(com.skyblockexp.ezauction.gui.OrderSort.valueOf(name()).previous().name());
         }
     }
 
@@ -1927,13 +1714,9 @@ public class AuctionMenu implements Listener {
 
     private ItemStack createActivityButton() {
         Material material = Material.NETHER_STAR;
-        String displayName = "&d&lMy Activity";
+        String displayName = ChatColor.LIGHT_PURPLE + messages.activityTitle();
         List<String> lore = List.of(
-                ChatColor.GRAY + "View all your auction activities:",
-                ChatColor.YELLOW + "• Active Listings",
-                ChatColor.YELLOW + "• Buy Orders", 
-                ChatColor.YELLOW + "• Pending Returns",
-                ChatColor.YELLOW + "• Recent History",
+                ChatColor.GRAY + messages.activityLore(),
                 "",
                 ChatColor.GREEN + "Click to open!"
         );

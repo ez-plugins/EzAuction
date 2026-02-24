@@ -98,17 +98,17 @@ public final class LiveAuctionMenu implements Listener {
         this.actionKey = "live_auction_action";
         this.itemTagStorage = Objects.requireNonNull(itemTagStorage, "itemTagStorage");
         this.fillerButton = createButton(Material.GRAY_STAINED_GLASS_PANE, ChatColor.DARK_GRAY + " ", List.of());
-        this.closeButton = createButton(Material.BARRIER, ChatColor.RED + "Close", List.of(ChatColor.GRAY + "Exit the menu."));
-        this.refreshButton = createButton(Material.SUNFLOWER, ChatColor.GOLD + "Refresh",
-                List.of(ChatColor.GRAY + "Update the live auction queue."));
-        this.browseButton = createButton(Material.CHEST, ChatColor.GREEN + "Browse Auctions",
-                List.of(ChatColor.GRAY + "Open the main auction house."));
-        this.backButton = createButton(Material.ARROW, ChatColor.YELLOW + "Back to Browser",
-                List.of(ChatColor.GRAY + "Return to the auction browser."));
-        this.infoButton = createButton(Material.WRITABLE_BOOK, ChatColor.AQUA + "Live Auction Queue",
-                List.of(ChatColor.GRAY + "View upcoming live announcements.",
-                        ChatColor.GRAY + "Listings are broadcast from first to last.",
-                        ChatColor.DARK_GRAY + "Showing up to " + QUEUE_SLOTS.length + " auctions."));
+        this.closeButton = createButton(Material.BARRIER, ChatColor.RED + messages.closeLabel(), List.of(ChatColor.GRAY + messages.closeLore()));
+        this.refreshButton = createButton(Material.SUNFLOWER, ChatColor.GOLD + messages.refreshLabel(),
+            List.of(ChatColor.GRAY + messages.refreshLore()));
+        this.browseButton = createButton(Material.CHEST, ChatColor.GREEN + messages.browseLabel(),
+            List.of(ChatColor.GRAY + messages.browseLore()));
+        this.backButton = createButton(Material.ARROW, ChatColor.YELLOW + messages.backLabel(),
+            List.of(ChatColor.GRAY + messages.backLore()));
+        this.infoButton = createButton(Material.WRITABLE_BOOK, ChatColor.AQUA + messages.infoTitle(),
+            List.of(ChatColor.GRAY + messages.infoLoreLine1(),
+                ChatColor.GRAY + messages.infoLoreLine2(),
+                ChatColor.DARK_GRAY + "Showing up to " + QUEUE_SLOTS.length + " auctions."));
     }
 
     /**
@@ -127,7 +127,8 @@ public final class LiveAuctionMenu implements Listener {
             return;
         }
         LiveAuctionMenuHolder holder = new LiveAuctionMenuHolder(player.getUniqueId());
-        Inventory inventory = Bukkit.createInventory(holder, INVENTORY_SIZE, INVENTORY_TITLE);
+        String title = ChatColor.GOLD + messages.inventoryTitle();
+        Inventory inventory = Bukkit.createInventory(holder, INVENTORY_SIZE, title);
         holder.setInventory(inventory);
         populateInventory(inventory);
         player.openInventory(inventory);
@@ -157,8 +158,8 @@ public final class LiveAuctionMenu implements Listener {
 
         List<LiveAuctionEntry> queue = new ArrayList<>(auctionManager.listQueuedLiveAuctions());
         if (queue.isEmpty()) {
-            ItemStack empty = createButton(Material.BARRIER, ChatColor.RED + "No Queued Auctions",
-                    List.of(ChatColor.GRAY + "The live auction queue is currently empty."));
+            ItemStack empty = createButton(Material.BARRIER, ChatColor.RED + messages.emptyQueueTitle(),
+                List.of(ChatColor.GRAY + messages.emptyQueueLore()));
             inventory.setItem(EMPTY_SLOT, empty);
             return;
         }
