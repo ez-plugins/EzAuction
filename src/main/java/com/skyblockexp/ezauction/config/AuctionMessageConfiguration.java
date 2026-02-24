@@ -267,7 +267,7 @@ public final class AuctionMessageConfiguration {
         }
     }
 
-    public record BrowserMessages(
+        public record BrowserMessages(
             String listingNotFound,
             String listingUnavailable,
             String orderNotFound,
@@ -288,7 +288,19 @@ public final class AuctionMessageConfiguration {
             String sortListings,
             String sortOrders,
             String shulkerPreviewHint,
-            String shulkerPreviewTitle) {
+            String shulkerPreviewTitle,
+            String previousPageTitle,
+            String previousPageLore,
+            String nextPageTitle,
+            String nextPageLore,
+            String listingsViewing,
+            String listingsClick,
+            String ordersViewing,
+            String ordersClick,
+            String closeTitle,
+            String closeLore,
+            String activityTitle,
+            String activityLore) {
 
         // additional UI/button labels
         // (kept after chat messages to preserve backwards-compat ordering in code)
@@ -354,6 +366,18 @@ public final class AuctionMessageConfiguration {
             shulkerPreviewHint = normalize(shulkerPreviewHint, DEFAULT_SHULKER_PREVIEW_HINT);
             shulkerPreviewTitle = normalize(shulkerPreviewTitle, DEFAULT_SHULKER_PREVIEW_TITLE);
             // set defaults for new UI labels if absent
+            previousPageTitle = normalize(previousPageTitle, DEFAULT_PREVIOUS_TITLE);
+            previousPageLore = normalize(previousPageLore, DEFAULT_PREVIOUS_LORE);
+            nextPageTitle = normalize(nextPageTitle, DEFAULT_NEXT_TITLE);
+            nextPageLore = normalize(nextPageLore, DEFAULT_NEXT_LORE);
+            listingsViewing = normalize(listingsViewing, DEFAULT_LISTINGS_VIEWING);
+            listingsClick = normalize(listingsClick, DEFAULT_LISTINGS_CLICK);
+            ordersViewing = normalize(ordersViewing, DEFAULT_ORDERS_VIEWING);
+            ordersClick = normalize(ordersClick, DEFAULT_ORDERS_CLICK);
+            closeTitle = normalize(closeTitle, DEFAULT_CLOSE_TITLE);
+            closeLore = normalize(closeLore, DEFAULT_CLOSE_LORE);
+            activityTitle = normalize(activityTitle, DEFAULT_ACTIVITY_TITLE);
+            activityLore = normalize(activityLore, DEFAULT_ACTIVITY_LORE);
             // Note: preserve existing behavior for callers that only used earlier fields
         }
 
