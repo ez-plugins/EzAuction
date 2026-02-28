@@ -4,7 +4,7 @@ import com.skyblockexp.ezauction.AuctionListing;
 import com.skyblockexp.ezauction.AuctionOrder;
 import com.skyblockexp.ezauction.EzAuctionPlugin;
 import com.skyblockexp.ezauction.config.AuctionStorageConfiguration.Mysql;
-import com.skyblockexp.ezauction.storage.AuctionStorage;
+import com.skyblockexp.ezauction.storage.AuctionListingRepository;
 import com.skyblockexp.ezauction.storage.DistributedAuctionListingStorage;
 import com.skyblockexp.ezauction.storage.AuctionStorageSnapshot;
 import com.skyblockexp.ezauction.util.EconomyUtils;
@@ -18,9 +18,9 @@ import org.bukkit.Material;
 import org.bukkit.plugin.java.JavaPlugin;
 
 /**
- * MySQL-based implementation of AuctionStorage and DistributedAuctionListingStorage.
+ * MySQL-based implementation of {@link AuctionListingRepository} and {@link DistributedAuctionListingStorage}.
  */
-public class MysqlAuctionListingStorage implements AuctionStorage, DistributedAuctionListingStorage {
+public class MysqlAuctionListingStorage implements AuctionListingRepository, DistributedAuctionListingStorage {
     private final JavaPlugin plugin;
     private final Logger logger;
     private final Mysql mysql;
@@ -225,6 +225,35 @@ public class MysqlAuctionListingStorage implements AuctionStorage, DistributedAu
             logger.log(Level.SEVERE,
                     "Failed to save " + EzAuctionPlugin.DISPLAY_NAME + " orders to MySQL.", ex);
         }
+    }
+
+    @Override
+    public java.util.Optional<AuctionListing> find(String id) throws Exception {
+        AuctionStorageSnapshot s = load();
+        if (s == null) return java.util.Optional.empty();
+        return java.util.Optional.ofNullable(s.listings().get(id));
+    }
+
+    @Override
+    public java.util.List<AuctionListing> findAll() throws Exception {
+        AuctionStorageSnapshot s = load();
+        if (s == null) return java.util.List.of();
+        return new java.util.ArrayList<>(s.listings().values());
+    }
+
+    @Override
+    public void save(AuctionListing entity) throws Exception {
+        insertListing(entity);
+    }
+
+    @Override
+    public void delete(String id) throws Exception {
+        deleteListing(id);
+    }
+
+    @Override
+    public void close() {
+        // No pooled resources to close in this implementation.
     }
 
     @Override

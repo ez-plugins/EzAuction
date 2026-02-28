@@ -53,13 +53,24 @@ class LiveAuctionMenuTest {
 
     @Test
     void appendShopPriceAddsLoreWhenProviderReturnsValue() throws Exception {
+        // Ensure MockBukkit registries are initialized if MockBukkit is available
+        com.skyblockexp.ezauction.testutil.MockBukkitHelper.ensureMocked();
+
+        try {
+            @SuppressWarnings("unused")
+            org.bukkit.Material testMat = org.bukkit.Material.STONE;
+        } catch (Throwable t) {
+            org.junit.jupiter.api.Assumptions.assumeTrue(false, "Paper Registry not available; skipping GUI test");
+        }
+
         ItemValueProvider shopPriceProvider = mock(ItemValueProvider.class);
         AuctionValueConfiguration valueConfiguration = AuctionValueConfiguration.defaults();
         LiveAuctionMenu menu = new LiveAuctionMenu(plugin, auctionManager, transactionService, auctionMenu,
                 liveAuctionService, AuctionMessageConfiguration.LiveMessages.defaults(), valueConfiguration,
                 shopPriceProvider, true, new LoreItemTagStorage());
 
-        ItemStack item = new ItemStack(Material.DIAMOND);
+        ItemStack item = mock(ItemStack.class);
+        when(item.getType()).thenReturn(Material.DIAMOND);
         List<String> lore = new ArrayList<>();
         OptionalDouble price = OptionalDouble.of(64.0D);
         when(shopPriceProvider.estimate(item)).thenReturn(price);
@@ -81,7 +92,8 @@ class LiveAuctionMenuTest {
                 liveAuctionService, AuctionMessageConfiguration.LiveMessages.defaults(), valueConfiguration,
                 shopPriceProvider, false, new LoreItemTagStorage());
 
-        ItemStack item = new ItemStack(Material.DIAMOND);
+        ItemStack item = mock(ItemStack.class);
+        when(item.getType()).thenReturn(Material.DIAMOND);
         List<String> lore = new ArrayList<>();
 
         Method method = LiveAuctionMenu.class.getDeclaredMethod("appendShopPrice", ItemStack.class, List.class);

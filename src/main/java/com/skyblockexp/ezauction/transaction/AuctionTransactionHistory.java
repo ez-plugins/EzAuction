@@ -3,7 +3,7 @@ package com.skyblockexp.ezauction.transaction;
 import com.skyblockexp.ezauction.HistorySaveDispatcher;
 
 import com.skyblockexp.ezauction.EzAuctionPlugin;
-import com.skyblockexp.ezauction.storage.AuctionHistoryStorage;
+import com.skyblockexp.ezauction.storage.AuctionHistoryRepository;
 import com.skyblockexp.ezauction.util.EconomyUtils;
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -23,12 +23,12 @@ public class AuctionTransactionHistory {
     private static final int MAX_ENTRIES_PER_PLAYER = 25;
 
     private final JavaPlugin plugin;
-    private final AuctionHistoryStorage storage;
+    private final AuctionHistoryRepository storage;
     private final Map<UUID, Deque<AuctionTransactionHistoryEntry>> entriesByPlayer = new ConcurrentHashMap<>();
     private HistorySaveDispatcher historySaveDispatcher;
     private boolean storageReady;
 
-    public AuctionTransactionHistory(JavaPlugin plugin, AuctionHistoryStorage storage) {
+    public AuctionTransactionHistory(JavaPlugin plugin, AuctionHistoryRepository storage) {
         this.plugin = Objects.requireNonNull(plugin, "plugin");
         this.storage = Objects.requireNonNull(storage, "storage");
     }

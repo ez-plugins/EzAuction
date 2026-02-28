@@ -56,6 +56,7 @@ public class AuctionOrderMenu implements Listener {
     private final JavaPlugin plugin;
     private final AuctionManager auctionManager;
     private final AuctionTransactionService transactionService;
+    private final com.skyblockexp.ezauction.config.AuctionConfiguration configuration;
     private final AuctionListingRules listingRules;
     private final ItemValueProvider itemValueProvider;
 
@@ -65,7 +66,7 @@ public class AuctionOrderMenu implements Listener {
     private final ItemTagStorage itemTagStorage;
 
     private final AuctionMenuInteractionConfiguration.OrderMenuLayoutConfiguration layout;
-    private final ItemStack fillerPane;
+    private volatile ItemStack fillerPane;
 
     // These are now managed externally for listeners
     private final ConcurrentMap<UUID, OrderMenuState> pendingPriceInputs;
@@ -79,8 +80,8 @@ public class AuctionOrderMenu implements Listener {
     private final int[] quantityAdjustments;
     private final AuctionMessageConfiguration.OrderMessages messages;
 
-    public AuctionOrderMenu(JavaPlugin plugin, AuctionManager auctionManager,
-            AuctionTransactionService transactionService, AuctionListingRules listingRules,
+        public AuctionOrderMenu(JavaPlugin plugin, AuctionManager auctionManager,
+            AuctionTransactionService transactionService, com.skyblockexp.ezauction.config.AuctionConfiguration configuration, AuctionListingRules listingRules,
             List<Duration> configuredDurationOptions,
             AuctionMenuInteractionConfiguration.OrderMenuInteractionConfiguration orderConfiguration,
             ItemValueProvider itemValueProvider, AuctionMessageConfiguration.OrderMessages messages,
@@ -88,6 +89,7 @@ public class AuctionOrderMenu implements Listener {
         this.plugin = Objects.requireNonNull(plugin, "plugin");
         this.auctionManager = Objects.requireNonNull(auctionManager, "auctionManager");
         this.transactionService = Objects.requireNonNull(transactionService, "transactionService");
+        this.configuration = configuration;
         this.listingRules = Objects.requireNonNull(listingRules, "listingRules");
         this.itemValueProvider = itemValueProvider != null ? itemValueProvider : ItemValueProvider.none();
         this.messages = messages != null ? messages : AuctionMessageConfiguration.OrderMessages.defaults();
@@ -109,7 +111,7 @@ public class AuctionOrderMenu implements Listener {
                 ? orderConfiguration
                 : AuctionMenuInteractionConfiguration.defaults().orderMenu();
         this.layout = interactions.layout();
-        this.fillerPane = createBaseItem(layout.filler());
+        this.fillerPane = null; // lazy init to avoid early Material/Registry initialization in tests
         this.defaultPricePerItem = Math.max(0.0D, interactions.defaultPricePerItem());
         List<Double> priceAdjustmentValues = interactions.priceAdjustments();
         this.priceAdjustments = new double[priceAdjustmentValues.size()];
@@ -124,6 +126,19 @@ public class AuctionOrderMenu implements Listener {
             this.quantityAdjustments[i] = value != null ? value.intValue() : 0;
         }
     }
+
+        /**
+         * Backwards-compatible constructor used by older tests and codepaths where AuctionConfiguration
+         * is not available. Delegates to the primary constructor with a null configuration.
+         */
+        public AuctionOrderMenu(JavaPlugin plugin, AuctionManager auctionManager,
+                AuctionTransactionService transactionService, AuctionListingRules listingRules,
+                List<Duration> configuredDurationOptions,
+                AuctionMenuInteractionConfiguration.OrderMenuInteractionConfiguration orderConfiguration,
+                ItemValueProvider itemValueProvider, AuctionMessageConfiguration.OrderMessages messages,
+                ItemTagStorage itemTagStorage) {
+            this(plugin, auctionManager, transactionService, null, listingRules, configuredDurationOptions, orderConfiguration, itemValueProvider, messages, itemTagStorage);
+        }
 
     /**
      * Opens the buy order menu for the item in the player's main hand.
@@ -159,7 +174,9 @@ public class AuctionOrderMenu implements Listener {
             }
         }
         Duration[] options = (durationOptions != null) ? durationOptions : new Duration[] { listingRules.defaultDuration() };
+        com.skyblockexp.ezauction.config.AuctionConfiguration cfg = this.configuration;
         OrderMenuState state = new OrderMenuState(
+            cfg,
             base,
             startingPrice,
             base.getAmount(),
@@ -359,6 +376,17 @@ public class AuctionOrderMenu implements Listener {
             item.setItemMeta(meta);
         }
         return item;
+    }
+
+    private ItemStack getFillerPane() {
+        if (this.fillerPane == null) {
+            synchronized (this) {
+                if (this.fillerPane == null) {
+                    this.fillerPane = createBaseItem(this.layout.filler());
+                }
+            }
+        }
+        return this.fillerPane;
     }
 
     private ItemStack createPriceDisplay(OrderMenuHolder holder) {
@@ -667,12 +695,15 @@ public class AuctionOrderMenu implements Listener {
             refreshMenu(holder);
             return;
         }
-        if (EzAuctionPlugin.getStaticRegistry().getConfiguration().debug()) {
-            ItemStack item = state.item();
-            plugin.getLogger().fine("[EzAuction][DEBUG] GUI triggering createOrder: player=" + player.getName() 
-                + ", item=" + (item != null ? item.getType() + "x" + item.getAmount() : "null") 
-                + ", price=" + total + ", duration=" + state.duration());
-        }
+        try {
+            com.skyblockexp.ezauction.config.AuctionConfiguration cfg = this.configuration;
+            if (cfg != null && cfg.debug()) {
+                ItemStack item = state.item();
+                plugin.getLogger().fine("[EzAuction][DEBUG] GUI triggering createOrder: player=" + player.getName()
+                    + ", item=" + (item != null ? item.getType() + "x" + item.getAmount() : "null")
+                    + ", price=" + total + ", duration=" + state.duration());
+            }
+        } catch (Throwable ignored) {}
         AuctionOperationResult result = auctionManager.createOrder(player, state.item(), total, state.duration(), total);
         if (result.message() != null && !result.message().isEmpty()) {
             player.sendMessage(result.message());

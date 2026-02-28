@@ -3,15 +3,47 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-
     <groupId>com.skyblockexp</groupId>
     <artifactId>ezauction</artifactId>
-    <version>2.0.2</version>
+    <version>2.1.0</version>
     <name>EzAuction Plugin</name>
     <description>Standalone auction house plugin for many of your advanced auction features.</description>
     <packaging>jar</packaging>
 
+    <properties>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <paper.version>1.21.11-R0.1-SNAPSHOT</paper.version>
+        <mockbukkit.artifactId>mockbukkit-v1.21</mockbukkit.artifactId>
+        <mockbukkit.version>4.101.0</mockbukkit.version>
+    </properties>
+
     <dependencies>
+        <dependency>
+            <groupId>com.github.ez-plugins.EzFramework</groupId>
+            <artifactId>ezframework-core</artifactId>
+            <version>0.2.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.ez-plugins.EzFramework</groupId>
+            <artifactId>ezframework-gui</artifactId>
+            <version>0.2.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.ez-plugins.EzFramework</groupId>
+            <artifactId>ezframework-query</artifactId>
+            <version>0.2.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.ez-plugins.EzFramework</groupId>
+            <artifactId>message-minimessage</artifactId>
+            <version>0.2.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.ez-plugins.EzFramework</groupId>
+            <artifactId>storage-mysql</artifactId>
+            <version>0.2.2</version>
+        </dependency>
         <dependency>
             <groupId>net.kyori</groupId>
             <artifactId>adventure-api</artifactId>
@@ -35,7 +67,7 @@
         <dependency>
             <groupId>io.papermc.paper</groupId>
             <artifactId>paper-api</artifactId>
-            <version>1.17.1-R0.1-SNAPSHOT</version>
+            <version>${paper.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -76,26 +108,6 @@
 
     <repositories>
         <repository>
-            <id>papermc-repo</id>
-            <url>https://repo.papermc.io/repository/maven-public/</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>enginehub-repo</id>
-            <url>https://maven.enginehub.org/repo/</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-        <repository>
             <id>jitpack.io</id>
             <url>https://jitpack.io</url>
         </repository>
@@ -110,6 +122,16 @@
             </snapshots>
         </repository>
         <repository>
+            <id>papermc-repo</id>
+            <url>https://repo.papermc.io/repository/maven-public/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+        <repository>
             <id>maven-central</id>
             <url>https://repo1.maven.org/maven2/</url>
             <releases>
@@ -121,10 +143,6 @@
         </repository>
     </repositories>
 
-    <properties>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
-    </properties>
     <build>
         <finalName>EzAuction-${project.version}</finalName>
         <resources>
@@ -193,6 +211,14 @@
                                     <pattern>com.mysql</pattern>
                                     <shadedPattern>com.skyblockexp.ezauction.libs.com.mysql</shadedPattern>
                                 </relocation>
+                                <relocation>
+                                    <pattern>com.skyblockexp.ezframework</pattern>
+                                    <shadedPattern>com.skyblockexp.ezauction.libs.ezframework</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>com.skyblockexp.message</pattern>
+                                    <shadedPattern>com.skyblockexp.ezauction.libs.message</shadedPattern>
+                                </relocation>
                             </relocations>
                         </configuration>
                     </execution>
@@ -200,4 +226,90 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>feature-tests</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <properties>
+                <!-- allow CI to override mockbukkit artifact coordinates -->
+            </properties>
+            <dependencies>
+                <dependency>
+                    <groupId>org.mockbukkit.mockbukkit</groupId>
+                    <artifactId>${mockbukkit.artifactId}</artifactId>
+                    <version>${mockbukkit.version}</version>
+                    <scope>test</scope>
+                </dependency>
+                <dependency>
+                    <groupId>io.papermc.paper</groupId>
+                    <artifactId>paper-api</artifactId>
+                    <version>${paper.version}</version>
+                    <scope>test</scope>
+                </dependency>
+            </dependencies>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <forkCount>1</forkCount>
+                            <reuseForks>false</reuseForks>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>ezframework</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>com.github.ez-plugins.EzFramework</groupId>
+                    <artifactId>ezframework-core</artifactId>
+                    <version>0.2.2</version>
+                    <scope>provided</scope>
+                    <exclusions>
+                        <exclusion>
+                            <groupId>io.papermc.paper</groupId>
+                            <artifactId>paper-api</artifactId>
+                        </exclusion>
+                        <exclusion>
+                            <groupId>org.bukkit</groupId>
+                            <artifactId>bukkit</artifactId>
+                        </exclusion>
+                    </exclusions>
+                </dependency>
+                <dependency>
+                    <groupId>com.github.ez-plugins.EzFramework</groupId>
+                    <artifactId>ezframework-gui</artifactId>
+                    <version>0.2.2</version>
+                    <scope>provided</scope>
+                </dependency>
+                <dependency>
+                    <groupId>com.github.ez-plugins.EzFramework</groupId>
+                    <artifactId>ezframework-query</artifactId>
+                    <version>0.2.2</version>
+                    <scope>provided</scope>
+                </dependency>
+                <dependency>
+                    <groupId>com.github.ez-plugins.EzFramework</groupId>
+                    <artifactId>message-minimessage</artifactId>
+                    <version>0.2.2</version>
+                    <scope>provided</scope>
+                </dependency>
+                <dependency>
+                    <groupId>com.github.ez-plugins.EzFramework</groupId>
+                    <artifactId>storage-mysql</artifactId>
+                    <version>0.2.2</version>
+                    <scope>provided</scope>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
 </project>

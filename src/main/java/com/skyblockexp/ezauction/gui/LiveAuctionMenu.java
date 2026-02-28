@@ -71,12 +71,12 @@ public final class LiveAuctionMenu implements Listener {
     private final String actionKey;
     private final ItemTagStorage itemTagStorage;
 
-    private final ItemStack fillerButton;
-    private final ItemStack closeButton;
-    private final ItemStack refreshButton;
-    private final ItemStack browseButton;
-    private final ItemStack backButton;
-    private final ItemStack infoButton;
+    private volatile ItemStack fillerButton;
+    private volatile ItemStack closeButton;
+    private volatile ItemStack refreshButton;
+    private volatile ItemStack browseButton;
+    private volatile ItemStack backButton;
+    private volatile ItemStack infoButton;
 
     public LiveAuctionMenu(JavaPlugin plugin, AuctionManager auctionManager,
             AuctionTransactionService transactionService, AuctionMenu auctionMenu,
@@ -97,18 +97,12 @@ public final class LiveAuctionMenu implements Listener {
         this.shopPriceFormat = shopPriceConfiguration != null ? shopPriceConfiguration.format() : null;
         this.actionKey = "live_auction_action";
         this.itemTagStorage = Objects.requireNonNull(itemTagStorage, "itemTagStorage");
-        this.fillerButton = createButton(Material.GRAY_STAINED_GLASS_PANE, ChatColor.DARK_GRAY + " ", List.of());
-        this.closeButton = createButton(Material.BARRIER, ChatColor.RED + messages.closeLabel(), List.of(ChatColor.GRAY + messages.closeLore()));
-        this.refreshButton = createButton(Material.SUNFLOWER, ChatColor.GOLD + messages.refreshLabel(),
-            List.of(ChatColor.GRAY + messages.refreshLore()));
-        this.browseButton = createButton(Material.CHEST, ChatColor.GREEN + messages.browseLabel(),
-            List.of(ChatColor.GRAY + messages.browseLore()));
-        this.backButton = createButton(Material.ARROW, ChatColor.YELLOW + messages.backLabel(),
-            List.of(ChatColor.GRAY + messages.backLore()));
-        this.infoButton = createButton(Material.WRITABLE_BOOK, ChatColor.AQUA + messages.infoTitle(),
-            List.of(ChatColor.GRAY + messages.infoLoreLine1(),
-                ChatColor.GRAY + messages.infoLoreLine2(),
-                ChatColor.DARK_GRAY + "Showing up to " + QUEUE_SLOTS.length + " auctions."));
+        this.fillerButton = null;
+        this.closeButton = null;
+        this.refreshButton = null;
+        this.browseButton = null;
+        this.backButton = null;
+        this.infoButton = null;
     }
 
     /**
@@ -137,22 +131,22 @@ public final class LiveAuctionMenu implements Listener {
     private void populateInventory(Inventory inventory) {
         applyFiller(inventory);
 
-        ItemStack info = infoButton.clone();
+        ItemStack info = getInfoButton().clone();
         inventory.setItem(INFO_SLOT, info);
 
-        ItemStack close = closeButton.clone();
+        ItemStack close = getCloseButton().clone();
         setAction(close, ACTION_CLOSE);
         inventory.setItem(CLOSE_SLOT, close);
 
-        ItemStack refresh = refreshButton.clone();
+        ItemStack refresh = getRefreshButton().clone();
         setAction(refresh, ACTION_REFRESH);
         inventory.setItem(REFRESH_SLOT, refresh);
 
-        ItemStack browse = browseButton.clone();
+        ItemStack browse = getBrowseButton().clone();
         setAction(browse, ACTION_BROWSE);
         inventory.setItem(BROWSE_SLOT, browse);
 
-        ItemStack back = backButton.clone();
+        ItemStack back = getBackButton().clone();
         setAction(back, ACTION_BACK);
         inventory.setItem(BACK_SLOT, back);
 
@@ -245,9 +239,78 @@ public final class LiveAuctionMenu implements Listener {
     }
 
     private void applyFiller(Inventory inventory) {
+        ItemStack pane = getFillerButton();
+        if (pane == null) return;
         for (int slot = 0; slot < inventory.getSize(); slot++) {
-            inventory.setItem(slot, fillerButton.clone());
+            inventory.setItem(slot, pane.clone());
         }
+    }
+
+    private ItemStack getFillerButton() {
+        if (this.fillerButton == null) {
+            synchronized (this) {
+                if (this.fillerButton == null) {
+                    this.fillerButton = createButton(Material.GRAY_STAINED_GLASS_PANE, ChatColor.DARK_GRAY + " ", List.of());
+                }
+            }
+        }
+        return this.fillerButton;
+    }
+
+    private ItemStack getCloseButton() {
+        if (this.closeButton == null) {
+            synchronized (this) {
+                if (this.closeButton == null) {
+                    this.closeButton = createButton(Material.BARRIER, ChatColor.RED + messages.closeLabel(), List.of(ChatColor.GRAY + messages.closeLore()));
+                }
+            }
+        }
+        return this.closeButton;
+    }
+
+    private ItemStack getRefreshButton() {
+        if (this.refreshButton == null) {
+            synchronized (this) {
+                if (this.refreshButton == null) {
+                    this.refreshButton = createButton(Material.SUNFLOWER, ChatColor.GOLD + messages.refreshLabel(), List.of(ChatColor.GRAY + messages.refreshLore()));
+                }
+            }
+        }
+        return this.refreshButton;
+    }
+
+    private ItemStack getBrowseButton() {
+        if (this.browseButton == null) {
+            synchronized (this) {
+                if (this.browseButton == null) {
+                    this.browseButton = createButton(Material.CHEST, ChatColor.GREEN + messages.browseLabel(), List.of(ChatColor.GRAY + messages.browseLore()));
+                }
+            }
+        }
+        return this.browseButton;
+    }
+
+    private ItemStack getBackButton() {
+        if (this.backButton == null) {
+            synchronized (this) {
+                if (this.backButton == null) {
+                    this.backButton = createButton(Material.ARROW, ChatColor.YELLOW + messages.backLabel(), List.of(ChatColor.GRAY + messages.backLore()));
+                }
+            }
+        }
+        return this.backButton;
+    }
+
+    private ItemStack getInfoButton() {
+        if (this.infoButton == null) {
+            synchronized (this) {
+                if (this.infoButton == null) {
+                    this.infoButton = createButton(Material.WRITABLE_BOOK, ChatColor.AQUA + messages.infoTitle(),
+                        List.of(ChatColor.GRAY + messages.infoLoreLine1(), ChatColor.GRAY + messages.infoLoreLine2(), ChatColor.DARK_GRAY + "Showing up to " + QUEUE_SLOTS.length + " auctions."));
+                }
+            }
+        }
+        return this.infoButton;
     }
 
     private ItemStack createButton(Material material, String displayName, List<String> lore) {

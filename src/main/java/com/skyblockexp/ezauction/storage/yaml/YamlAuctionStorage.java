@@ -3,7 +3,7 @@ package com.skyblockexp.ezauction.storage.yaml;
 import com.skyblockexp.ezauction.AuctionListing;
 import com.skyblockexp.ezauction.AuctionOrder;
 import com.skyblockexp.ezauction.EzAuctionPlugin;
-import com.skyblockexp.ezauction.storage.AuctionStorage;
+import com.skyblockexp.ezauction.storage.AuctionListingRepository;
 import com.skyblockexp.ezauction.storage.AuctionStorageSnapshot;
 import com.skyblockexp.ezauction.util.EconomyUtils;
 import java.io.File;
@@ -21,9 +21,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
 /**
- * YAML-backed implementation of {@link AuctionStorage}.
+ * YAML-backed implementation of {@link AuctionListingRepository}.
  */
-public final class YamlAuctionStorage implements AuctionStorage {
+public final class YamlAuctionStorage implements AuctionListingRepository {
 
     private final JavaPlugin plugin;
     private File listingsFile;
@@ -189,6 +189,46 @@ public final class YamlAuctionStorage implements AuctionStorage {
     @Override
     public void close() {
         // Nothing to close for YAML storage.
+    }
+
+    @Override
+    public java.util.Optional<com.skyblockexp.ezauction.AuctionListing> find(String id) throws Exception {
+        AuctionStorageSnapshot s = load();
+        if (s == null) return java.util.Optional.empty();
+        return java.util.Optional.ofNullable(s.listings().get(id));
+    }
+
+    @Override
+    public java.util.List<com.skyblockexp.ezauction.AuctionListing> findAll() throws Exception {
+        AuctionStorageSnapshot s = load();
+        if (s == null) return java.util.List.of();
+        return new java.util.ArrayList<>(s.listings().values());
+    }
+
+    @Override
+    public void save(com.skyblockexp.ezauction.AuctionListing entity) throws Exception {
+        AuctionStorageSnapshot s = load();
+        java.util.Map<String, com.skyblockexp.ezauction.AuctionListing> listings = new java.util.HashMap<>();
+        java.util.Map<String, com.skyblockexp.ezauction.AuctionOrder> orders = new java.util.HashMap<>();
+        if (s != null) {
+            listings.putAll(s.listings());
+            orders.putAll(s.orders());
+        }
+        listings.put(entity.id(), entity);
+        saveListings(listings.values(), orders.values());
+    }
+
+    @Override
+    public void delete(String id) throws Exception {
+        AuctionStorageSnapshot s = load();
+        java.util.Map<String, com.skyblockexp.ezauction.AuctionListing> listings = new java.util.HashMap<>();
+        java.util.Map<String, com.skyblockexp.ezauction.AuctionOrder> orders = new java.util.HashMap<>();
+        if (s != null) {
+            listings.putAll(s.listings());
+            orders.putAll(s.orders());
+        }
+        listings.remove(id);
+        saveListings(listings.values(), orders.values());
     }
 
     private AuctionListing loadListing(String id, ConfigurationSection section) {

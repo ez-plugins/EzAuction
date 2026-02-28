@@ -3,7 +3,6 @@ package com.skyblockexp.ezauction;
 import com.skyblockexp.ezauction.transaction.AuctionTransactionHistoryEntry;
 
 import com.skyblockexp.ezauction.EzAuctionPlugin;
-import com.skyblockexp.ezauction.storage.AuctionHistoryStorage;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
@@ -28,7 +27,7 @@ public final class HistorySaveDispatcher implements AutoCloseable {
     private static final int DEFAULT_BATCH_SIZE = 25;
 
     private final JavaPlugin plugin;
-    private final AuctionHistoryStorage storage;
+    private final com.skyblockexp.ezauction.storage.AuctionHistoryRepository storage;
     private final ExecutorService executor;
     private final ConcurrentHashMap<UUID, Deque<AuctionTransactionHistoryEntry>> pendingUpdates =
             new ConcurrentHashMap<>();
@@ -38,11 +37,11 @@ public final class HistorySaveDispatcher implements AutoCloseable {
     private final AtomicBoolean draining = new AtomicBoolean();
     private final int batchSize;
 
-    public HistorySaveDispatcher(JavaPlugin plugin, AuctionHistoryStorage storage) {
+    public HistorySaveDispatcher(JavaPlugin plugin, com.skyblockexp.ezauction.storage.AuctionHistoryRepository storage) {
         this(plugin, storage, DEFAULT_BATCH_SIZE);
     }
 
-    public HistorySaveDispatcher(JavaPlugin plugin, AuctionHistoryStorage storage, int batchSize) {
+    public HistorySaveDispatcher(JavaPlugin plugin, com.skyblockexp.ezauction.storage.AuctionHistoryRepository storage, int batchSize) {
         this.plugin = plugin;
         this.storage = storage;
         this.batchSize = Math.max(1, batchSize);

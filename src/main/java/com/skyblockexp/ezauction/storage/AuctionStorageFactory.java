@@ -33,7 +33,9 @@ public final class AuctionStorageFactory {
                 boolean listingOk = listingStorage.initialize();
                 boolean historyOk = historyStorage.initialize();
                 if (listingOk && historyOk) {
-                    return new AuctionStorageBundle(listingStorage, historyStorage);
+                    com.skyblockexp.ezauction.storage.AuctionListingRepository listingRepo = (com.skyblockexp.ezauction.storage.AuctionListingRepository) listingStorage;
+                    com.skyblockexp.ezauction.storage.AuctionHistoryRepository historyRepo = (com.skyblockexp.ezauction.storage.AuctionHistoryRepository) historyStorage;
+                    return new AuctionStorageBundle(listingRepo, historyRepo);
                 }
                 plugin.getLogger().warning(
                         "Failed to initialize MySQL storage for " + EzAuctionPlugin.DISPLAY_NAME
@@ -43,10 +45,15 @@ public final class AuctionStorageFactory {
             }
         }
 
-        YamlAuctionStorage listingStorage = new YamlAuctionStorage(plugin);
-        listingStorage.initialize();
-        YamlAuctionHistoryStorage historyStorage = new YamlAuctionHistoryStorage(plugin);
-        historyStorage.initialize();
-        return new AuctionStorageBundle(listingStorage, historyStorage);
+            var listingStorage = new YamlAuctionStorage(plugin);
+            var historyStorage = new YamlAuctionHistoryStorage(plugin);
+
+            // Initialize YAML storage
+            listingStorage.initialize();
+            historyStorage.initialize();
+
+            com.skyblockexp.ezauction.storage.AuctionListingRepository listingRepo = (com.skyblockexp.ezauction.storage.AuctionListingRepository) listingStorage;
+            com.skyblockexp.ezauction.storage.AuctionHistoryRepository historyRepo = (com.skyblockexp.ezauction.storage.AuctionHistoryRepository) historyStorage;
+            return new AuctionStorageBundle(listingRepo, historyRepo);
     }
 }

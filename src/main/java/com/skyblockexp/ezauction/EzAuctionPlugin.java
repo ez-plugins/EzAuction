@@ -1,6 +1,5 @@
 package com.skyblockexp.ezauction;
 
-import com.skyblockexp.ezauction.bootstrap.PluginRegistry;
 import com.skyblockexp.ezauction.config.OrdersOnlyConfig;
 import com.skyblockexp.ezauction.bootstrap.PluginConfigs;
 import java.io.File;
@@ -12,7 +11,10 @@ import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.ServicesManager;
-import org.bukkit.plugin.java.JavaPlugin;
+import com.skyblockexp.ezframework.EzPlugin;
+import com.skyblockexp.ezframework.bootstrap.Component;
+import java.util.List;
+import com.skyblockexp.ezauction.bootstrap.EzAuctionFrameworkComponent;
 import org.bstats.bukkit.Metrics;
 
 /**
@@ -29,12 +31,11 @@ import org.bstats.bukkit.Metrics;
  * @author Shadow48402
  * @since 1.1.0
  */
-public final class EzAuctionPlugin extends JavaPlugin {
+public final class EzAuctionPlugin extends EzPlugin {
 
     public static final String DISPLAY_NAME = "EzAuction";
-    private PluginRegistry registry;
+    
     private static volatile EzAuctionPlugin instance;
-    private static volatile PluginRegistry staticRegistry;
 
     /**
      * Called when the plugin is enabled by the server.
@@ -45,36 +46,22 @@ public final class EzAuctionPlugin extends JavaPlugin {
      * </p>
      */
     @Override
-    public void onEnable() {
+    protected List<Component> components() {
+        // Ensure defaults and orders-only config are available early
         instance = this;
-
         logStartupHeader();
         ensureDefaultConfig();
-        // Load orders-only config before registry
         OrdersOnlyConfig.load(this);
-        // PluginRegistry will handle all initialization and registration
-        registry = new PluginRegistry(instance);
-        staticRegistry = registry;
-        registry.load();
-        registry.enableAll();
-        getLogger().info(DISPLAY_NAME + " plugin enabled.");
-    }
-
-    /**
-     * Called when the plugin is disabled by the server.
-     * 
-     * <p>
-     * Unregisters all listeners, disables managers and services, cleans up resources, and closes storage.
-     * </p>
-     */
-    @Override
-    public void onDisable() {
-        HandlerList.unregisterAll(this);
-        if (registry != null) {
-            registry.disableAll();
-            registry = null;
-        }
-        getLogger().info(DISPLAY_NAME + " plugin disabled.");
+        // Provide explicit, ordered components so each can be constructed with only
+        // the plugin and resolve dependencies from the framework registry at start.
+        return List.of(
+            new com.skyblockexp.ezauction.bootstrap.component.ConfigurationLoaderComponent(this),
+            new com.skyblockexp.ezauction.bootstrap.component.EconomySetupComponent(this),
+            new com.skyblockexp.ezauction.bootstrap.component.CompatibilityAndStorageComponent(this),
+            new com.skyblockexp.ezauction.bootstrap.component.EzFrameworkIntegrationComponent(this),
+            new com.skyblockexp.ezauction.bootstrap.component.ServiceSetupComponent(this),
+            new com.skyblockexp.ezauction.bootstrap.component.GuiAndCommandSetupComponent(this)
+        );
     }
 
     /**
@@ -120,17 +107,7 @@ public final class EzAuctionPlugin extends JavaPlugin {
      * Gets the plugin's registry containing all managers and services.
      * @return
      */
-    public PluginRegistry getRegistry() {
-        return registry;
-    }
-
-    /**
-     * Gets the static plugin registry (for global access).
-     * @return
-     */
-    public static PluginRegistry getStaticRegistry() {
-        return staticRegistry;
-    }
+    // PluginRegistry has been replaced by EzFramework Registry; consumers should use Registry.forPlugin(this).
 
     /**
      * Gets the singleton instance of the EzAuctionPlugin.
@@ -139,4 +116,11 @@ public final class EzAuctionPlugin extends JavaPlugin {
     public static EzAuctionPlugin getInstance() {
         return instance;
     }
+
+    /**
+     * Lightweight detection hook to log if EzFramework is available at runtime.
+     * This uses reflection so EzAuction can compile even when EzFramework
+     * artifacts are not yet installed locally.
+     */
+    // EzFramework bootstrap handles lifecycle; no direct init required here.
 }

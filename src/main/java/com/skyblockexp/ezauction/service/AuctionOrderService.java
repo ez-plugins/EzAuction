@@ -3,8 +3,6 @@ package com.skyblockexp.ezauction.service;
 import com.skyblockexp.ezauction.AuctionListing;
 import com.skyblockexp.ezauction.AuctionOperationResult;
 import com.skyblockexp.ezauction.AuctionOrder;
-import com.skyblockexp.ezauction.EzAuctionPlugin;
-import com.skyblockexp.ezauction.bootstrap.PluginRegistry;
 import com.skyblockexp.ezauction.transaction.AuctionTransactionService;
 import com.skyblockexp.ezauction.notification.AuctionNotificationService;
 import com.skyblockexp.ezauction.history.AuctionTransactionHistoryService;
@@ -37,8 +35,7 @@ public class AuctionOrderService {
     private final Map<UUID, List<ItemStack>> pendingReturns;
     private final Map<String, AuctionListing> listings;
     private final AuctionConfiguration configuration;
-
-    public AuctionOrderService(
+        public AuctionOrderService(
             AuctionTransactionService transactionService,
             AuctionListingRules listingRules,
             AuctionPersistenceManager persistenceManager,
@@ -48,7 +45,8 @@ public class AuctionOrderService {
             Map<UUID, List<ItemStack>> pendingReturns,
             Map<String, AuctionListing> listings,
             Map<String, AuctionOrder> orders
-    ) {
+            , AuctionConfiguration configuration
+        ) {
         this.orders = orders;
         this.transactionService = transactionService;
         this.listingRules = listingRules;
@@ -58,7 +56,7 @@ public class AuctionOrderService {
         this.claimService = claimService;
         this.pendingReturns = pendingReturns;
         this.listings = listings;
-        this.configuration = EzAuctionPlugin.getStaticRegistry().getConfiguration();
+        this.configuration = configuration;
     }
 
     public AuctionOperationResult createOrder(Player buyer, ItemStack template, double offeredPrice, Duration duration, double reservedAmount) {

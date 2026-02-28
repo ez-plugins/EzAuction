@@ -3,7 +3,7 @@ package com.skyblockexp.ezauction.storage.yaml;
 import com.skyblockexp.ezauction.transaction.AuctionTransactionHistoryEntry;
 import com.skyblockexp.ezauction.transaction.AuctionTransactionType;
 import com.skyblockexp.ezauction.EzAuctionPlugin;
-import com.skyblockexp.ezauction.storage.AuctionHistoryStorage;
+import com.skyblockexp.ezauction.storage.AuctionHistoryRepository;
 import com.skyblockexp.ezauction.util.EconomyUtils;
 import java.io.File;
 import java.io.IOException;
@@ -26,9 +26,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
 /**
- * YAML implementation of {@link AuctionHistoryStorage}.
+ * YAML implementation of {@link AuctionHistoryRepository}.
  */
-public final class YamlAuctionHistoryStorage implements AuctionHistoryStorage {
+public final class YamlAuctionHistoryStorage implements AuctionHistoryRepository {
 
     private final JavaPlugin plugin;
     private File historyFile;
