@@ -59,7 +59,7 @@ public class AuctionSellMenu {
     private final ItemTagStorage itemTagStorage;
 
     private final AuctionMenuInteractionConfiguration.SellMenuLayoutConfiguration layout;
-    private final ItemStack fillerPane;
+    private volatile ItemStack fillerPane;
 
     private final ConcurrentMap<UUID, SellMenuState> pendingPriceInputs;
     private final ConcurrentMap<UUID, Target> pendingTargets = new ConcurrentHashMap<>();
@@ -96,7 +96,7 @@ public class AuctionSellMenu {
                 ? sellConfiguration
                 : AuctionMenuInteractionConfiguration.defaults().sellMenu();
         this.layout = interactions.layout();
-        this.fillerPane = createBaseItem(layout.filler());
+        this.fillerPane = null; // lazy init to avoid Material/Registry during test construction
         this.defaultPrice = Math.max(0.0D, interactions.defaultPrice());
         List<Double> adjustments = interactions.priceAdjustments();
         this.priceAdjustments = new double[adjustments.size()];
@@ -419,13 +419,25 @@ public class AuctionSellMenu {
     }
 
     private void applyFiller(Inventory inventory) {
-        if (fillerPane == null) return;
+        ItemStack pane = getFillerPane();
+        if (pane == null) return;
         for (int slot = 0; slot < inventory.getSize(); slot++) {
             ItemStack current = inventory.getItem(slot);
             if (current == null || current.getType() == Material.AIR) {
-                inventory.setItem(slot, fillerPane.clone());
+                inventory.setItem(slot, pane.clone());
             }
         }
+    }
+
+    private ItemStack getFillerPane() {
+        if (this.fillerPane == null) {
+            synchronized (this) {
+                if (this.fillerPane == null) {
+                    this.fillerPane = createBaseItem(this.layout.filler());
+                }
+            }
+        }
+        return this.fillerPane;
     }
 
     private String colorize(String input) {

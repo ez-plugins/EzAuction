@@ -2,7 +2,7 @@ package com.skyblockexp.ezauction.component.gui.order;
 
 import org.bukkit.inventory.ItemStack;
 
-import com.skyblockexp.ezauction.EzAuctionPlugin;
+import com.skyblockexp.ezauction.config.AuctionConfiguration;
 
 import java.time.Duration;
 import java.util.logging.Logger;
@@ -21,7 +21,7 @@ public class OrderMenuState {
     private final boolean debugEnabled;
     private static final Logger LOGGER = Logger.getLogger(OrderMenuState.class.getName());
 
-    public OrderMenuState(ItemStack template, double pricePerItem, int quantity, int durationIndex,
+    public OrderMenuState(AuctionConfiguration configuration, ItemStack template, double pricePerItem, int quantity, int durationIndex,
                           Double recommendedPricePerItem, Duration[] durationOptions, int defaultDurationIndex) {
         if (template == null) {
             throw new IllegalArgumentException("template cannot be null");
@@ -36,13 +36,13 @@ public class OrderMenuState {
         this.recommendedPricePerItem = recommendedPricePerItem;
         this.defaultDurationIndex = defaultDurationIndex;
         
-        // Safely access debug configuration with null checks
+        // Use provided configuration for debug flag, if available
         boolean debug = false;
         try {
-            if (EzAuctionPlugin.getStaticRegistry() != null && EzAuctionPlugin.getStaticRegistry().getConfiguration() != null) {
-                debug = EzAuctionPlugin.getStaticRegistry().getConfiguration().debug();
+            if (configuration != null && configuration.debug()) {
+                debug = true;
             }
-        } catch (Exception e) {
+        } catch (Throwable e) {
             LOGGER.fine("[OrderMenuState] Debug disabled due to configuration access error: " + e.getMessage());
         }
         this.debugEnabled = debug;

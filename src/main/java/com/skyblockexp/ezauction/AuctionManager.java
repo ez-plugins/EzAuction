@@ -2,23 +2,12 @@ package com.skyblockexp.ezauction;
 
 import com.skyblockexp.ezauction.api.AuctionListingLimitResolver;
 import com.skyblockexp.ezauction.config.AuctionConfiguration;
-import com.skyblockexp.ezauction.config.AuctionBackendMessages;
-import com.skyblockexp.ezauction.config.AuctionListingRules;
 import com.skyblockexp.ezauction.live.LiveAuctionEntry;
-import com.skyblockexp.ezauction.live.LiveAuctionService;
-import com.skyblockexp.ezauction.storage.AuctionStorage;
-import com.skyblockexp.ezauction.storage.AuctionStorageSnapshot;
-import com.skyblockexp.ezauction.storage.DistributedAuctionListingStorage;
-import com.skyblockexp.ezauction.persistence.AuctionPersistenceManager;
-import com.skyblockexp.ezauction.notification.AuctionNotificationService;
-import com.skyblockexp.ezauction.claim.AuctionClaimService;
-import com.skyblockexp.ezauction.history.AuctionTransactionHistoryService;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.ChatColor;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitTask;
 
 import java.time.Duration;
 import java.util.*;
@@ -37,9 +26,7 @@ public class AuctionManager {
     private final AuctionReturnService returnService;
     private final AuctionExpiryService expiryService;
     private final AuctionQueryService queryService;
-    // Core plugin reference (if needed)
     private final JavaPlugin plugin;
-    // Config and resolver for listing limits
     private final AuctionConfiguration configuration;
     private final AuctionListingLimitResolver listingLimitResolver;
 
@@ -167,21 +154,12 @@ public class AuctionManager {
     }
 
     /**
-     * Helper method to count the total item amount in a list of ItemStacks.
-     *
-     * @param items the list of ItemStacks
-     * @return the total item amount
-     */
-    // ...existing code...
-
-    /**
      * Disables the auction manager, saving all auction data and stopping periodic expiry tasks.
      * This method should be called during plugin shutdown to ensure data integrity.
      */
     public void disable() {
         expiryService.disable();
     }
-
 
     /**
      * Creates a new auction listing for the given seller and item.
@@ -259,12 +237,6 @@ public class AuctionManager {
     public AuctionOperationResult cancelOrder(UUID buyerId, String orderId) {
         return orderService.cancelOrder(buyerId, orderId);
     }
-
-    /**
-     * Starts the periodic expiry task for listings and orders.
-     * Should be called after loading auction data to enable automatic expiry handling.
-     */
-    // ...existing code...
 
     /**
      * Purges expired auction listings and orders, returning items and refunding funds as needed.

@@ -81,13 +81,19 @@ public class AuctionCommand implements CommandExecutor, TabCompleter {
             }
             
             try {
-                // Reload configuration files
-                if (EzAuctionPlugin.getStaticRegistry() != null) {
-                    EzAuctionPlugin.getStaticRegistry().reloadConfiguration();
-                    sendMessage(sender, ChatColor.GREEN + "EzAuction configuration reloaded successfully.");
-                    sendMessage(sender, ChatColor.YELLOW + "Note: Some settings may require a server restart to fully apply.");
+                EzAuctionPlugin inst = EzAuctionPlugin.getInstance();
+                if (inst != null) {
+                    com.skyblockexp.ezframework.Registry reg = com.skyblockexp.ezframework.Registry.forPlugin(inst);
+                    com.skyblockexp.ezauction.manager.ConfigManager cfgMgr = reg.get(com.skyblockexp.ezauction.manager.ConfigManager.class);
+                    if (cfgMgr != null) {
+                        cfgMgr.reloadConfiguration();
+                        sendMessage(sender, ChatColor.GREEN + "EzAuction configuration reloaded successfully.");
+                        sendMessage(sender, ChatColor.YELLOW + "Note: Some settings may require a server restart to fully apply.");
+                    } else {
+                        sendMessage(sender, ChatColor.RED + "Failed to reload: ConfigManager not available.");
+                    }
                 } else {
-                    sendMessage(sender, ChatColor.RED + "Failed to reload: Plugin registry not initialized.");
+                    sendMessage(sender, ChatColor.RED + "Failed to reload: Plugin instance not available.");
                 }
             } catch (Exception ex) {
                 sendMessage(sender, ChatColor.RED + "Failed to reload configuration: " + ex.getMessage());
@@ -315,8 +321,7 @@ public class AuctionCommand implements CommandExecutor, TabCompleter {
                 sendMessage(player, messages.cancel().ordersHeader());
                 for (AuctionOrder order : ownOrders) {
                     String priceText = transactionService.formatCurrency(order.offeredPrice());
-                    String expiryText = HISTORY_DATE_FORMAT
-                            DateUtil.formatDate(order.expiryEpochMillis());
+                    String expiryText = DateUtil.formatDate(order.expiryEpochMillis());
                     String message = messages.cancel().orderEntry()
                             .replace("{id}", order.id())
                             .replace("{item}", describeItem(order.requestedItem()))

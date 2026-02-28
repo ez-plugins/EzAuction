@@ -3,7 +3,7 @@ package com.skyblockexp.ezauction.storage.mysql;
 import com.skyblockexp.ezauction.transaction.AuctionTransactionHistoryEntry;
 import com.skyblockexp.ezauction.transaction.AuctionTransactionType;
 import com.skyblockexp.ezauction.EzAuctionPlugin;
-import com.skyblockexp.ezauction.storage.AuctionHistoryStorage;
+import com.skyblockexp.ezauction.storage.AuctionHistoryRepository;
 import com.skyblockexp.ezauction.config.AuctionStorageConfiguration.Mysql;
 import com.skyblockexp.ezauction.util.EconomyUtils;
 import com.skyblockexp.ezauction.util.ItemStackSerialization;
@@ -16,9 +16,9 @@ import java.util.logging.Logger;
 import org.bukkit.inventory.ItemStack;
 
 /**
- * MySQL-based implementation of AuctionHistoryStorage.
+ * MySQL-based implementation of AuctionHistoryRepository.
  */
-public class MysqlAuctionHistoryStorage implements AuctionHistoryStorage {
+public class MysqlAuctionHistoryStorage implements AuctionHistoryRepository {
     private final Logger logger;
     private final Mysql mysql;
     private final String jdbcUrl;

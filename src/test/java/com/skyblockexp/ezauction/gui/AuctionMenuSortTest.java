@@ -7,6 +7,8 @@ import com.skyblockexp.ezauction.AuctionOrder;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.time.Duration;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -53,13 +55,25 @@ class AuctionMenuSortTest {
     }
 
     private AuctionListing createListing(String id, Material material, int amount, double price, long minutesUntilExpiry) {
-        ItemStack stack = new ItemStack(material, amount);
+        ItemStack stack = mock(ItemStack.class);
+        when(stack.getAmount()).thenReturn(amount);
+        when(stack.getType()).thenReturn(material);
+        try {
+            when(stack.clone()).thenReturn(stack);
+        } catch (Exception ignored) {
+        }
         long expiry = System.currentTimeMillis() + Duration.ofMinutes(minutesUntilExpiry).toMillis();
         return new AuctionListing(id, UUID.randomUUID(), price, expiry, stack, 0.0D);
     }
 
     private AuctionOrder createOrder(String id, Material material, int amount, double offeredPrice, long minutesUntilExpiry) {
-        ItemStack stack = new ItemStack(material, amount);
+        ItemStack stack = mock(ItemStack.class);
+        when(stack.getAmount()).thenReturn(amount);
+        when(stack.getType()).thenReturn(material);
+        try {
+            when(stack.clone()).thenReturn(stack);
+        } catch (Exception ignored) {
+        }
         long expiry = System.currentTimeMillis() + Duration.ofMinutes(minutesUntilExpiry).toMillis();
         return new AuctionOrder(id, UUID.randomUUID(), offeredPrice, expiry, stack, offeredPrice * amount);
     }
