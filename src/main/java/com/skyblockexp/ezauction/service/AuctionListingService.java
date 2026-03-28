@@ -151,7 +151,8 @@ public class AuctionListingService {
             liveAuctionService.enqueue(listing, seller.getUniqueId(), seller.getName());
         }
 
-        notificationService.notifySellerSale(listing);
+        // Notify that the auction has started
+        notificationService.notifyAuctionStarted(listing, seller, sanitizedDuration);
         transactionHistoryService.recordListingTransactionHistory(listing, seller);
 
         return AuctionOperationResult.success("Your item has been listed for auction!");
@@ -222,6 +223,30 @@ public class AuctionListingService {
         Bukkit.getPluginManager().callEvent(soldEvent);
 
         return AuctionOperationResult.success("You have successfully purchased the listing!");
+    }
+
+    /**
+     * Places a bid on the given listing. Currently this method only fires an event and
+     * notifies listeners — it does not mutate the listing state or handle payments.
+     * This provides a safe hook for implementing a full bid workflow later.
+     */
+    public AuctionOperationResult placeBid(Player bidder, String listingId, double amount) {
+        if (bidder == null || listingId == null || listingId.isEmpty()) {
+            return AuctionOperationResult.failure("Invalid bidder or listingId.");
+        }
+        AuctionListing listing = listings.get(listingId);
+        if (listing == null) return AuctionOperationResult.failure("Listing not found.");
+        if (listing.isExpired()) return AuctionOperationResult.failure("Listing has expired.");
+        if (listing.sellerId().equals(bidder.getUniqueId())) return AuctionOperationResult.failure("You cannot bid on your own listing.");
+        // Fire event
+        com.skyblockexp.ezauction.event.AuctionListingBidEvent bidEvent = new com.skyblockexp.ezauction.event.AuctionListingBidEvent(listing, bidder, amount);
+        org.bukkit.Bukkit.getPluginManager().callEvent(bidEvent);
+        if (bidEvent.isCancelled()) return AuctionOperationResult.failure("Bid cancelled by another plugin.");
+
+        // Notify services (no state change)
+        notificationService.notifyAuctionBid(listing, bidder, amount);
+
+        return AuctionOperationResult.success("Your bid was submitted.");
     }
 
     public AuctionOperationResult cancelListing(UUID sellerId, String listingId) {
