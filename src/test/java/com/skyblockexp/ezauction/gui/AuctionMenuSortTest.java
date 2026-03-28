@@ -12,9 +12,20 @@ import java.util.List;
 import java.util.UUID;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.mockbukkit.mockbukkit.MockBukkit;
 
 class AuctionMenuSortTest {
+
+    @BeforeAll
+    static void initMockBukkit() {
+        // Ensure MockBukkit server is initialized so ItemFactory and Material types are available
+        try {
+            MockBukkit.getOrCreateMock();
+        } catch (IllegalStateException ignored) {
+        }
+    }
 
     @Test
     void listingQuantitySortPlacesLargerStacksFirst() throws ReflectiveOperationException {
