@@ -11,6 +11,21 @@
     <description>Standalone auction house plugin for many of your advanced auction features.</description>
     <packaging>jar</packaging>
 
+    <properties>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <!-- Target Java 21 to match Paper API (class file version 65) -->
+        <!-- Allow CI to override the Paper API version with -Dpaper.version -->
+        <!-- Pinned to the exact timestamped snapshot MockBukkit was built against -->
+        <paper.version>1.21.11-R0.1-20260310.030221-86</paper.version>
+        <!-- MockBukkit coordinates are configurable so CI can select the right artifact per Paper matrix entry -->
+        <mockbukkit.groupId>org.mockbukkit.mockbukkit</mockbukkit.groupId>
+        <mockbukkit.artifactId>mockbukkit-v1.21</mockbukkit.artifactId>
+        <mockbukkit.version>4.108.0</mockbukkit.version>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>net.kyori</groupId>
@@ -35,7 +50,7 @@
         <dependency>
             <groupId>io.papermc.paper</groupId>
             <artifactId>paper-api</artifactId>
-            <version>1.17.1-R0.1-SNAPSHOT</version>
+            <version>${paper.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -67,14 +82,42 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-launcher</artifactId>
+            <version>1.10.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
             <version>5.11.0</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-inline</artifactId>
+            <version>5.2.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>${mockbukkit.groupId}</groupId>
+            <artifactId>${mockbukkit.artifactId}</artifactId>
+            <version>${mockbukkit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-nop</artifactId>
+            <version>2.0.9</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <repositories>
+        <repository>
+            <id>central-first</id>
+            <url>https://repo1.maven.org/maven2/</url>
+        </repository>
         <repository>
             <id>papermc-repo</id>
             <url>https://repo.papermc.io/repository/maven-public/</url>
@@ -121,10 +164,6 @@
         </repository>
     </repositories>
 
-    <properties>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
-    </properties>
     <build>
         <finalName>EzAuction-${project.version}</finalName>
         <resources>
@@ -148,9 +187,17 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.1.2</version>
+                <configuration>
+                    <forkCount>1</forkCount>
+                    <reuseForks>false</reuseForks>
+                    <useSystemClassLoader>false</useSystemClassLoader>
+                    <argLine>--add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.lang.invoke=ALL-UNNAMED</argLine>
+                </configuration>
             </plugin>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
+                <version>3.3.1</version>
                 <executions>
                     <execution>
                         <id>copy-plugin-descriptor</id>
@@ -165,10 +212,14 @@
                 </executions>
             </plugin>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
+                <version>3.3.0</version>
                 <configuration>
                     <excludes>
                         <exclude>org/bukkit/**</exclude>
+                        <exclude>io/papermc/**</exclude>
+                        <exclude>com/destroystokyo/**</exclude>
                     </excludes>
                 </configuration>
             </plugin>
@@ -200,4 +251,20 @@
             </plugin>
         </plugins>
     </build>
+    <profiles>
+        <profile>
+            <id>mockbukkit</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>org.mockbukkit.mockbukkit</groupId>
+                    <artifactId>mockbukkit-v1.21</artifactId>
+                    <version>4.108.0</version>
+                    <scope>test</scope>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
 </project>
