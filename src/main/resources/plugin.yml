@@ -43,6 +43,12 @@ commands:
     usage: /orders - Open the buy orders menu.
     permission: ezauction.auction.order
     permission-message: You do not have permission to use this command.
+  auctiondiscord:
+    description: DiscordSRV integration admin commands for EzAuction.
+    usage: |
+      /<command> test [message] - Send a test message to the configured Discord channel.
+    permission: ezauction.discord
+    permission-message: You do not have permission to use Discord integration commands.
   order:
     description: Place a new buy order.
     usage: /order - Place a new buy order for the item in your hand.

@@ -34,6 +34,8 @@ public final class PluginConfigs {
         "messages/gui-messages_nl.yml",
         "messages/gui-messages_zh.yml",
         "auction-values.yml"
+        ,
+        "discord.yml"
     ));
 
     private PluginConfigs() {

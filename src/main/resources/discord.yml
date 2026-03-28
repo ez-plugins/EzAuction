@@ -1,0 +1,34 @@
+enabled: false
+# The Discord channel ID to send auction notifications to. Use numeric ID (snowflake).
+channel-id: null
+
+# Events to publish to Discord. Set to true to enable sending that event.
+events:
+  auction_start: true
+  auction_end: true
+  auction_bid: true
+  auction_cancel: true
+
+# Optional role requirement: when enabled, only listings/bids from players who have a linked
+# Discord account with the configured role will cause messages to be sent.
+role-required: false
+# Prefer using the role ID (snowflake). If set, this will be checked first.
+required-role-id: null
+# Optional role name fallback if you prefer names over IDs.
+required-role-name: null
+# Message templates support placeholders used by AuctionNotificationService.
+# Placeholders available:
+# - {item}: item description (e.g. "3x Diamond Sword")
+# - {price}: formatted price (total or per-item depending on event)
+# - {seller}: seller's username
+# - {buyer}: buyer's username
+# - {bidder}: bidder's username
+# - {amount}: bid amount
+# - {listingId}: the auction listing id
+# - {quantity}: item stack quantity
+# - {duration}: human-friendly duration (when listing started)
+message-format:
+  auction_start: "&aAuction started: {item} ({quantity}) listed by {seller} for {price} (id:{listingId})"
+  auction_end: "&bAuction ended: {item} sold for {price} to {buyer} (id:{listingId})"
+  auction_bid: "&eNew bid on {item}: {bidder} bid {amount} (id:{listingId})"
+  auction_cancel: "&cAuction cancelled: {item} by {seller} (id:{listingId})"
