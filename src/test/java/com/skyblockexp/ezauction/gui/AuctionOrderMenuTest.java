@@ -62,6 +62,13 @@ class AuctionOrderMenuTest {
 
         ItemValueProvider provider = itemStack -> OptionalDouble.of(120.0D);
 
+        // Ensure MockBukkit server is available before constructing menu (registry/item types)
+                try {
+                        org.mockbukkit.mockbukkit.MockBukkit.unmock();
+                } catch (IllegalStateException ignored) {
+                }
+                org.mockbukkit.mockbukkit.MockBukkit.mock();
+
         AuctionOrderMenu menu = new AuctionOrderMenu(plugin, auctionManager, transactionService, listingRules,
                 null, orderConfig, provider, AuctionMessageConfiguration.OrderMessages.defaults(), new LoreItemTagStorage());
 
@@ -85,6 +92,8 @@ class AuctionOrderMenuTest {
                         when(mockInventory.getHolder()).thenReturn(holder);
                         return mockInventory;
                     });
+                        // Ensure other Bukkit static calls still use real behavior (ItemFactory etc.)
+                        mockedBukkit.when(() -> Bukkit.getItemFactory()).thenCallRealMethod();
 
             menu.openOrderMenu(player);
         }
