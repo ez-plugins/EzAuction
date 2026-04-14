@@ -211,7 +211,7 @@ public class AuctionCommand implements CommandExecutor, TabCompleter {
         double price;
         try {
             price = com.skyblockexp.ezauction.util.NumberShortcutParser.parse(args[1]);
-        } catch (NumberFormatException ex) {
+        } catch (IllegalArgumentException ex) {
             sendMessage(player, messages.sell().invalidPrice().replace("{price}", args[1]));
             return;
         }
@@ -387,7 +387,7 @@ public class AuctionCommand implements CommandExecutor, TabCompleter {
         double pricePerItem;
         try {
             pricePerItem = com.skyblockexp.ezauction.util.NumberShortcutParser.parse(args[1]);
-        } catch (NumberFormatException ex) {
+        } catch (IllegalArgumentException ex) {
             sendMessage(player, messages.order().invalidPrice().replace("{price}", args[1]));
             return;
         }
@@ -406,7 +406,7 @@ public class AuctionCommand implements CommandExecutor, TabCompleter {
         int amount;
         try {
             amount = (int) com.skyblockexp.ezauction.util.NumberShortcutParser.parse(args[2]);
-        } catch (NumberFormatException ex) {
+        } catch (IllegalArgumentException ex) {
             sendMessage(player, messages.order().invalidAmount().replace("{amount}", args[2]));
             return;
         }
@@ -610,7 +610,7 @@ public class AuctionCommand implements CommandExecutor, TabCompleter {
         double value;
         try {
             value = Double.parseDouble(numericPortion);
-        } catch (NumberFormatException ex) {
+        } catch (IllegalArgumentException ex) {
             return null;
         }
 
