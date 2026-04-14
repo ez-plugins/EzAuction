@@ -3,7 +3,7 @@ version: ${project.version}
 main: com.skyblockexp.ezauction.EzAuctionPlugin
 author: Shadow48402
 description: Standalone auction house plugin for EzAuction-powered Minecraft servers (requires Vault + economy provider).
-softdepend: [Vault, EzShops, SkyblockExperienceCommon, EzScoreboard, PlaceholderAPI]
+softdepend: [Vault, EzShops, SkyblockExperienceCommon, EzScoreboard, PlaceholderAPI, DiscordSRV]
 api-version: 1.13
 commands:
   auction:
