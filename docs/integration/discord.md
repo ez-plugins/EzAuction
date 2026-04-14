@@ -79,3 +79,80 @@ Permission: `ezauction.discord` is required to run these commands.
 - The integration uses reflection to avoid a hard dependency on DiscordSRV; nothing breaks if DiscordSRV is absent.
 - If you want, I can add step-by-step screenshots or a short admin checklist to this doc.
 
+---
+
+## Discord Webhook (standalone — no DiscordSRV required)
+
+EzAuction can post rich embed notifications directly to any Discord channel via a **webhook URL**. This works independently of DiscordSRV: you can use one, the other, or both simultaneously.
+
+### How it works
+
+1. You create a webhook in Discord and copy its URL.
+2. You configure the URL in `discord.yml` under the `webhook:` section.
+3. On every enabled auction event (start, end, bid, cancel) EzAuction POSTs a colour-coded embed to that channel asynchronously — the server tick thread is never blocked.
+
+### Creating a webhook in Discord
+
+1. Open the target channel → **Edit Channel** → **Integrations** → **Webhooks** → **New Webhook**.
+2. Give it a name and optionally an avatar, then click **Copy Webhook URL**.
+3. Keep this URL private — treat it like a password. Anyone with it can post to your channel.
+
+### Configuration (`discord.yml`)
+
+```yaml
+webhook:
+  enabled: true
+  url: "https://discord.com/api/webhooks/123456789/ABCDEFGHIJKLMNOP"
+  username: "EzAuction"       # Display name in Discord (null = webhook default)
+  avatar-url: null            # Avatar URL override (null = webhook default)
+  use-embeds: true            # true = rich embed, false = plain text
+  events:
+    auction_start: true
+    auction_end: true
+    auction_bid: true
+    auction_cancel: true
+  embed-colors:
+    auction_start: 5763719    # green
+    auction_end: 3447003      # blue
+    auction_bid: 16776960     # yellow
+    auction_cancel: 15158332  # red
+```
+
+**Embed colour values** are decimal integers. To convert a hex colour (#RRGGBB) use any online hex-to-decimal tool (e.g. `0x57F287` → `5763719`).
+
+### Admin commands (`/auctiondiscord webhook ...`)
+
+All commands require the `ezauction.discord` permission.
+
+| Command | Description |
+|---|---|
+| `webhook status` | Show whether the webhook is enabled and the last 10 characters of the URL. |
+| `webhook set url <url>` | Set the webhook URL (must start with `https://discord.com/api/webhooks/`), enable the webhook, and reload config. |
+| `webhook enable` | Enable the webhook without changing other settings. |
+| `webhook disable` | Disable the webhook without changing other settings. |
+| `webhook test` | Send a test embed to verify the webhook is working. |
+
+Changes are written to `discord.yml` and take effect immediately — no restart required.
+
+### Event descriptions
+
+| Event key | Triggered when | Embed colour |
+|---|---|---|
+| `auction_start` | A new auction listing is created | Green |
+| `auction_end` | A listing is sold or purchased as an order | Blue |
+| `auction_bid` | A bid is placed on a listing | Yellow |
+| `auction_cancel` | A seller cancels their listing | Red |
+
+> Expired listings (no buyer found) fire an "Auction Expired" embed using the `auction_end` colour and toggle.
+
+### Error handling
+
+- If the webhook call fails (network error, non-2xx response), a `WARNING` is logged in the server console and gameplay continues unaffected.
+- If the configured URL does not start with `https://discord.com/api/webhooks/`, the webhook is silently disabled to prevent misuse.
+
+### Security notes
+
+- Never share your webhook URL publicly — revoke and regenerate it in Discord if it is leaked.
+- The URL is validated client-side before any HTTP request is sent.
+- Rate limits: Discord allows one message per second per webhook. For busy servers consider disabling less important events (e.g. `auction_bid: false`).
+

@@ -30,6 +30,40 @@ Pre-release of EzAuction 1.0.1 is available [in the Discord server of EzPlugins]
 - **Integration-ready API** – Register Bukkit services to override listing caps or provide custom value providers without forking the plugin.
 - **Enchant-aware search** – Type queries like `sharpness v`, `fortune 3`, or `minecraft:looting` to surface listings and buy orders carrying the matching enchantments, including stored book enchants. Matching works with roman numerals, numeric levels, namespaced keys, and underscore/space differences so players can zero in on the exact enchant stack they need.
 
+## Discord Integration
+- **Standalone webhook** – Post colour-coded embed notifications to any Discord channel by pasting a webhook URL into `discord.yml`. No DiscordSRV or bot setup required.
+- **DiscordSRV support** – Optionally route notifications through an existing DiscordSRV installation with optional account-linking and role-gating per event.
+- **Four event types** – Receive a message whenever an auction is listed, sold, bid on, or cancelled, each styled with its own accent colour (green / blue / yellow / red).
+- **Live admin commands** – Configure, enable, disable, and test the webhook in-game with `/auctiondiscord webhook` — changes take effect instantly without a restart.
+- **Async & non-blocking** – All HTTP calls run on a background thread; a failed delivery is logged at WARNING level and never interrupts gameplay.
+
+<details>
+<summary>Discord Webhook Quick Setup</summary>
+
+1. Open the target Discord channel → **Edit Channel** → **Integrations** → **Webhooks** → **New Webhook** → **Copy Webhook URL**.
+2. In-game or via console, run:
+   ```
+   /auctiondiscord webhook set url https://discord.com/api/webhooks/YOUR_ID/YOUR_TOKEN
+   ```
+3. Verify with `/auctiondiscord webhook test` — a test embed will appear in your channel immediately.
+
+```yml
+# discord.yml — webhook section
+webhook:
+  enabled: true
+  url: "https://discord.com/api/webhooks/123456789/YOURTOKEN"
+  username: "EzAuction"
+  use-embeds: true
+  events:
+    auction_start: true
+    auction_end: true
+    auction_bid: true
+    auction_cancel: true
+```
+
+For the full DiscordSRV integration guide and all options, see [docs/integration/discord.md](../integration/discord.md).
+</details>
+
 ## Hologram Features
 - **Auction holograms** – Place interactive holograms in the world to display live auction stats, top listings, or buy order summaries. Supports click/touch interaction for quick info and future actions.
 - **Performance optimized** – Configurable max hologram count and batch update options ensure smooth gameplay even with many holograms active.

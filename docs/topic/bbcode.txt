@@ -36,6 +36,48 @@
 [*][B]Configurable types[/B] – Choose which auction stats or listings to display via hologram type selection.
 [/LIST]
 
+[SIZE=4][B]Discord Integration[/B][/SIZE]
+[LIST]
+[*][B]Standalone webhook[/B] – Post colour-coded embed notifications to any Discord channel by pasting a webhook URL into [icode]discord.yml[/icode]. No DiscordSRV or bot setup required.
+[*][B]DiscordSRV support[/B] – Optionally route notifications through an existing DiscordSRV installation with optional account-linking and role-gating per event.
+[*][B]Four event types[/B] – Receive a message whenever an auction is listed, sold, bid on, or cancelled, each styled with its own accent colour (green / blue / yellow / red).
+[*][B]Live admin commands[/B] – Configure, enable, disable, and test the webhook in-game with [icode]/auctiondiscord webhook[/icode] — changes take effect instantly without a restart.
+[*][B]Async & non-blocking[/B] – All HTTP calls run on a background thread; a failed delivery is logged at WARNING level and never interrupts gameplay.
+[/LIST]
+
+[spoiler="Discord Webhook Quick Setup"]
+[LIST=1]
+[*]Open the target Discord channel → [B]Edit Channel[/B] → [B]Integrations[/B] → [B]Webhooks[/B] → [B]New Webhook[/B] → [B]Copy Webhook URL[/B].
+[*]In-game or via console, run:
+[code]/auctiondiscord webhook set url https://discord.com/api/webhooks/YOUR_ID/YOUR_TOKEN[/code]
+[*]Verify with [icode]/auctiondiscord webhook test[/icode] — a test embed will appear in your channel immediately.
+[/LIST]
+
+[code=yml]
+# discord.yml — webhook section
+webhook:
+  enabled: true
+  url: "https://discord.com/api/webhooks/123456789/YOURTOKEN"
+  username: "EzAuction"
+  use-embeds: true
+  events:
+    auction_start: true
+    auction_end: true
+    auction_bid: true
+    auction_cancel: true
+[/code]
+
+[B]Webhook admin commands[/B] ([icode]ezauction.discord[/icode] permission required):
+[table]
+[tr][th]Command[/th][th]Description[/th][/tr]
+[tr][td]/auctiondiscord webhook status[/td][td]Show whether the webhook is enabled and the masked URL.[/td][/tr]
+[tr][td]/auctiondiscord webhook set url <url>[/td][td]Set the webhook URL and enable immediately.[/td][/tr]
+[tr][td]/auctiondiscord webhook enable / disable[/td][td]Toggle the webhook without changing other settings.[/td][/tr]
+[tr][td]/auctiondiscord webhook test[/td][td]Send a test embed to verify the webhook is working.[/td][/tr]
+[tr][td]/auctiondiscord reload[/td][td]Reload discord.yml (both DiscordSRV and webhook) at runtime.[/td][/tr]
+[/table]
+[/spoiler]
+
 [spoiler="Hologram Configuration"]
 [code=yml]
 holograms:
