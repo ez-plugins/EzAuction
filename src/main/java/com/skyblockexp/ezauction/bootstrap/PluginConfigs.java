@@ -15,7 +15,6 @@ public final class PluginConfigs {
     public static final List<String> CONFIG_FILES = Collections.unmodifiableList(Arrays.asList(
         "auction.yml",
         "auction-storage.yml",
-        "messages.yml",
         "orders-only.yml",
         "messages/messages_en.yml",
         "messages/messages_es.yml",
