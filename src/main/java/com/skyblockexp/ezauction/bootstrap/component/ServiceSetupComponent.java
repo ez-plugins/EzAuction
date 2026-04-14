@@ -29,13 +29,15 @@ public class ServiceSetupComponent {
         public final AuctionManager auctionManager;
         public final Map<UUID, List<org.bukkit.inventory.ItemStack>> pendingReturns;
         public final com.skyblockexp.ezauction.integration.DiscordIntegration discordIntegration;
+        public final com.skyblockexp.ezauction.claim.AuctionClaimService claimService;
         public ServiceSetupResult(
             AuctionTransactionService transactionService,
             AuctionTransactionHistory transactionHistory,
             LiveAuctionService liveAuctionService,
             AuctionManager auctionManager,
-            Map<UUID, List<org.bukkit.inventory.ItemStack>> pendingReturns
-            , com.skyblockexp.ezauction.integration.DiscordIntegration discordIntegration
+            Map<UUID, List<org.bukkit.inventory.ItemStack>> pendingReturns,
+            com.skyblockexp.ezauction.integration.DiscordIntegration discordIntegration,
+            com.skyblockexp.ezauction.claim.AuctionClaimService claimService
         ) {
             this.transactionService = transactionService;
             this.transactionHistory = transactionHistory;
@@ -43,6 +45,7 @@ public class ServiceSetupComponent {
             this.auctionManager = auctionManager;
             this.pendingReturns = pendingReturns;
             this.discordIntegration = discordIntegration;
+            this.claimService = claimService;
         }
     }
 
@@ -106,6 +109,6 @@ public class ServiceSetupComponent {
         AuctionManager auctionManager = new AuctionManager(plugin, listingService, orderService, returnService, expiryService, queryService, configuration, listingLimitResolver);
         auctionManager.enable();
         liveAuctionService.enable();
-        return new ServiceSetupResult(transactionService, transactionHistory, liveAuctionService, auctionManager, pendingReturns, discordIntegration);
+        return new ServiceSetupResult(transactionService, transactionHistory, liveAuctionService, auctionManager, pendingReturns, discordIntegration, claimService);
     }
 }
