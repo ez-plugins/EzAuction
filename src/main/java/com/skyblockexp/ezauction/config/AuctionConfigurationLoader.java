@@ -34,9 +34,8 @@ public final class AuctionConfigurationLoader {
         YamlConfiguration valueConfigurationFile = loadConfiguration(dataFolder, "auction-values.yml");
         YamlConfiguration messageConfigurationFile = loadLocalizedConfiguration(plugin, dataFolder,
                 "messages/gui-messages", languageCode);
-        YamlConfiguration commandMessageConfigurationFile = firstNonNull(
-                loadLocalizedConfiguration(plugin, dataFolder, "messages/messages", languageCode),
-                loadConfiguration(dataFolder, "messages.yml"));
+        YamlConfiguration commandMessageConfigurationFile = loadLocalizedConfiguration(plugin, dataFolder,
+                "messages/messages", languageCode);
 
         if (baseConfiguration == null
                 && storageConfigurationFile == null
