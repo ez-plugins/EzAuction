@@ -4,25 +4,21 @@ import com.skyblockexp.ezauction.EzAuctionPlugin;
 import com.skyblockexp.ezauction.config.AuctionConfiguration;
 import com.skyblockexp.ezauction.config.AuctionConfigurationLoader;
 import com.skyblockexp.ezauction.integration.DiscordIntegration;
+import com.skyblockexp.ezauction.integration.DiscordWebhookNotifier;
 
 /**
  * Lightweight registry used by the plugin to expose configuration and integrations.
- *
- * This implementation provides the minimal surface required by the codebase
- * (configuration access, Discord integration, and basic lifecycle methods).
  */
 public final class PluginRegistry {
     private final EzAuctionPlugin plugin;
-    public com.skyblockexp.ezauction.integration.DiscordIntegration discordIntegration;
+    public DiscordIntegration discordIntegration;
+    public DiscordWebhookNotifier discordWebhookNotifier;
     private AuctionConfiguration configuration;
 
     public PluginRegistry(EzAuctionPlugin plugin) {
         this.plugin = plugin;
     }
 
-    /**
-     * Load configuration and lightweight integrations.
-     */
     public void load() {
         try {
             this.configuration = AuctionConfigurationLoader.load(plugin);
@@ -36,18 +32,18 @@ public final class PluginRegistry {
             plugin.getLogger().warning("Failed to initialize Discord integration: " + t.getMessage());
             this.discordIntegration = null;
         }
+        try {
+            this.discordWebhookNotifier = new DiscordWebhookNotifier(plugin);
+        } catch (Throwable t) {
+            plugin.getLogger().warning("Failed to initialize Discord webhook notifier: " + t.getMessage());
+            this.discordWebhookNotifier = null;
+        }
     }
 
-    /**
-     * Enable or initialize runtime components. Kept minimal for tests/compilation.
-     */
     public void enableAll() {
         // Intentionally minimal: other components initialize themselves lazily.
     }
 
-    /**
-     * Disable runtime components and cleanup.
-     */
     public void disableAll() {
         // No-op for minimal registry.
     }
@@ -58,5 +54,24 @@ public final class PluginRegistry {
 
     public void reloadConfiguration() {
         this.configuration = AuctionConfigurationLoader.load(plugin);
+    }
+
+    /**
+     * Reloads both the DiscordSRV integration and the webhook notifier from disk.
+     * Does not reload the main auction configuration.
+     */
+    public void reloadDiscordIntegrations() {
+        try {
+            this.discordIntegration = new DiscordIntegration(plugin);
+        } catch (Throwable t) {
+            plugin.getLogger().warning("Failed to reload Discord integration: " + t.getMessage());
+            this.discordIntegration = null;
+        }
+        try {
+            this.discordWebhookNotifier = new DiscordWebhookNotifier(plugin);
+        } catch (Throwable t) {
+            plugin.getLogger().warning("Failed to reload Discord webhook notifier: " + t.getMessage());
+            this.discordWebhookNotifier = null;
+        }
     }
 }

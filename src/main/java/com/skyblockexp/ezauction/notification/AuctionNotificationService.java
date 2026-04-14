@@ -40,6 +40,11 @@ public class AuctionNotificationService {
             String message = formatMessage(template, "item", describeItem(listing.item()), "price", transactionService.formatCurrency(listing.price()), "seller", org.bukkit.Bukkit.getOfflinePlayer(listing.sellerId()).getName(), "listingId", listing.id());
             di.sendMessageIfAllowed(listing.sellerId(), stripColor(message));
         }
+        com.skyblockexp.ezauction.integration.DiscordWebhookNotifier wh = null;
+        if (com.skyblockexp.ezauction.EzAuctionPlugin.getStaticRegistry() != null) wh = com.skyblockexp.ezauction.EzAuctionPlugin.getStaticRegistry().discordWebhookNotifier;
+        if (wh != null && wh.isEnabled() && wh.isEventEnabled("auction_end")) {
+            wh.sendAuctionEnd(describeItem(listing.item()), org.bukkit.Bukkit.getOfflinePlayer(listing.sellerId()).getName(), transactionService.formatCurrency(listing.price()), listing.id());
+        }
     }
 
     public void notifySellerExpiry(AuctionListing listing) {
@@ -59,6 +64,11 @@ public class AuctionNotificationService {
             if (template == null || template.isBlank()) template = backendMessages.notifications().sellerExpired();
             String message = formatMessage(template, "item", describeItem(listing.item()), "seller", org.bukkit.Bukkit.getOfflinePlayer(listing.sellerId()).getName(), "listingId", listing.id());
             di.sendMessageIfAllowed(listing.sellerId(), stripColor(message));
+        }
+        com.skyblockexp.ezauction.integration.DiscordWebhookNotifier wh = null;
+        if (com.skyblockexp.ezauction.EzAuctionPlugin.getStaticRegistry() != null) wh = com.skyblockexp.ezauction.EzAuctionPlugin.getStaticRegistry().discordWebhookNotifier;
+        if (wh != null && wh.isEnabled() && wh.isEventEnabled("auction_end")) {
+            wh.sendAuctionExpiry(describeItem(listing.item()), org.bukkit.Bukkit.getOfflinePlayer(listing.sellerId()).getName(), listing.id());
         }
     }
 
@@ -80,6 +90,11 @@ public class AuctionNotificationService {
             String message = formatMessage(template, "item", describeItem(listing.item()), "seller", org.bukkit.Bukkit.getOfflinePlayer(listing.sellerId()).getName(), "listingId", listing.id());
             di.sendMessageIfAllowed(listing.sellerId(), stripColor(message));
         }
+        com.skyblockexp.ezauction.integration.DiscordWebhookNotifier wh = null;
+        if (com.skyblockexp.ezauction.EzAuctionPlugin.getStaticRegistry() != null) wh = com.skyblockexp.ezauction.EzAuctionPlugin.getStaticRegistry().discordWebhookNotifier;
+        if (wh != null && wh.isEnabled() && wh.isEventEnabled("auction_cancel")) {
+            wh.sendAuctionCancel(describeItem(listing.item()), org.bukkit.Bukkit.getOfflinePlayer(listing.sellerId()).getName(), listing.id());
+        }
     }
 
     public void notifyOrderCreated(AuctionOrder order, Player buyer) {
@@ -97,6 +112,11 @@ public class AuctionNotificationService {
             if (template == null || template.isBlank()) template = backendMessages.notifications().sellerSold();
             String message = formatMessage(template, "item", describeItem(order.requestedItem()), "price", transactionService.formatCurrency(order.offeredPrice()), "seller", (seller != null ? seller.getName() : ""), "buyer", org.bukkit.Bukkit.getOfflinePlayer(order.buyerId()).getName());
             di.sendMessageIfAllowed(seller.getUniqueId(), stripColor(message));
+        }
+        com.skyblockexp.ezauction.integration.DiscordWebhookNotifier wh = null;
+        if (com.skyblockexp.ezauction.EzAuctionPlugin.getStaticRegistry() != null) wh = com.skyblockexp.ezauction.EzAuctionPlugin.getStaticRegistry().discordWebhookNotifier;
+        if (wh != null && wh.isEnabled() && wh.isEventEnabled("auction_end")) {
+            wh.sendAuctionEnd(describeItem(order.requestedItem()), seller.getName(), transactionService.formatCurrency(order.offeredPrice()), "order");
         }
     }
 
@@ -128,6 +148,14 @@ public class AuctionNotificationService {
             java.util.UUID uid = (seller != null) ? seller.getUniqueId() : listing.sellerId();
             di.sendMessageIfAllowed(uid, stripColor(message));
         }
+        com.skyblockexp.ezauction.integration.DiscordWebhookNotifier wh = null;
+        if (com.skyblockexp.ezauction.EzAuctionPlugin.getStaticRegistry() != null) wh = com.skyblockexp.ezauction.EzAuctionPlugin.getStaticRegistry().discordWebhookNotifier;
+        if (wh != null && wh.isEnabled() && wh.isEventEnabled("auction_start")) {
+            String sellerName = seller != null ? seller.getName() : org.bukkit.Bukkit.getOfflinePlayer(listing.sellerId()).getName();
+            String quantityStr = String.valueOf(listing.item() != null ? listing.item().getAmount() : 1);
+            String durationStr = duration != null ? com.skyblockexp.ezauction.util.DateUtil.formatDuration(duration) : "N/A";
+            wh.sendAuctionStart(describeItem(listing.item()), quantityStr, sellerName, transactionService.formatCurrency(listing.price()), durationStr, listing.id());
+        }
     }
 
     /**
@@ -154,6 +182,11 @@ public class AuctionNotificationService {
                 "amount", transactionService.formatCurrency(amount),
                 "listingId", listing.id());
             di.sendMessageIfAllowed(bidder.getUniqueId(), stripColor(message));
+        }
+        com.skyblockexp.ezauction.integration.DiscordWebhookNotifier wh = null;
+        if (com.skyblockexp.ezauction.EzAuctionPlugin.getStaticRegistry() != null) wh = com.skyblockexp.ezauction.EzAuctionPlugin.getStaticRegistry().discordWebhookNotifier;
+        if (wh != null && wh.isEnabled() && wh.isEventEnabled("auction_bid")) {
+            wh.sendAuctionBid(describeItem(listing.item()), bidder.getName(), transactionService.formatCurrency(amount), listing.id());
         }
     }
 
