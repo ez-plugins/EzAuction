@@ -28,18 +28,21 @@ public class ServiceSetupComponent {
         public final LiveAuctionService liveAuctionService;
         public final AuctionManager auctionManager;
         public final Map<UUID, List<org.bukkit.inventory.ItemStack>> pendingReturns;
+        public final com.skyblockexp.ezauction.integration.DiscordIntegration discordIntegration;
         public ServiceSetupResult(
             AuctionTransactionService transactionService,
             AuctionTransactionHistory transactionHistory,
             LiveAuctionService liveAuctionService,
             AuctionManager auctionManager,
             Map<UUID, List<org.bukkit.inventory.ItemStack>> pendingReturns
+            , com.skyblockexp.ezauction.integration.DiscordIntegration discordIntegration
         ) {
             this.transactionService = transactionService;
             this.transactionHistory = transactionHistory;
             this.liveAuctionService = liveAuctionService;
             this.auctionManager = auctionManager;
             this.pendingReturns = pendingReturns;
+            this.discordIntegration = discordIntegration;
         }
     }
 
@@ -83,7 +86,8 @@ public class ServiceSetupComponent {
         } else {
             listingLimitResolver = com.skyblockexp.ezauction.api.AuctionListingLimitResolver.useBaseLimit();
         }
-        com.skyblockexp.ezauction.notification.AuctionNotificationService notificationService = new com.skyblockexp.ezauction.notification.AuctionNotificationService(configuration.backendMessages(), transactionService);
+        com.skyblockexp.ezauction.integration.DiscordIntegration discordIntegration = new com.skyblockexp.ezauction.integration.DiscordIntegration(plugin);
+        com.skyblockexp.ezauction.notification.AuctionNotificationService notificationService = new com.skyblockexp.ezauction.notification.AuctionNotificationService(plugin, configuration.backendMessages(), transactionService);
         com.skyblockexp.ezauction.claim.AuctionClaimService claimService = new com.skyblockexp.ezauction.claim.AuctionClaimService(pendingReturns, configuration.backendMessages());
         com.skyblockexp.ezauction.history.AuctionTransactionHistoryService transactionHistoryService = new com.skyblockexp.ezauction.history.AuctionTransactionHistoryService(transactionHistory, plugin, configuration.backendMessages().fallback());
         com.skyblockexp.ezauction.service.AuctionListingService listingService = new com.skyblockexp.ezauction.service.AuctionListingService(
@@ -102,6 +106,6 @@ public class ServiceSetupComponent {
         AuctionManager auctionManager = new AuctionManager(plugin, listingService, orderService, returnService, expiryService, queryService, configuration, listingLimitResolver);
         auctionManager.enable();
         liveAuctionService.enable();
-        return new ServiceSetupResult(transactionService, transactionHistory, liveAuctionService, auctionManager, pendingReturns);
+        return new ServiceSetupResult(transactionService, transactionHistory, liveAuctionService, auctionManager, pendingReturns, discordIntegration);
     }
 }

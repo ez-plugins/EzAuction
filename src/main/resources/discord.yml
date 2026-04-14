@@ -1,0 +1,71 @@
+enabled: false
+# The Discord channel ID to send auction notifications to. Use numeric ID (snowflake).
+channel-id: null
+
+# Events to publish to Discord. Set to true to enable sending that event.
+events:
+  auction_start: true
+  auction_end: true
+  auction_bid: true
+  auction_cancel: true
+
+# Optional role requirement: when enabled, only listings/bids from players who have a linked
+# Discord account with the configured role will cause messages to be sent.
+role-required: false
+# Prefer using the role ID (snowflake). If set, this will be checked first.
+required-role-id: null
+# Optional role name fallback if you prefer names over IDs.
+required-role-name: null
+# Message templates support placeholders used by AuctionNotificationService.
+# Placeholders available:
+# - {item}: item description (e.g. "3x Diamond Sword")
+# - {price}: formatted price (total or per-item depending on event)
+# - {seller}: seller's username
+# - {buyer}: buyer's username
+# - {bidder}: bidder's username
+# - {amount}: bid amount
+# - {listingId}: the auction listing id
+# - {quantity}: item stack quantity
+# - {duration}: human-friendly duration (when listing started)
+message-format:
+  auction_start: "&aAuction started: {item} ({quantity}) listed by {seller} for {price} (id:{listingId})"
+  auction_end: "&bAuction ended: {item} sold for {price} to {buyer} (id:{listingId})"
+  auction_bid: "&eNew bid on {item}: {bidder} bid {amount} (id:{listingId})"
+  auction_cancel: "&cAuction cancelled: {item} by {seller} (id:{listingId})"
+
+# ============================================================
+# Discord Webhook Integration (no DiscordSRV required)
+# ============================================================
+# Set webhook.enabled to true and supply a valid webhook URL to
+# have EzAuction POST rich embed messages directly to Discord
+# whenever auction events occur.
+#
+# Obtain a webhook URL via:
+#   Discord channel Settings → Integrations → Webhooks → New Webhook → Copy Webhook URL
+# The URL must start with https://discord.com/api/webhooks/
+#
+# This feature is completely independent of the DiscordSRV section above.
+# Both can be active at the same time.
+webhook:
+  enabled: false
+  # Full Discord webhook URL. Keep this secret — treat it like a password.
+  url: null
+  # Override the display name shown in Discord (null = use webhook's configured name).
+  username: "EzAuction"
+  # Override the avatar URL shown in Discord (null = use webhook's configured avatar).
+  avatar-url: null
+  # Send rich Discord embeds (true) or plain text messages (false).
+  use-embeds: true
+  # Which auction events trigger a webhook message.
+  events:
+    auction_start: true
+    auction_end: true
+    auction_bid: true
+    auction_cancel: true
+  # Embed accent colours per event, expressed as a decimal integer.
+  # Tip: convert hex (#RRGGBB) at e.g. https://www.binaryhexconverter.com/hex-to-decimal-converter
+  embed-colors:
+    auction_start: 5763719    # #57F287  green
+    auction_end: 3447003      # #3498DB  blue
+    auction_bid: 16776960     # #FFFF00  yellow
+    auction_cancel: 15158332  # #E74C3C  red

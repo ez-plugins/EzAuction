@@ -66,4 +66,21 @@ public class DateUtil {
             return null;
         }
     }
+
+    public static String formatDuration(Duration duration) {
+        if (duration == null) return "0s";
+        long seconds = duration.getSeconds();
+        long days = seconds / 86400;
+        seconds %= 86400;
+        long hours = seconds / 3600;
+        seconds %= 3600;
+        long minutes = seconds / 60;
+        seconds %= 60;
+        StringBuilder sb = new StringBuilder();
+        if (days > 0) sb.append(days).append("d ");
+        if (hours > 0) sb.append(hours).append("h ");
+        if (minutes > 0) sb.append(minutes).append("m ");
+        if (seconds > 0 || sb.length() == 0) sb.append(seconds).append("s");
+        return sb.toString().trim();
+    }
 }
