@@ -14,9 +14,9 @@ public final class DiscordIntegration {
     private final String channelId;
     private final Map<String, Boolean> events;
     private final Map<String, String> templates;
-    private final boolean roleRequired;
-    private final String requiredRoleId;
-    private final String requiredRoleName;
+    private boolean roleRequired;
+    private String requiredRoleId;
+    private String requiredRoleName;
 
     public DiscordIntegration(JavaPlugin plugin) {
         this.plugin = plugin;

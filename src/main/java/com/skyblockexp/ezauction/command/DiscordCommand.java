@@ -1,5 +1,6 @@
 package com.skyblockexp.ezauction.command;
 
+import com.skyblockexp.ezauction.bootstrap.PluginRegistry;
 import com.skyblockexp.ezauction.integration.DiscordIntegration;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -50,7 +51,7 @@ public class DiscordCommand implements CommandExecutor, TabCompleter {
                 cfg.set("enabled", true);
                 cfg.save(new java.io.File(((org.bukkit.plugin.java.JavaPlugin)org.bukkit.Bukkit.getPluginManager().getPlugin("EzAuction")).getDataFolder(), "discord.yml"));
                 // reload integration in registry
-                com.skyblockexp.ezauction.PluginRegistry reg = com.skyblockexp.ezauction.EzAuctionPlugin.getStaticRegistry();
+                PluginRegistry reg = com.skyblockexp.ezauction.EzAuctionPlugin.getStaticRegistry();
                 if (reg != null) reg.discordIntegration = new com.skyblockexp.ezauction.integration.DiscordIntegration((org.bukkit.plugin.java.JavaPlugin)org.bukkit.Bukkit.getPluginManager().getPlugin("EzAuction"));
                 sender.sendMessage("Discord channel set to " + id + " and enabled.");
             } catch (Exception ex) {
@@ -64,7 +65,7 @@ public class DiscordCommand implements CommandExecutor, TabCompleter {
                 org.bukkit.configuration.file.YamlConfiguration cfg = loadDiscordConfig();
                 cfg.set("enabled", enable);
                 cfg.save(new java.io.File(((org.bukkit.plugin.java.JavaPlugin)org.bukkit.Bukkit.getPluginManager().getPlugin("EzAuction")).getDataFolder(), "discord.yml"));
-                com.skyblockexp.ezauction.PluginRegistry reg = com.skyblockexp.ezauction.EzAuctionPlugin.getStaticRegistry();
+                PluginRegistry reg = com.skyblockexp.ezauction.EzAuctionPlugin.getStaticRegistry();
                 if (reg != null) reg.discordIntegration = new com.skyblockexp.ezauction.integration.DiscordIntegration((org.bukkit.plugin.java.JavaPlugin)org.bukkit.Bukkit.getPluginManager().getPlugin("EzAuction"));
                 sender.sendMessage("Discord integration " + (enable ? "enabled" : "disabled") + ".");
             } catch (Exception ex) {
@@ -73,7 +74,7 @@ public class DiscordCommand implements CommandExecutor, TabCompleter {
             return true;
         }
         if ("reload".equals(sub)) {
-            com.skyblockexp.ezauction.PluginRegistry reg = com.skyblockexp.ezauction.EzAuctionPlugin.getStaticRegistry();
+            PluginRegistry reg = com.skyblockexp.ezauction.EzAuctionPlugin.getStaticRegistry();
             if (reg != null) reg.discordIntegration = new com.skyblockexp.ezauction.integration.DiscordIntegration((org.bukkit.plugin.java.JavaPlugin)org.bukkit.Bukkit.getPluginManager().getPlugin("EzAuction"));
             sender.sendMessage("Reloaded Discord configuration.");
             return true;
@@ -98,7 +99,7 @@ public class DiscordCommand implements CommandExecutor, TabCompleter {
                     org.bukkit.configuration.file.YamlConfiguration cfg = loadDiscordConfig();
                     cfg.set("required-role-id", id);
                     cfg.save(new java.io.File(((org.bukkit.plugin.java.JavaPlugin)org.bukkit.Bukkit.getPluginManager().getPlugin("EzAuction")).getDataFolder(), "discord.yml"));
-                    com.skyblockexp.ezauction.PluginRegistry reg = com.skyblockexp.ezauction.EzAuctionPlugin.getStaticRegistry();
+                    PluginRegistry reg = com.skyblockexp.ezauction.EzAuctionPlugin.getStaticRegistry();
                     if (reg != null) reg.discordIntegration = new com.skyblockexp.ezauction.integration.DiscordIntegration((org.bukkit.plugin.java.JavaPlugin)org.bukkit.Bukkit.getPluginManager().getPlugin("EzAuction"));
                     sender.sendMessage("Set required role ID to " + id);
                 } catch (Exception ex) {
@@ -112,7 +113,7 @@ public class DiscordCommand implements CommandExecutor, TabCompleter {
                     org.bukkit.configuration.file.YamlConfiguration cfg = loadDiscordConfig();
                     cfg.set("required-role-name", name);
                     cfg.save(new java.io.File(((org.bukkit.plugin.java.JavaPlugin)org.bukkit.Bukkit.getPluginManager().getPlugin("EzAuction")).getDataFolder(), "discord.yml"));
-                    com.skyblockexp.ezauction.PluginRegistry reg = com.skyblockexp.ezauction.EzAuctionPlugin.getStaticRegistry();
+                    PluginRegistry reg = com.skyblockexp.ezauction.EzAuctionPlugin.getStaticRegistry();
                     if (reg != null) reg.discordIntegration = new com.skyblockexp.ezauction.integration.DiscordIntegration((org.bukkit.plugin.java.JavaPlugin)org.bukkit.Bukkit.getPluginManager().getPlugin("EzAuction"));
                     sender.sendMessage("Set required role name to " + name);
                 } catch (Exception ex) {
@@ -126,7 +127,7 @@ public class DiscordCommand implements CommandExecutor, TabCompleter {
                     cfg.set("required-role-id", null);
                     cfg.set("required-role-name", null);
                     cfg.save(new java.io.File(((org.bukkit.plugin.java.JavaPlugin)org.bukkit.Bukkit.getPluginManager().getPlugin("EzAuction")).getDataFolder(), "discord.yml"));
-                    com.skyblockexp.ezauction.PluginRegistry reg = com.skyblockexp.ezauction.EzAuctionPlugin.getStaticRegistry();
+                    PluginRegistry reg = com.skyblockexp.ezauction.EzAuctionPlugin.getStaticRegistry();
                     if (reg != null) reg.discordIntegration = new com.skyblockexp.ezauction.integration.DiscordIntegration((org.bukkit.plugin.java.JavaPlugin)org.bukkit.Bukkit.getPluginManager().getPlugin("EzAuction"));
                     sender.sendMessage("Cleared required role settings.");
                 } catch (Exception ex) {
@@ -141,7 +142,7 @@ public class DiscordCommand implements CommandExecutor, TabCompleter {
                     org.bukkit.configuration.file.YamlConfiguration cfg = loadDiscordConfig();
                     cfg.set("role-required", val);
                     cfg.save(new java.io.File(((org.bukkit.plugin.java.JavaPlugin)org.bukkit.Bukkit.getPluginManager().getPlugin("EzAuction")).getDataFolder(), "discord.yml"));
-                    com.skyblockexp.ezauction.PluginRegistry reg = com.skyblockexp.ezauction.EzAuctionPlugin.getStaticRegistry();
+                    PluginRegistry reg = com.skyblockexp.ezauction.EzAuctionPlugin.getStaticRegistry();
                     if (reg != null) reg.discordIntegration = new com.skyblockexp.ezauction.integration.DiscordIntegration((org.bukkit.plugin.java.JavaPlugin)org.bukkit.Bukkit.getPluginManager().getPlugin("EzAuction"));
                     sender.sendMessage("Set role-required to " + val);
                 } catch (Exception ex) {

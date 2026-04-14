@@ -4,16 +4,9 @@ import com.skyblockexp.ezauction.bootstrap.PluginRegistry;
 import com.skyblockexp.ezauction.config.OrdersOnlyConfig;
 import com.skyblockexp.ezauction.bootstrap.PluginConfigs;
 import java.io.File;
-import java.util.Locale;
 import java.util.logging.Level;
-import net.milkbowl.vault.economy.Economy;
-import org.bukkit.command.PluginCommand;
 import org.bukkit.event.HandlerList;
-import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.RegisteredServiceProvider;
-import org.bukkit.plugin.ServicesManager;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bstats.bukkit.Metrics;
 
 /**
  * Main plugin class for EzAuction.
