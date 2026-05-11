@@ -152,3 +152,9 @@ backend:
     buyer-expired: "&eYour buy order for &b{item}&e has expired. Reserved funds were refunded."
   live:
     broadcast: "&6[Live Auction] &a{seller}&7 is auctioning &b{item}&7 for &6{price}&7."
+  team-auctions:
+    no-permission: "&cYou do not have permission to use team auctions."
+    disabled: "&cTeam auctions are not available on this server."
+    not-in-team: "&cYou must be in a team to create a team listing."
+    buyer-not-in-team: "&cYou must be a member of the seller's team to purchase this listing."
+    teams-unavailable: "&cTeam auctions are currently unavailable."

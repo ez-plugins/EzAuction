@@ -152,3 +152,9 @@ backend:
     buyer-expired: "&eTu orden de compra de &b{item}&e ha expirado. Los fondos reservados fueron reembolsados."
   live:
     broadcast: "&6[Subasta en Vivo] &a{seller}&7 está subastando &b{item}&7 por &6{price}&7."
+  team-auctions:
+    no-permission: "&cNo tienes permiso para usar las subastas de equipo."
+    disabled: "&cLas subastas de equipo no están disponibles en este servidor."
+    not-in-team: "&cDebes estar en un equipo para crear una publicación de equipo."
+    buyer-not-in-team: "&cDebes ser miembro del equipo del vendedor para comprar esta publicación."
+    teams-unavailable: "&cLas subastas de equipo no están disponibles actualmente."

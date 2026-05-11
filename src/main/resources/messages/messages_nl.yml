@@ -152,3 +152,9 @@ backend:
     buyer-expired: "&eJe kooporder voor &b{item}&e is verlopen. Gereserveerde fondsen zijn terugbetaald."
   live:
     broadcast: "&6[Live Veiling] &a{seller}&7 veilt &b{item}&7 voor &6{price}&7."
+  team-auctions:
+    no-permission: "&cJe hebt geen toestemming om teamveilingen te gebruiken."
+    disabled: "&cTeamveilingen zijn niet beschikbaar op deze server."
+    not-in-team: "&cJe moet in een team zitten om een teamvermelding aan te maken."
+    buyer-not-in-team: "&cJe moet lid zijn van het team van de verkoper om dit item te kopen."
+    teams-unavailable: "&cTeamveilingen zijn momenteel niet beschikbaar."
