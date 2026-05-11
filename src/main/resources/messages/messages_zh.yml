@@ -151,7 +151,8 @@ backend:
     buyer-delivery-failed: "&e无法交付订单物品。请检查你的背包。"
     buyer-expired: "&e你的求购订单 &b{item}&e 已过期。预留的资金已退还。"
   live:
-    broadcast: "&6[现场拍卖] &a{seller}&7 正在拍卖 &b{item}&7，当前价格 &6{price}&7。"  team-auctions:
+    broadcast: "&6[现场拍卖] &a{seller}&7 正在拍卖 &b{item}&7，当前价格 &6{price}&7。"
+  team-auctions:
     no-permission: "&c您没有权限使用队伍拍卖。"
     disabled: "&c本服务器未启用队伍拍卖。"
     not-in-team: "&c您必须加入队伍才能创建队伍拍卖。"
