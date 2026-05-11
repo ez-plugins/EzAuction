@@ -112,12 +112,15 @@ When `orders-only-mode` is enabled, all other auction commands are disabled.
 See the [docs/permissions.md](docs/permissions.md) for a full list.
 
 ## 📚 Documentation
-- [API Reference](docs/api.md): Public classes, methods, and code samples
-- [Event Reference](docs/events.md): All plugin events, listener registration, and event payloads
-- [Configuration Guide](docs/configuration.md): All config options explained
-- [Permissions](docs/permissions.md): All permissions and their usage
-- [Changelog](CHANGELOG.md): Version history and notable changes
-- [Full Documentation](docs/): Guides, advanced usage, and troubleshooting
+
+Full documentation is available at **[ez-plugins.github.io/ezauction](https://ez-plugins.github.io/ezauction)**.
+
+- [Getting Started](https://ez-plugins.github.io/ezauction/getting-started) - Installation and first setup
+- [Configuration](https://ez-plugins.github.io/ezauction/configuration) - All config files explained
+- [Commands & Permissions](https://ez-plugins.github.io/ezauction/reference/commands) - Full command and permission reference
+- [Developer API & Events](https://ez-plugins.github.io/ezauction/reference/api) - Public API and custom Bukkit events
+- [Integrations](https://ez-plugins.github.io/ezauction/integrations) - Discord, TeamsAPI, EzShops
+- [Changelog](CHANGELOG.md) - Version history and notable changes
 
 ## 🛠️ Usage Examples
 
