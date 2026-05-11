@@ -15,10 +15,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/). Version
 ![Team Auctions](https://i.ibb.co/vCYzR3R6/image.png)
 
 - **Team Auctions**: team-scoped listings visible and purchasable only by members of the seller's team.
-  - New command: `/auction team` — browse team listings (hidden when disabled or TeamsAPI absent).
-  - New command: `/auction team sell` — list held item as a team auction.
+  - New command: `/auction team` - browse team listings (hidden when disabled or TeamsAPI absent).
+  - New command: `/auction team sell` - list held item as a team auction.
   - `team-auctions.enabled` toggle in `auction.yml` (default `false`).
-  - `TeamsIntegration` facade — null-safe soft-dependency wrapper around [TeamsAPI 1.4.0](https://github.com/ez-plugins/teams-api).
+  - `TeamsIntegration` facade - null-safe soft-dependency wrapper around [TeamsAPI 1.4.0](https://github.com/ez-plugins/teams-api).
   - `AuctionListing.teamId` field persisted to both YAML and MySQL backends.
   - `AuctionListingService` team scope and `AuctionQueryService` team query, both guarded by the config flag.
   - `AuctionManager.createTeamListing()` and `listActiveTeamListings()`.
@@ -31,13 +31,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/). Version
 
 - Price-adjustment buttons replaced with coloured glass panes (lime = increase, red = decrease).
 - Second row of quantity-adjustment buttons (same glass style) to select how many of a stack to list.
-- `SellMenuState.quantity()` — tracks the chosen listing amount, clamped to `[1, item stack size]`.
-- `SellMenuInteractionConfiguration.quantityAdjustments` — configurable quantity-step list (default: `±1, ±8, ±16, ±64`).
+- `SellMenuState.quantity()` - tracks the chosen listing amount, clamped to `[1, item stack size]`.
+- `SellMenuInteractionConfiguration.quantityAdjustments` - configurable quantity-step list (default: `±1, ±8, ±16, ±64`).
 - `SellMenuLayoutConfiguration.quantityAdjustmentSlots` / `quantityDisplay` layout fields; inventory expanded from 27 to 36 slots to accommodate the extra row.
 
 ### Fixed
 
 - Price-adjustment button labels displayed "coins" instead of the configured currency symbol (`$` by default). Labels now use `formatCurrency()` consistently with the rest of the sell menu.
+- Chinese (`zh`) translation files: `gui-messages_zh.yml` had a duplicate `activity` preamble block and incorrect 4-space indentation; `messages_zh.yml` had `broadcast` and `team-auctions` merged onto one line and was missing a trailing newline; `orders-only.yml` had Windows CRLF line endings. All three files now pass YAML validation.
 
 ---
 
