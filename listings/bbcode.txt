@@ -125,14 +125,14 @@ holograms:
 
 [SIZE=4][B]Setup Guide[/B][/SIZE]
 [spoiler="Full Configuration Guide"]
-[B]Need more details?[/B] See the [URL='https://github.com/ez-plugins/EzAuction/blob/main/docs/configuration.md']full configuration guide[/URL] for all YAML, MySQL, menu, and advanced settings options.
+[B]Need more details?[/B] See the [URL='https://ez-plugins.github.io/ezauction/']full documentation[/URL] for all YAML, MySQL, menu, and advanced settings options.
 [/spoiler]
 [spoiler="Installation & Configuration"]
 [B]Requirements[/B]
 [table]
 [tr][th]Requirement[/th][th]Notes[/th][/tr]
-[tr][td]Java 17+[/td][td]Matches the Paper 1.21.4 API target used by EzAuction.[/td][/tr]
-[tr][td]Paper or Purpur 1.21+[/td][td]The plugin relies on modern Paper server APIs.[/td][/tr]
+[tr][td]Java 21+[/td][td]Matches the Paper 1.21+ API target used by EzAuction.[/td][/tr]
+[tr][td]Paper / Spigot / Purpur 1.21+[/td][td]The plugin relies on Paper-compatible server APIs.[/td][/tr]
 [tr][td]Vault[/td][td]Provides the economy bridge for deposits, buy orders, and payouts.[/td][/tr]
 [tr][td]Economy plugin (recommended: [URL='https://www.spigotmc.org/resources/1-21-ezeconomy-modern-vault-economy-plugin-for-minecraft-servers.130975/']EzEconomy[/URL])[/td][td]A Vault-compatible provider is required. EzEconomy is recommended for best compatibility and modern features.[/td][/tr]
 [tr][td]Optional: [URL='https://www.spigotmc.org/resources/1-21-%E2%9A%A0%EF%B8%8F-ezshops-%E2%9A%A0%EF%B8%8F-dynamic-shops-gui-player-shops-sell-hand-inv.129780/']EzShops[/URL][/td][td]Unlock live value overlays via [icode]values.mode[/icode] = [icode]ezshops-buy[/icode] or [icode]ezshops-sell[/icode].[/td][/tr]
