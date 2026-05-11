@@ -66,7 +66,7 @@ class AuctionMenuSortTest {
     private AuctionListing createListing(String id, Material material, int amount, double price, long minutesUntilExpiry) {
         ItemStack stack = new ItemStack(material, amount);
         long expiry = System.currentTimeMillis() + Duration.ofMinutes(minutesUntilExpiry).toMillis();
-        return new AuctionListing(id, UUID.randomUUID(), price, expiry, stack, 0.0D);
+        return new AuctionListing(id, UUID.randomUUID(), price, expiry, stack, 0.0D, null);
     }
 
     private AuctionOrder createOrder(String id, Material material, int amount, double offeredPrice, long minutesUntilExpiry) {

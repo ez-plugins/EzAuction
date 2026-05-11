@@ -94,7 +94,7 @@ class AuctionManagerTest {
         UUID buyerId = UUID.randomUUID();
         ItemStack item = new ItemStack(Material.DIAMOND, 1);
         AuctionListing listing = new AuctionListing("listing-1", sellerId, 100.0D,
-                System.currentTimeMillis() + Duration.ofMinutes(5).toMillis(), item, 10.0D);
+                System.currentTimeMillis() + Duration.ofMinutes(5).toMillis(), item, 10.0D, null);
 
         Player buyer = mock(Player.class);
         PlayerInventory buyerInventory = mock(PlayerInventory.class);
@@ -125,7 +125,7 @@ class AuctionManagerTest {
         UUID sellerId = UUID.randomUUID();
         ItemStack item = new ItemStack(Material.DIAMOND, 1);
         AuctionListing listing = new AuctionListing("listing-2", sellerId, 75.0D,
-                System.currentTimeMillis() + Duration.ofMinutes(5).toMillis(), item, 5.0D);
+                System.currentTimeMillis() + Duration.ofMinutes(5).toMillis(), item, 5.0D, null);
 
         when(transactionService.formatCurrency(anyDouble())).thenAnswer(invocation -> {
             double amount = invocation.getArgument(0);
@@ -155,7 +155,7 @@ class AuctionManagerTest {
         UUID sellerId = UUID.randomUUID();
         ItemStack item = new ItemStack(Material.DIAMOND, 1);
         AuctionListing listing = new AuctionListing("listing-3", sellerId, 50.0D,
-                System.currentTimeMillis() - Duration.ofMinutes(1).toMillis(), item, 4.0D);
+                System.currentTimeMillis() - Duration.ofMinutes(1).toMillis(), item, 4.0D, null);
 
         when(transactionService.formatCurrency(anyDouble())).thenAnswer(invocation -> {
             double amount = invocation.getArgument(0);
