@@ -6,7 +6,7 @@
 
 **EzAuction** is a modern, extensible Minecraft auction plugin for Bukkit/Spigot servers. It features a user-friendly GUI, robust API, and comprehensive event system for both server owners and plugin developers.
 
-**Version 2.0.0** introduced enhanced GUI navigation, detailed confirmation dialogs, and full compatibility with EzShops 2.0.0+. **Version 2.2.0** adds Team Auctions — team-scoped listings visible and purchasable only by your team, powered by the optional [TeamsAPI](https://github.com/ez-plugins/teams-api) soft-dependency.
+**Version 2.0.0** introduced enhanced GUI navigation, detailed confirmation dialogs, and full compatibility with EzShops 2.0.0+. **Version 2.2.0** adds Team Auctions, team-scoped listings visible and purchasable only by your team, powered by the optional [TeamsAPI](https://modrinth.com/plugin/teams-api) soft-dependency.
 
 ---
 
