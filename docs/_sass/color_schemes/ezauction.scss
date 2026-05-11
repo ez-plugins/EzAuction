@@ -1,4 +1,4 @@
-// EzAuction color scheme — gold/dark auction-house palette
+// EzAuction color scheme - gold/dark auction-house palette
 $yellow-000: #fff8e1;
 $yellow-100: #ffe599;
 $yellow-200: #f0c040;
@@ -8,7 +8,7 @@ $body-background-color: #0d1117;
 $sidebar-color: #111820;
 $search-background-color: #161f28;
 $table-background-color: #0f1820;
-$code-background-color: #111c25;
+$code-background-color: #1a2535;
 
 $body-text-color: #dce9f2;
 $body-heading-color: #fff8e8;
@@ -17,3 +17,29 @@ $nav-child-link-color: #c8d8e4;
 $link-color: #f0c040;
 $btn-primary-color: $yellow-300;
 $base-button-color: #1c2a38;
+
+// Remove the white text-shadow that Just the Docs applies to active nav items.
+// With a gold active colour on a dark sidebar the default white shadow reads poorly.
+.nav-list-item .nav-list-link.active {
+  text-shadow: none;
+}
+
+// Improve code block readability on the dark background.
+// Use a lighter near-white for inline and fenced code text.
+code {
+  color: #e8f4ff;
+}
+
+.highlight,
+div.highlighter-rouge {
+  background: $code-background-color;
+
+  // Token colours tuned for dark background legibility
+  .k, .kd, .kn, .kp, .kr, .kt { color: #c792ea; } // keywords - soft purple
+  .s, .s1, .s2, .sb, .sc, .sd, .se, .sh, .si, .ss, .sx { color: #c3e88d; } // strings - green
+  .m, .mf, .mh, .mi, .mo, .il { color: #f78c6c; } // numbers - orange
+  .c, .c1, .cm, .cs, .cp      { color: #546e7a; font-style: italic; } // comments - muted
+  .na, .nb, .nc, .nd, .ne, .nf, .nl, .nn, .nt, .nv, .vc, .vg, .vi { color: #82aaff; } // names/functions - blue
+  .o, .ow                     { color: #89ddff; } // operators - cyan
+  .p                          { color: #dce9f2; } // punctuation - body text colour
+}
