@@ -659,7 +659,7 @@ public class AuctionCommand implements CommandExecutor, TabCompleter {
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (args.length == 1) {
-            return filter(args[0], List.of("sell", "order", "cancel", "history", "claim", "live"));
+            return filter(args[0], List.of("sell", "order", "cancel", "history", "claim", "live", "team"));
         }
 
         if (args.length == 2 && args[0].equalsIgnoreCase("sell")) {
@@ -700,6 +700,13 @@ public class AuctionCommand implements CommandExecutor, TabCompleter {
 
         if (args.length == 2 && args[0].equalsIgnoreCase("history")) {
             return filter(args[1], List.of("buy", "sell"));
+        }
+
+        if (args.length == 2 && args[0].equalsIgnoreCase("team")) {
+            if (auctionManager.isTeamAuctionsAvailable() && sender.hasPermission("ezauction.auction.team.sell")) {
+                return filter(args[1], List.of("sell"));
+            }
+            return Collections.emptyList();
         }
 
         return Collections.emptyList();

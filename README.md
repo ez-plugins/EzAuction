@@ -116,6 +116,7 @@ See the [docs/permissions.md](docs/permissions.md) for a full list.
 - [Event Reference](docs/events.md): All plugin events, listener registration, and event payloads
 - [Configuration Guide](docs/configuration.md): All config options explained
 - [Permissions](docs/permissions.md): All permissions and their usage
+- [Changelog](CHANGELOG.md): Version history and notable changes
 - [Full Documentation](docs/): Guides, advanced usage, and troubleshooting
 
 ## 🛠️ Usage Examples
