@@ -18,9 +18,18 @@ $link-color: #f0c040;
 $btn-primary-color: $yellow-300;
 $base-button-color: #1c2a38;
 
-// Remove the white text-shadow that Just the Docs applies to active nav items.
-// With a gold active colour on a dark sidebar the default white shadow reads poorly.
-.nav-list-item .nav-list-link.active {
+// Override the default nav hover/active gradient.
+// Just the Docs uses a light #ebedf5 gradient that bleeds white over the dark sidebar.
+// Replace with a dark-sidebar-matching gold-tinted fade.
+.nav-list .nav-list-item .nav-list-link:hover,
+.nav-list .nav-list-item .nav-list-link.active {
+  color: $yellow-200;
+  background-image: linear-gradient(
+    -90deg,
+    #1e2d3d 0%,
+    rgba(30, 45, 61, 0.8) 80%,
+    rgba(30, 45, 61, 0) 100%
+  );
   text-shadow: none;
 }
 
