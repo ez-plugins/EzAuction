@@ -64,6 +64,7 @@ public class AuctionMenu implements Listener {
     private static final String ACTION_CLOSE = "close";
     private static final String ACTION_TOGGLE_LISTINGS = "toggle_listings";
     private static final String ACTION_TOGGLE_ORDERS = "toggle_orders";
+    private static final String ACTION_TOGGLE_TEAM_LISTINGS = "toggle_team_listings";
     private static final String ACTION_SEARCH = "search";
     private static final String ACTION_SORT = "sort";
     private static final String ACTION_SEARCH_TIPS = "search_tips";
@@ -81,6 +82,7 @@ public class AuctionMenu implements Listener {
     private final AuctionMenuConfiguration.ConfirmMenuConfiguration confirmConfig;
     private final AuctionMenuConfiguration.ToggleButtonConfiguration listingsToggleConfig;
     private final AuctionMenuConfiguration.ToggleButtonConfiguration ordersToggleConfig;
+    private final AuctionMenuConfiguration.ToggleButtonConfiguration teamListingsToggleConfig;
     private final AuctionMenuConfiguration.BrowserMenuConfiguration.SearchButtonConfiguration searchButtonConfig;
     private final AuctionMenuConfiguration.BrowserMenuConfiguration.SortButtonConfiguration sortButtonConfig;
     private final AuctionMenuConfiguration.BrowserMenuConfiguration.SearchTipsButtonConfiguration searchTipsButtonConfig;
@@ -125,6 +127,7 @@ public class AuctionMenu implements Listener {
         this.confirmConfig = Objects.requireNonNull(menuConfiguration.confirm(), "confirmConfig");
         this.listingsToggleConfig = this.browserConfig.listingsToggle();
         this.ordersToggleConfig = this.browserConfig.ordersToggle();
+        this.teamListingsToggleConfig = this.browserConfig.teamListingsToggle();
         this.searchButtonConfig = this.browserConfig.searchButton();
         this.sortButtonConfig = this.browserConfig.sortButton();
         this.searchTipsButtonConfig = this.browserConfig.searchTipsButton();
@@ -167,18 +170,27 @@ public class AuctionMenu implements Listener {
         openBrowser(player, BrowserView.LISTINGS, 0);
     }
 
-    private void openBrowser(Player player, BrowserView view, int page) {
+    public void openBrowser(Player player, BrowserView view, int page) {
+        openBrowserInternal(player, view, page);
+    }
+
+    private void openBrowserInternal(Player player, BrowserView view, int page) {
         UUID playerId = player.getUniqueId();
         String searchQuery = getSearchQuery(playerId);
         String normalizedQuery = searchQuery != null ? searchQuery.toLowerCase(Locale.ENGLISH) : null;
 
-        List<AuctionListing> listings = view == BrowserView.LISTINGS
-            ? new ArrayList<>(auctionManager.listActiveListings())
-            : Collections.emptyList();
+        List<AuctionListing> listings;
+        if (view == BrowserView.LISTINGS) {
+            listings = new ArrayList<>(auctionManager.listActiveListings());
+        } else if (view == BrowserView.TEAM_LISTINGS) {
+            listings = new ArrayList<>(auctionManager.listActiveTeamListings(player.getUniqueId()));
+        } else {
+            listings = Collections.emptyList();
+        }
         if (view == BrowserView.LISTINGS && auctionManager != null && auctionManager.getConfiguration() != null && auctionManager.getConfiguration().debug()) {
             System.out.println("[EzAuction][DEBUG] AuctionMenu.openBrowser: listings.size() = " + listings.size() + ", listings = " + listings);
         }
-        if (view == BrowserView.LISTINGS) {
+        if (view == BrowserView.LISTINGS || view == BrowserView.TEAM_LISTINGS) {
             filterListings(listings, normalizedQuery);
         }
         List<AuctionOrder> orders = view == BrowserView.ORDERS
@@ -190,14 +202,14 @@ public class AuctionMenu implements Listener {
 
         ListingSort listingSort = getListingSort(playerId);
         OrderSort orderSort = getOrderSort(playerId);
-        if (view == BrowserView.LISTINGS) {
+        if (view == BrowserView.LISTINGS || view == BrowserView.TEAM_LISTINGS) {
             listingSort.sort(listings);
         }
         if (view == BrowserView.ORDERS) {
             orderSort.sort(orders);
         }
 
-        int totalEntries = view == BrowserView.LISTINGS ? listings.size() : orders.size();
+        int totalEntries = (view == BrowserView.LISTINGS || view == BrowserView.TEAM_LISTINGS) ? listings.size() : orders.size();
         int entriesPerPage = Math.max(1, listingsPerPage);
         int totalPages = Math.max(1, (int) Math.ceil(totalEntries / (double) entriesPerPage));
         int currentPage = Math.max(0, Math.min(page, totalPages - 1));
@@ -219,13 +231,13 @@ public class AuctionMenu implements Listener {
                 emptyTitle = ChatColor.RED + "No Matches";
                 List<String> tempLore = new ArrayList<>();
                 tempLore.add(ChatColor.GRAY + "No "
-                        + (view == BrowserView.LISTINGS ? "listings" : "orders")
+                + ((view == BrowserView.LISTINGS || view == BrowserView.TEAM_LISTINGS) ? "listings" : "orders")
                         + " matched \"" + ChatColor.AQUA + formatSearchQueryForLore(searchQuery) + ChatColor.GRAY + "\".");
                 tempLore.add(ChatColor.YELLOW + "Right-click the search button to clear.");
                 lore = tempLore;
             } else {
-                emptyTitle = view == BrowserView.LISTINGS ? ChatColor.RED + "No Listings" : ChatColor.RED + "No Orders";
-                lore = view == BrowserView.LISTINGS
+                emptyTitle = (view == BrowserView.LISTINGS || view == BrowserView.TEAM_LISTINGS) ? ChatColor.RED + "No Listings" : ChatColor.RED + "No Orders";
+                lore = (view == BrowserView.LISTINGS || view == BrowserView.TEAM_LISTINGS)
                         ? List.of(ChatColor.GRAY + "No items are currently listed.")
                         : List.of(ChatColor.GRAY + "No buy orders are currently active.");
             }
@@ -236,14 +248,14 @@ public class AuctionMenu implements Listener {
         } else {
             int slot = 0;
             for (int index = startIndex; index < endIndex; index++) {
-                if (view == BrowserView.LISTINGS) {
+                if (view == BrowserView.LISTINGS || view == BrowserView.TEAM_LISTINGS) {
                     AuctionListing listing = listings.get(index);
                     ItemStack icon = decorateListing(listing, playerId);
                     if (icon == null) {
                         continue;
                     }
                     setPersistent(icon, actionKey, ACTION_LISTING);
-                    setPersistent(icon, actionTypeKey, BrowserView.LISTINGS.name());
+                    setPersistent(icon, actionTypeKey, view.name());
                     setPersistent(icon, listingKey, listing.id());
                     if (slot < inventory.getSize()) {
                         inventory.setItem(slot, icon);
@@ -309,6 +321,27 @@ public class AuctionMenu implements Listener {
             inventory.setItem(ordersToggleSlot, ordersToggle);
         }
 
+        // Show team-listings toggle at slot 50 when team auctions are available;
+        // otherwise fall back to the search tips button
+        boolean teamAvailable = auctionManager.isTeamAuctionsAvailable()
+                && player.hasPermission("ezauction.auction.team");
+        if (teamAvailable && teamListingsToggleConfig != null) {
+            ItemStack teamToggle = createToggleButton(view == BrowserView.TEAM_LISTINGS, teamListingsToggleConfig,
+                    ChatColor.AQUA + "Viewing Team Listings", ChatColor.YELLOW + "Click to browse your team's listings.");
+            setPersistent(teamToggle, actionKey, ACTION_TOGGLE_TEAM_LISTINGS);
+            int teamToggleSlot = teamListingsToggleConfig.slot();
+            if (teamToggleSlot >= 0 && teamToggleSlot < inventory.getSize()) {
+                inventory.setItem(teamToggleSlot, teamToggle);
+            }
+        } else if (searchTipsButtonConfig != null) {
+            ItemStack searchTipsButton = createSearchTipsButton();
+            setPersistent(searchTipsButton, actionKey, ACTION_SEARCH_TIPS);
+            int searchTipsSlot = searchTipsButtonConfig.slot();
+            if (searchTipsSlot >= 0 && searchTipsSlot < inventory.getSize()) {
+                inventory.setItem(searchTipsSlot, searchTipsButton);
+            }
+        }
+
         if (searchButtonConfig != null) {
             ItemStack searchButton = createSearchButton(view, searchQuery);
             setPersistent(searchButton, actionKey, ACTION_SEARCH);
@@ -324,15 +357,6 @@ public class AuctionMenu implements Listener {
             int sortSlot = sortButtonConfig.slot();
             if (sortSlot >= 0 && sortSlot < inventory.getSize()) {
                 inventory.setItem(sortSlot, sortButton);
-            }
-        }
-
-        if (searchTipsButtonConfig != null) {
-            ItemStack searchTipsButton = createSearchTipsButton();
-            setPersistent(searchTipsButton, actionKey, ACTION_SEARCH_TIPS);
-            int searchTipsSlot = searchTipsButtonConfig.slot();
-            if (searchTipsSlot >= 0 && searchTipsSlot < inventory.getSize()) {
-                inventory.setItem(searchTipsSlot, searchTipsButton);
             }
         }
 
@@ -531,6 +555,9 @@ public class AuctionMenu implements Listener {
         appendEstimatedValue(display, lore);
         appendShopPrice(display, lore);
         lore.add(ChatColor.GRAY + "Expires: " + ChatColor.YELLOW + DateUtil.formatDate(listing.expiryEpochMillis()));
+        if (listing.isTeamListing()) {
+            lore.add(ChatColor.AQUA + "[Team Listing]");
+        }
         lore.add(" ");
         if (isShulkerBox(display)) {
             lore.add(colorize(messages.shulkerPreviewHint()));
@@ -587,12 +614,7 @@ public class AuctionMenu implements Listener {
         if (listingId == null || listingId.isEmpty()) {
             return null;
         }
-        for (AuctionListing listing : auctionManager.listActiveListings()) {
-            if (listing.id().equalsIgnoreCase(listingId)) {
-                return listing;
-            }
-        }
-        return null;
+        return auctionManager.findListingById(listingId);
     }
 
     private AuctionOrder findOrder(String orderId) {
@@ -832,6 +854,13 @@ public class AuctionMenu implements Listener {
             runSync(() -> openBrowser(player, BrowserView.ORDERS, 0));
             return;
         }
+        if (ACTION_TOGGLE_TEAM_LISTINGS.equalsIgnoreCase(action)) {
+            if (!auctionManager.isTeamAuctionsAvailable() || !player.hasPermission("ezauction.auction.team")) {
+                return;
+            }
+            runSync(() -> openBrowser(player, BrowserView.TEAM_LISTINGS, 0));
+            return;
+        }
         if (ACTION_SEARCH.equalsIgnoreCase(action)) {
             handleSearchClick(player, holder, event);
             return;
@@ -980,7 +1009,7 @@ public class AuctionMenu implements Listener {
     private void handleSortClick(Player player, BrowserMenuHolder holder, InventoryClickEvent event) {
         UUID playerId = player.getUniqueId();
         boolean backwards = event.isRightClick();
-        if (holder.view() == BrowserView.LISTINGS) {
+        if (holder.view() == BrowserView.LISTINGS || holder.view() == BrowserView.TEAM_LISTINGS) {
             ListingSort current = getListingSort(playerId);
             ListingSort updated = backwards ? current.previous() : current.next();
             activeListingSorts.put(playerId, updated);

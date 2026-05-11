@@ -5,7 +5,7 @@ import org.bukkit.inventory.Inventory;
 
 public final class SellMenuHolder implements org.bukkit.inventory.InventoryHolder {
 
-    public enum Target { NORMAL, LIVE }
+    public enum Target { NORMAL, LIVE, TEAM }
 
     private final UUID owner;
     private final SellMenuState state;

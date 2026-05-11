@@ -141,6 +141,9 @@ public final class YamlAuctionStorage implements AuctionStorage {
             listingSection.set("expiry", listing.expiryEpochMillis());
             listingSection.set("deposit", listing.deposit());
             listingSection.set("item", listing.item());
+            if (listing.teamId() != null) {
+                listingSection.set("team-id", listing.teamId().toString());
+            }
         }
         ConfigurationSection ordersSection = configuration.createSection("orders");
         for (AuctionOrder order : orders) {
@@ -216,7 +219,16 @@ public final class YamlAuctionStorage implements AuctionStorage {
             plugin.getLogger().warning("Ignoring auction listing " + id + " because the item is invalid.");
             return null;
         }
-        return new AuctionListing(id, sellerId, price, expiry, item.clone(), deposit);
+        String teamIdRaw = section.getString("team-id", null);
+        UUID teamId = null;
+        if (teamIdRaw != null && !teamIdRaw.isEmpty()) {
+            try {
+                teamId = UUID.fromString(teamIdRaw);
+            } catch (IllegalArgumentException ex) {
+                plugin.getLogger().warning("Ignoring invalid team-id for listing " + id + ": " + teamIdRaw);
+            }
+        }
+        return new AuctionListing(id, sellerId, price, expiry, item.clone(), deposit, teamId);
     }
 
     private AuctionOrder loadOrder(String id, ConfigurationSection section) {

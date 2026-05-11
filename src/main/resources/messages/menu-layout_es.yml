@@ -29,6 +29,12 @@ browser:
       display-name: "&aÓrdenes de compra"
       lore:
         - "&7Explora las órdenes de compra activas."
+    team-listings:
+      slot: 50
+      material: SHIELD
+      display-name: "&bSubastas de equipo"
+      lore:
+        - "&7Explora las publicaciones de tu equipo."
 confirm:
   title: "&2Confirmar compra"
   size: 27

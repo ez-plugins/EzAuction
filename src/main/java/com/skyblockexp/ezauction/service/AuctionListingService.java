@@ -5,6 +5,7 @@ import com.skyblockexp.ezauction.*;
 import com.skyblockexp.ezauction.event.AuctionListingCreateEvent;
 import com.skyblockexp.ezauction.event.AuctionListingSellEvent;
 import com.skyblockexp.ezauction.event.AuctionListingSoldEvent;
+import com.skyblockexp.ezauction.integration.TeamsIntegration;
 import com.skyblockexp.ezauction.live.LiveAuctionService;
 import com.skyblockexp.ezauction.notification.AuctionNotificationService;
 import com.skyblockexp.ezauction.history.AuctionTransactionHistoryService;
@@ -39,6 +40,7 @@ public class AuctionListingService {
     private final AuctionTransactionHistoryService transactionHistoryService;
     private final Map<UUID, List<ItemStack>> pendingReturns;
     private final Map<String, AuctionOrder> orders; // Needed for persistence
+    private final TeamsIntegration teamsIntegration;
 
     public AuctionListingService(
             AuctionTransactionService transactionService,
@@ -54,6 +56,26 @@ public class AuctionListingService {
             Map<String, AuctionListing> listings,
             Map<String, AuctionOrder> orders
     ) {
+        this(transactionService, listingLimitResolver, configuration, listingRules, liveAuctionService,
+                persistenceManager, notificationService, claimService, transactionHistoryService,
+                pendingReturns, listings, orders, null);
+    }
+
+    public AuctionListingService(
+            AuctionTransactionService transactionService,
+            AuctionListingLimitResolver listingLimitResolver,
+            AuctionConfiguration configuration,
+            AuctionListingRules listingRules,
+            LiveAuctionService liveAuctionService,
+            AuctionPersistenceManager persistenceManager,
+            AuctionNotificationService notificationService,
+            AuctionClaimService claimService,
+            AuctionTransactionHistoryService transactionHistoryService,
+            Map<UUID, List<ItemStack>> pendingReturns,
+            Map<String, AuctionListing> listings,
+            Map<String, AuctionOrder> orders,
+            TeamsIntegration teamsIntegration
+    ) {
         this.listings = listings;
         this.transactionService = transactionService;
         this.listingLimitResolver = listingLimitResolver;
@@ -66,9 +88,20 @@ public class AuctionListingService {
         this.transactionHistoryService = transactionHistoryService;
         this.pendingReturns = pendingReturns;
         this.orders = orders;
+        this.teamsIntegration = teamsIntegration;
     }
 
     public AuctionOperationResult createListing(Player seller, ItemStack item, double price, Duration duration) {
+        return createListing(seller, item, price, duration, null);
+    }
+
+    /**
+     * Creates a new auction listing.
+     *
+     * @param teamId when non-null the listing is restricted to members of this team; pass
+     *               {@code null} for a global listing visible to everyone
+     */
+    public AuctionOperationResult createListing(Player seller, ItemStack item, double price, Duration duration, UUID teamId) {
                 if (configuration.debug()) {
                     System.out.println("[EzAuction][DEBUG] createListing called: seller=" + (seller != null ? seller.getName() : "null") + ", item=" + (item != null ? item.getType() : "null") + ", price=" + price + ", duration=" + duration);
                 }
@@ -77,6 +110,17 @@ public class AuctionListingService {
         }
         if (item == null || item.getType() == Material.AIR || item.getAmount() <= 0) {
             return AuctionOperationResult.failure("You must provide a valid item to list.");
+        }
+
+        // Team scope validation
+        if (teamId != null) {
+            if (teamsIntegration == null || !teamsIntegration.isAvailable()) {
+                return AuctionOperationResult.failure("Team auctions are not available on this server.");
+            }
+            Optional<UUID> sellerTeamId = teamsIntegration.getTeamId(seller.getUniqueId());
+            if (sellerTeamId.isEmpty() || !sellerTeamId.get().equals(teamId)) {
+                return AuctionOperationResult.failure("You are not a member of the specified team.");
+            }
         }
 
         AuctionListingCreateEvent event = new AuctionListingCreateEvent(seller, item, price);
@@ -140,7 +184,7 @@ public class AuctionListingService {
 
         String id = UUID.randomUUID().toString();
         long expiry = System.currentTimeMillis() + sanitizedDuration.toMillis();
-        AuctionListing listing = new AuctionListing(id, seller.getUniqueId(), normalizedPrice, expiry, listingItem, normalizedDeposit);
+        AuctionListing listing = new AuctionListing(id, seller.getUniqueId(), normalizedPrice, expiry, listingItem, normalizedDeposit, teamId);
         listings.put(id, listing);
                 if (configuration.debug()) {
                     System.out.println("[EzAuction][DEBUG] Listing added to map: id=" + id + ", listing=" + listing);
@@ -176,6 +220,16 @@ public class AuctionListingService {
         }
         if (listing.sellerId().equals(buyer.getUniqueId())) {
             return AuctionOperationResult.failure("You cannot purchase your own listing.");
+        }
+
+        // Team scope validation: buyer must be a member of the seller's team
+        if (listing.isTeamListing()) {
+            if (teamsIntegration == null || !teamsIntegration.isAvailable()) {
+                return AuctionOperationResult.failure("Team listings cannot be purchased: TeamsAPI is unavailable.");
+            }
+            if (!teamsIntegration.isSameTeam(listing.sellerId(), buyer.getUniqueId())) {
+                return AuctionOperationResult.failure("You must be a member of the seller's team to purchase this listing.");
+            }
         }
 
         // Fire AuctionListingSellEvent (cancellable) before sale

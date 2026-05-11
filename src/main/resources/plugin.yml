@@ -3,7 +3,7 @@ version: ${project.version}
 main: com.skyblockexp.ezauction.EzAuctionPlugin
 author: Shadow48402
 description: Standalone auction house plugin for EzAuction-powered Minecraft servers (requires Vault + economy provider).
-softdepend: [Vault, EzShops, SkyblockExperienceCommon, EzScoreboard, PlaceholderAPI, DiscordSRV]
+softdepend: [Vault, EzShops, SkyblockExperienceCommon, EzScoreboard, PlaceholderAPI, DiscordSRV, TeamsAPI]
 api-version: 1.13
 commands:
   auction:
@@ -78,6 +78,12 @@ permissions:
     default: op
   ezauction.auction.live:
     description: Allows players to view the live auction queue.
+    default: true
+  ezauction.auction.team:
+    description: Allows players to browse team-scoped auction listings.
+    default: true
+  ezauction.auction.team.sell:
+    description: Allows players to create team-scoped auction listings.
     default: true
   ezauction.hologram:
     description: Allows administrators to place and remove EzAuction holograms.

@@ -47,6 +47,7 @@ public class AuctionSellMenu {
     private static final String ACTION_DURATION_NEXT = "duration_next";
     private static final String ACTION_CONFIRM = "confirm";
     private static final String ACTION_CANCEL = "cancel";
+    private static final String ACTION_AMOUNT_ADJUST = "amount_adjust";
 
     private final JavaPlugin plugin;
     private final AuctionManager auctionManager;
@@ -56,6 +57,7 @@ public class AuctionSellMenu {
 
     private final String actionKey;
     private final String priceAdjustKey;
+    private final String amountAdjustKey;
     private final ItemTagStorage itemTagStorage;
 
     private final AuctionMenuInteractionConfiguration.SellMenuLayoutConfiguration layout;
@@ -70,6 +72,7 @@ public class AuctionSellMenu {
     private final Duration longestDurationOption;
     private final double defaultPrice;
     private final double[] priceAdjustments;
+    private final int[] amountAdjustments;
     private final SellMessages messages;
     private LiveAuctionManager liveAuctionManager; 
 
@@ -86,6 +89,7 @@ public class AuctionSellMenu {
         this.messages = messages != null ? messages : SellMessages.defaults();
         this.actionKey = "auction_sell_action";
         this.priceAdjustKey = "auction_sell_adjust";
+        this.amountAdjustKey = "auction_sell_amount";
         this.itemTagStorage = Objects.requireNonNull(itemTagStorage, "itemTagStorage");
         this.pendingPriceInputs = new ConcurrentHashMap<>();
         this.durationOptions = buildDurationOptions(listingRules, configuredDurationOptions);
@@ -104,7 +108,12 @@ public class AuctionSellMenu {
             Double value = adjustments.get(i);
             this.priceAdjustments[i] = value != null ? value.doubleValue() : 0.0D;
         }
-        
+        List<Integer> qtyAdjustments = interactions.quantityAdjustments();
+        this.amountAdjustments = new int[qtyAdjustments.size()];
+        for (int i = 0; i < qtyAdjustments.size(); i++) {
+            Integer value = qtyAdjustments.get(i);
+            this.amountAdjustments[i] = value != null ? value.intValue() : 0;
+        }
         this.liveAuctionManager = null;
     }
 
@@ -158,6 +167,13 @@ public class AuctionSellMenu {
     }
 
     /**
+     * Opens the sell menu for the team auction target.
+     */
+    public void openTeamSell(Player player) {
+        openSellMenu(player, SellMenuHolder.Target.TEAM);
+    }
+
+    /**
      * Opens the sell menu for the live auction target.
      * Used by the /liveauction sell command.
      */
@@ -186,10 +202,12 @@ public class AuctionSellMenu {
         applyFiller(inventory);
 
         placePriceAdjustmentButtons(inventory);
+        placeAmountAdjustmentButtons(inventory);
 
         ItemStack listingItem = holder.state().item();
         ItemMeta meta = listingItem.getItemMeta();
         List<String> lore = new ArrayList<>();
+        lore.add(ChatColor.GRAY + "Amount: " + ChatColor.AQUA + holder.state().quantity());
         lore.add(ChatColor.GRAY + "Listing Price: " + ChatColor.GOLD + formatPrice(holder.state().price()));
         Double recommended = holder.state().recommendedPrice();
         if (recommended != null) {
@@ -210,6 +228,9 @@ public class AuctionSellMenu {
 
         ItemStack priceDisplay = createPriceDisplay(holder);
         inventory.setItem(layout.priceDisplay().slot(), priceDisplay);
+
+        ItemStack quantityDisplay = createQuantityDisplay(holder);
+        inventory.setItem(layout.quantityDisplay().slot(), quantityDisplay);
 
         ItemStack durationDisplay = createDurationDisplay(holder);
         setPersistent(durationDisplay, actionKey, ACTION_DURATION_NEXT);
@@ -237,6 +258,19 @@ public class AuctionSellMenu {
             ItemStack button = createPriceAdjustButton(amount);
             setPersistent(button, actionKey, ACTION_PRICE_ADJUST);
             setPersistent(button, priceAdjustKey, amount);
+            inventory.setItem(slots[i], button);
+        }
+    }
+
+    private void placeAmountAdjustmentButtons(Inventory inventory) {
+        int[] adjustments = amountAdjustments;
+        int[] slots = layout.quantityAdjustmentSlots();
+        for (int i = 0; i < adjustments.length && i < slots.length; i++) {
+            int amount = adjustments[i];
+            if (amount == 0) continue;
+            ItemStack button = createAmountAdjustButton(amount);
+            setPersistent(button, actionKey, ACTION_AMOUNT_ADJUST);
+            setPersistent(button, amountAdjustKey, (double) amount);
             inventory.setItem(slots[i], button);
         }
     }
@@ -343,6 +377,7 @@ public class AuctionSellMenu {
             }
             List<String> lore = new ArrayList<>();
             lore.add(ChatColor.GRAY + "Item: " + ChatColor.AQUA + describeItem(holder.state().item()));
+            lore.add(ChatColor.GRAY + "Amount: " + ChatColor.AQUA + holder.state().quantity());
             lore.add(ChatColor.GRAY + "Price: " + ChatColor.GOLD + formatPrice(holder.state().price()));
             Double recommended = holder.state().recommendedPrice();
             if (recommended != null) {
@@ -385,37 +420,49 @@ public class AuctionSellMenu {
     private ItemStack createPriceAdjustButton(double amount) {
         boolean positive = amount > 0;
         double displayAmount = Math.abs(amount);
-        Material material;
-        if (displayAmount >= 1000.0D) {
-            material = positive ? Material.DIAMOND_BLOCK : Material.REDSTONE_BLOCK;
-        } else if (displayAmount >= 100.0D) {
-            material = positive ? Material.DIAMOND : Material.REDSTONE;
-        } else if (displayAmount >= 10.0D) {
-            material = positive ? Material.EMERALD_BLOCK : Material.REDSTONE_TORCH;
-        } else {
-            material = positive ? Material.EMERALD : Material.COAL;
-        }
+        Material material = positive ? Material.LIME_STAINED_GLASS_PANE : Material.RED_STAINED_GLASS_PANE;
         String prefix = positive ? ChatColor.GREEN + "+" : ChatColor.RED + "-";
-        String display = prefix + formatNumber(displayAmount);
-        ItemStack item = material != null ? new ItemStack(material) : null;
-        if (item == null) {
-            item = new ItemStack(Material.STONE);
-        }
+        ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            meta.setDisplayName(display + ChatColor.GOLD + " coins");
-            List<String> lore = new ArrayList<>();
-            lore.add(ChatColor.GRAY + "Adjust the price by this amount.");
-            meta.setLore(lore);
+            meta.setDisplayName(prefix + formatPrice(displayAmount));
+            meta.setLore(List.of(ChatColor.GRAY + "Adjust the price by this amount."));
             item.setItemMeta(meta);
         }
         return item;
     }
 
-    private String formatNumber(double amount) {
-        if (amount >= 1000.0D && amount % 1000.0D == 0) return String.format(Locale.ENGLISH, "%.0fk", amount / 1000.0D);
-        if (amount % 1.0D == 0) return String.format(Locale.ENGLISH, "%.0f", amount);
-        return String.format(Locale.ENGLISH, "%.2f", amount);
+    private ItemStack createAmountAdjustButton(int amount) {
+        boolean positive = amount > 0;
+        Material material = positive ? Material.CYAN_STAINED_GLASS_PANE : Material.BLUE_STAINED_GLASS_PANE;
+        String prefix = positive ? ChatColor.AQUA + "+" : ChatColor.DARK_AQUA + "-";
+        ItemStack item = new ItemStack(material);
+        ItemMeta meta = item.getItemMeta();
+        if (meta != null) {
+            meta.setDisplayName(prefix + Math.abs(amount));
+            meta.setLore(List.of(ChatColor.GRAY + "Adjust the listing amount by this value."));
+            item.setItemMeta(meta);
+        }
+        return item;
+    }
+
+    private ItemStack createQuantityDisplay(SellMenuHolder holder) {
+        AuctionMenuInteractionConfiguration.ButtonLayoutConfiguration definition = layout.quantityDisplay();
+        ItemStack item = createBaseItem(definition.button());
+        ItemMeta meta = item.getItemMeta();
+        if (meta != null) {
+            String displayName = definition.button().displayName();
+            if (displayName != null && !displayName.isEmpty()) {
+                meta.setDisplayName(colorize(displayName));
+            }
+            List<String> lore = new ArrayList<>();
+            lore.add(ChatColor.GRAY + "Amount: " + ChatColor.AQUA + holder.state().quantity());
+            lore.add(ChatColor.GRAY + "Stack Size: " + ChatColor.AQUA + holder.state().item().getAmount());
+            lore.add(ChatColor.GRAY + "Use the buttons around to adjust.");
+            meta.setLore(lore);
+            item.setItemMeta(meta);
+        }
+        return item;
     }
 
     private void applyFiller(Inventory inventory) {
@@ -518,6 +565,7 @@ public class AuctionSellMenu {
 
         switch (action) {
             case ACTION_PRICE_ADJUST -> handlePriceAdjust(player, holder, clicked);
+            case ACTION_AMOUNT_ADJUST -> handleAmountAdjust(holder, clicked);
             case ACTION_PRICE_CUSTOM -> startCustomPriceInput(player, holder);
             case ACTION_DURATION_NEXT -> {
                 holder.state().cycleDuration();
@@ -548,6 +596,13 @@ public class AuctionSellMenu {
        Internal helpers
        ========================= */
 
+    private void handleAmountAdjust(SellMenuHolder holder, ItemStack clicked) {
+        Double raw = itemTagStorage.getDouble(clicked, amountAdjustKey);
+        if (raw == null) return;
+        holder.state().adjustQuantity(raw.intValue());
+        refreshMenu(holder);
+    }
+
     private void handlePriceAdjust(Player player, SellMenuHolder holder, ItemStack clicked) {
         Double amount = itemTagStorage.getDouble(clicked, priceAdjustKey);
         if (amount == null) return;
@@ -569,10 +624,13 @@ public class AuctionSellMenu {
         AuctionOperationResult result;
         if (holder.target() == Target.LIVE && liveAuctionManager != null) {
             // LIVE flow
-            result = liveAuctionManager.createLiveListing(player, state.item(), state.price(), state.duration());
+            result = liveAuctionManager.createLiveListing(player, state.itemWithQuantity(), state.price(), state.duration());
+        } else if (holder.target() == Target.TEAM) {
+            // Team auction flow
+            result = auctionManager.createTeamListing(player, state.itemWithQuantity(), state.price(), state.duration());
         } else {
             // Normal AH flow (fallback)
-            result = auctionManager.createListing(player, state.item(), state.price(), state.duration());
+            result = auctionManager.createListing(player, state.itemWithQuantity(), state.price(), state.duration());
         }
 
         if (result.message() != null && !result.message().isEmpty()) {

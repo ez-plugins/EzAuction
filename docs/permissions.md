@@ -16,6 +16,8 @@ This document lists all permissions available in the EzAuction plugin, their def
 | `ezauction.bypass.duration`   | op        | Bypass max listing duration restriction.          |
 | `ezauction.hologram`          | true      | Allows use of auction hologram commands.          |
 | `ezauction.live`              | true      | Allows use of live auction commands.              |
+| `ezauction.auction.team`      | true      | Allows browsing team-scoped auction listings.     |
+| `ezauction.auction.team.sell` | true      | Allows creating team-scoped auction listings.     |
 
 ## Permission Details
 
@@ -29,6 +31,8 @@ This document lists all permissions available in the EzAuction plugin, their def
 - **`ezauction.bypass.duration`**: Allows a player to set listing durations beyond the configured maximum.
 - **`ezauction.hologram`**: Allows use of commands related to auction holograms (if enabled).
 - **`ezauction.live`**: Allows use of live auction features and commands.
+- **`ezauction.auction.team`**: Required to browse the team auction view. Players without this permission will not see the team toggle button.
+- **`ezauction.auction.team.sell`**: Required to create team-scoped listings via `/auction team sell`. Requires TeamsAPI soft-dependency.
 
 ## Example Usage
 

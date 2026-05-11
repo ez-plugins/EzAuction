@@ -121,7 +121,8 @@ public final class LiveAuctionManager {
                 normalizedPrice,
                 expiry,
                 listingItem,
-                normalizedDeposit
+                normalizedDeposit,
+                null
         );
 
         // Enqueue to LIVE (announces / queues depending on config)

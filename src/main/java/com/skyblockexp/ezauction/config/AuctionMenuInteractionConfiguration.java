@@ -346,21 +346,24 @@ public final class AuctionMenuInteractionConfiguration {
     public static final class SellMenuLayoutConfiguration {
 
         private static final String DEFAULT_TITLE = "&2Create Auction Listing";
-        private static final int DEFAULT_SIZE = 27;
+        private static final int DEFAULT_SIZE = 36;
         private static final MenuButtonDefinition DEFAULT_FILLER =
                 MenuButtonDefinition.of(Material.GRAY_STAINED_GLASS_PANE, "&8 ");
-        private static final int DEFAULT_LISTING_SLOT = 11;
+        private static final int DEFAULT_LISTING_SLOT = 20;
         private static final ButtonLayoutConfiguration DEFAULT_PRICE_DISPLAY =
-                ButtonLayoutConfiguration.of(13, MenuButtonDefinition.of(Material.SUNFLOWER, "&6Listing Price"));
+                ButtonLayoutConfiguration.of(22, MenuButtonDefinition.of(Material.SUNFLOWER, "&6Listing Price"));
         private static final ButtonLayoutConfiguration DEFAULT_DURATION_DISPLAY =
-                ButtonLayoutConfiguration.of(15, MenuButtonDefinition.of(Material.CLOCK, "&eListing Duration"));
+                ButtonLayoutConfiguration.of(24, MenuButtonDefinition.of(Material.CLOCK, "&eListing Duration"));
         private static final ButtonLayoutConfiguration DEFAULT_CUSTOM_PRICE =
-                ButtonLayoutConfiguration.of(16, MenuButtonDefinition.of(Material.WRITABLE_BOOK, "&bCustom Price"));
+                ButtonLayoutConfiguration.of(25, MenuButtonDefinition.of(Material.WRITABLE_BOOK, "&bCustom Price"));
         private static final ButtonLayoutConfiguration DEFAULT_CONFIRM_BUTTON =
-                ButtonLayoutConfiguration.of(22, MenuButtonDefinition.of(Material.LIME_CONCRETE, "&aCreate Listing"));
+                ButtonLayoutConfiguration.of(31, MenuButtonDefinition.of(Material.LIME_CONCRETE, "&aCreate Listing"));
         private static final ButtonLayoutConfiguration DEFAULT_CANCEL_BUTTON =
-                ButtonLayoutConfiguration.of(24, MenuButtonDefinition.of(Material.RED_CONCRETE, "&cCancel"));
+                ButtonLayoutConfiguration.of(33, MenuButtonDefinition.of(Material.RED_CONCRETE, "&cCancel"));
         private static final int[] DEFAULT_PRICE_ADJUST_SLOTS = new int[] {0, 1, 2, 3, 5, 6, 7, 8};
+        private static final int[] DEFAULT_QUANTITY_ADJUST_SLOTS = new int[] {9, 10, 11, 12, 14, 15, 16, 17};
+        private static final ButtonLayoutConfiguration DEFAULT_QUANTITY_DISPLAY =
+                ButtonLayoutConfiguration.of(13, MenuButtonDefinition.of(Material.CHEST, "&bListing Amount"));
         private static final SellMenuLayoutConfiguration DEFAULT = new SellMenuLayoutConfiguration(
                 DEFAULT_TITLE,
                 DEFAULT_SIZE,
@@ -371,7 +374,9 @@ public final class AuctionMenuInteractionConfiguration {
                 DEFAULT_CUSTOM_PRICE,
                 DEFAULT_CONFIRM_BUTTON,
                 DEFAULT_CANCEL_BUTTON,
-                DEFAULT_PRICE_ADJUST_SLOTS);
+                DEFAULT_PRICE_ADJUST_SLOTS,
+                DEFAULT_QUANTITY_ADJUST_SLOTS,
+                DEFAULT_QUANTITY_DISPLAY);
 
         private final String title;
         private final int size;
@@ -383,11 +388,14 @@ public final class AuctionMenuInteractionConfiguration {
         private final ButtonLayoutConfiguration confirmButton;
         private final ButtonLayoutConfiguration cancelButton;
         private final int[] priceAdjustmentSlots;
+        private final int[] quantityAdjustmentSlots;
+        private final ButtonLayoutConfiguration quantityDisplay;
 
         private SellMenuLayoutConfiguration(String title, int size, MenuButtonDefinition filler, int listingSlot,
                 ButtonLayoutConfiguration priceDisplay, ButtonLayoutConfiguration durationDisplay,
                 ButtonLayoutConfiguration customPrice, ButtonLayoutConfiguration confirmButton,
-                ButtonLayoutConfiguration cancelButton, int[] priceAdjustmentSlots) {
+                ButtonLayoutConfiguration cancelButton, int[] priceAdjustmentSlots,
+                int[] quantityAdjustmentSlots, ButtonLayoutConfiguration quantityDisplay) {
             this.title = title != null ? title : DEFAULT_TITLE;
             int sanitizedSize = sanitizeInventorySize(size, DEFAULT_SIZE);
             this.size = sanitizedSize;
@@ -402,6 +410,10 @@ public final class AuctionMenuInteractionConfiguration {
             this.cancelButton = ButtonLayoutConfiguration.normalize(cancelButton, DEFAULT_CANCEL_BUTTON, sanitizedSize);
             this.priceAdjustmentSlots = sanitizeSlotsArray(priceAdjustmentSlots, sanitizedSize,
                     DEFAULT_PRICE_ADJUST_SLOTS);
+            this.quantityAdjustmentSlots = sanitizeSlotsArray(quantityAdjustmentSlots, sanitizedSize,
+                    DEFAULT_QUANTITY_ADJUST_SLOTS);
+            this.quantityDisplay = ButtonLayoutConfiguration.normalize(quantityDisplay, DEFAULT_QUANTITY_DISPLAY,
+                    sanitizedSize);
         }
 
         public static SellMenuLayoutConfiguration defaults() {
@@ -431,8 +443,12 @@ public final class AuctionMenuInteractionConfiguration {
                     section.getConfigurationSection("cancel"), DEFAULT_CANCEL_BUTTON, size);
             int[] priceAdjustSlots = sanitizeSlots(section.getList("price-adjust.slots"), size,
                     DEFAULT_PRICE_ADJUST_SLOTS);
+            int[] quantityAdjustSlots = sanitizeSlots(section.getList("quantity-adjust.slots"), size,
+                    DEFAULT_QUANTITY_ADJUST_SLOTS);
+            ButtonLayoutConfiguration quantityDisplay = ButtonLayoutConfiguration.from(
+                    section.getConfigurationSection("quantity-display"), DEFAULT_QUANTITY_DISPLAY, size);
             return new SellMenuLayoutConfiguration(title, size, filler, listingSlot, priceDisplay, durationDisplay,
-                    customPrice, confirm, cancel, priceAdjustSlots);
+                    customPrice, confirm, cancel, priceAdjustSlots, quantityAdjustSlots, quantityDisplay);
         }
 
         public String title() {
@@ -475,6 +491,14 @@ public final class AuctionMenuInteractionConfiguration {
             return priceAdjustmentSlots.clone();
         }
 
+        public int[] quantityAdjustmentSlots() {
+            return quantityAdjustmentSlots.clone();
+        }
+
+        public ButtonLayoutConfiguration quantityDisplay() {
+            return quantityDisplay;
+        }
+
         @Override
         public String toString() {
             return "SellMenuLayoutConfiguration{"
@@ -488,6 +512,8 @@ public final class AuctionMenuInteractionConfiguration {
                     + ", confirmButton=" + confirmButton
                     + ", cancelButton=" + cancelButton
                     + ", priceAdjustmentSlots=" + Arrays.toString(priceAdjustmentSlots)
+                    + ", quantityAdjustmentSlots=" + Arrays.toString(quantityAdjustmentSlots)
+                    + ", quantityDisplay=" + quantityDisplay
                     + '}';
         }
 
@@ -508,14 +534,17 @@ public final class AuctionMenuInteractionConfiguration {
                     && Objects.equals(customPrice, that.customPrice)
                     && Objects.equals(confirmButton, that.confirmButton)
                     && Objects.equals(cancelButton, that.cancelButton)
-                    && Arrays.equals(priceAdjustmentSlots, that.priceAdjustmentSlots);
+                    && Arrays.equals(priceAdjustmentSlots, that.priceAdjustmentSlots)
+                    && Arrays.equals(quantityAdjustmentSlots, that.quantityAdjustmentSlots)
+                    && Objects.equals(quantityDisplay, that.quantityDisplay);
         }
 
         @Override
         public int hashCode() {
             int result = Objects.hash(title, size, filler, listingSlot, priceDisplay, durationDisplay, customPrice,
-                    confirmButton, cancelButton);
+                    confirmButton, cancelButton, quantityDisplay);
             result = 31 * result + Arrays.hashCode(priceAdjustmentSlots);
+            result = 31 * result + Arrays.hashCode(quantityAdjustmentSlots);
             return result;
         }
     }
@@ -528,15 +557,18 @@ public final class AuctionMenuInteractionConfiguration {
         private static final double DEFAULT_PRICE = 100.0D;
         private static final List<Double> DEFAULT_ADJUSTMENTS = List.of(-1000.0D, -100.0D, -10.0D, -1.0D, 1.0D, 10.0D,
                 100.0D, 1000.0D);
+        private static final List<Integer> DEFAULT_QUANTITY_ADJUSTMENTS = List.of(-64, -16, -8, -1, 1, 8, 16, 64);
 
         private final double defaultPrice;
         private final List<Double> priceAdjustments;
+        private final List<Integer> quantityAdjustments;
         private final SellMenuLayoutConfiguration layout;
 
         private SellMenuInteractionConfiguration(double defaultPrice, List<Double> priceAdjustments,
-                SellMenuLayoutConfiguration layout) {
+                List<Integer> quantityAdjustments, SellMenuLayoutConfiguration layout) {
             this.defaultPrice = defaultPrice;
             this.priceAdjustments = priceAdjustments;
+            this.quantityAdjustments = quantityAdjustments;
             this.layout = layout != null ? layout : SellMenuLayoutConfiguration.defaults();
         }
 
@@ -546,6 +578,10 @@ public final class AuctionMenuInteractionConfiguration {
 
         public List<Double> priceAdjustments() {
             return priceAdjustments;
+        }
+
+        public List<Integer> quantityAdjustments() {
+            return quantityAdjustments;
         }
 
         public SellMenuLayoutConfiguration layout() {
@@ -564,9 +600,10 @@ public final class AuctionMenuInteractionConfiguration {
                 }
             }
             List<Double> adjustments = sanitizePriceAdjustments(section.getList("price-adjustments"));
+            List<Integer> quantityAdjustments = sanitizeQuantityAdjustments(section.getList("quantity-adjustments"));
             SellMenuLayoutConfiguration layout = SellMenuLayoutConfiguration
                     .from(section.getConfigurationSection("layout"));
-            return new SellMenuInteractionConfiguration(defaultPrice, adjustments, layout);
+            return new SellMenuInteractionConfiguration(defaultPrice, adjustments, quantityAdjustments, layout);
         }
 
         private static List<Double> sanitizePriceAdjustments(List<?> rawValues) {
@@ -586,9 +623,26 @@ public final class AuctionMenuInteractionConfiguration {
             return List.copyOf(parsed);
         }
 
+        private static List<Integer> sanitizeQuantityAdjustments(List<?> rawValues) {
+            if (rawValues == null || rawValues.isEmpty()) {
+                return DEFAULT_QUANTITY_ADJUSTMENTS;
+            }
+            List<Integer> parsed = new ArrayList<>();
+            for (Object rawValue : rawValues) {
+                Integer parsedValue = parseInteger(rawValue);
+                if (parsedValue != null && parsedValue != 0) {
+                    parsed.add(parsedValue);
+                }
+            }
+            if (parsed.isEmpty()) {
+                return DEFAULT_QUANTITY_ADJUSTMENTS;
+            }
+            return List.copyOf(parsed);
+        }
+
         private static SellMenuInteractionConfiguration defaults() {
             return new SellMenuInteractionConfiguration(DEFAULT_PRICE, DEFAULT_ADJUSTMENTS,
-                    SellMenuLayoutConfiguration.defaults());
+                    DEFAULT_QUANTITY_ADJUSTMENTS, SellMenuLayoutConfiguration.defaults());
         }
 
         @Override
@@ -596,6 +650,7 @@ public final class AuctionMenuInteractionConfiguration {
             return "SellMenuInteractionConfiguration{"
                     + "defaultPrice=" + defaultPrice
                     + ", priceAdjustments=" + priceAdjustments
+                    + ", quantityAdjustments=" + quantityAdjustments
                     + ", layout=" + layout
                     + '}';
         }
@@ -610,12 +665,13 @@ public final class AuctionMenuInteractionConfiguration {
             }
             return Double.compare(that.defaultPrice, defaultPrice) == 0
                     && Objects.equals(priceAdjustments, that.priceAdjustments)
+                    && Objects.equals(quantityAdjustments, that.quantityAdjustments)
                     && Objects.equals(layout, that.layout);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(defaultPrice, priceAdjustments, layout);
+            return Objects.hash(defaultPrice, priceAdjustments, quantityAdjustments, layout);
         }
     }
 

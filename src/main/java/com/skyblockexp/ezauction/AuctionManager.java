@@ -4,6 +4,7 @@ import com.skyblockexp.ezauction.api.AuctionListingLimitResolver;
 import com.skyblockexp.ezauction.config.AuctionConfiguration;
 import com.skyblockexp.ezauction.config.AuctionBackendMessages;
 import com.skyblockexp.ezauction.config.AuctionListingRules;
+import com.skyblockexp.ezauction.integration.TeamsIntegration;
 import com.skyblockexp.ezauction.live.LiveAuctionEntry;
 import com.skyblockexp.ezauction.live.LiveAuctionService;
 import com.skyblockexp.ezauction.storage.AuctionStorage;
@@ -42,6 +43,8 @@ public class AuctionManager {
     // Config and resolver for listing limits
     private final AuctionConfiguration configuration;
     private final AuctionListingLimitResolver listingLimitResolver;
+    // Optional TeamsAPI integration
+    private final TeamsIntegration teamsIntegration;
 
     public AuctionManager(JavaPlugin plugin,
                          AuctionListingService listingService,
@@ -51,6 +54,19 @@ public class AuctionManager {
                          AuctionQueryService queryService,
                          AuctionConfiguration configuration,
                          AuctionListingLimitResolver listingLimitResolver) {
+        this(plugin, listingService, orderService, returnService, expiryService, queryService,
+                configuration, listingLimitResolver, null);
+    }
+
+    public AuctionManager(JavaPlugin plugin,
+                         AuctionListingService listingService,
+                         AuctionOrderService orderService,
+                         AuctionReturnService returnService,
+                         AuctionExpiryService expiryService,
+                         AuctionQueryService queryService,
+                         AuctionConfiguration configuration,
+                         AuctionListingLimitResolver listingLimitResolver,
+                         TeamsIntegration teamsIntegration) {
         this.plugin = plugin;
         this.listingService = listingService;
         this.orderService = orderService;
@@ -59,6 +75,7 @@ public class AuctionManager {
         this.queryService = queryService;
         this.configuration = configuration;
         this.listingLimitResolver = listingLimitResolver;
+        this.teamsIntegration = teamsIntegration;
     }
 
     /**
@@ -378,4 +395,58 @@ public class AuctionManager {
         }
         return result;
     }
-}
+
+    /**
+     * Returns active listings scoped to the team of the given player.
+     * Returns an empty list if the player is not in a team, team auctions are disabled,
+     * or TeamsAPI is unavailable.
+     *
+     * @param viewerId the UUID of the viewing player
+     * @return an unmodifiable list of team-scoped active listings
+     */
+    public List<AuctionListing> listActiveTeamListings(UUID viewerId) {
+        return queryService.listActiveTeamListings(viewerId);
+    }
+
+    /**
+     * Creates a team-scoped listing for the given seller.
+     * The listing will only be visible and purchasable by members of the seller's team.
+     *
+     * @param seller   the player creating the listing
+     * @param item     the item to list
+     * @param price    the listing price
+     * @param duration the duration
+     * @return the operation result
+     */
+    public AuctionOperationResult createTeamListing(Player seller, ItemStack item, double price, Duration duration) {
+        if (!isTeamAuctionsAvailable()) {
+            return AuctionOperationResult.failure("Team auctions are not available on this server.");
+        }
+        UUID teamId = teamsIntegration.getTeamId(seller.getUniqueId()).orElse(null);
+        if (teamId == null) {
+            return AuctionOperationResult.failure("You must be in a team to create a team listing.");
+        }
+        return listingService.createListing(seller, item, price, duration, teamId);
+    }
+
+    /**
+     * Returns {@code true} when team auctions are both enabled in config and TeamsAPI is available.
+     *
+     * @return {@code true} if team auctions can be used
+     */
+    public boolean isTeamAuctionsAvailable() {
+        return teamsIntegration != null
+                && teamsIntegration.isAvailable()
+                && configuration != null
+                && configuration.teamAuctionsEnabled();
+    }
+
+    /**
+     * Finds a listing by id regardless of team scope.
+     *
+     * @param listingId the listing id
+     * @return the listing, or {@code null} if not found
+     */
+    public AuctionListing findListingById(String listingId) {
+        return queryService.findListingById(listingId);
+    }}

@@ -173,4 +173,20 @@ Version 2.0.0 adds support for EzShops 2.0.0+ while maintaining backwards compat
 
 ---
 
+## Team Auctions (`auction.yml`)
+
+Requires the [TeamsAPI](https://github.com/ez-plugins/teams-api) soft-dependency to be installed on the server. When the soft-dependency is absent or the toggle is off, the feature degrades gracefully — the GUI button is hidden and all team-auction commands are disabled.
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| `team-auctions.enabled` | boolean | `true` | Master toggle. Set to `false` to disable team-scoped auction listings server-wide. The GUI toggle button is also hidden when TeamsAPI is unavailable at runtime. |
+
+When `team-auctions.enabled` is `true` **and** TeamsAPI is present at runtime:
+
+- A **Team Auctions** toggle button appears in the browser GUI (configurable via `menu-layout_*.yml` under `toggles.team-listings`, default slot 50).
+- Players can use `/auction team` to browse their team's listings and `/auction team sell` to create a team-scoped listing.
+- Team listings are hidden from the global browse view and visible only to members of the seller's team.
+
+---
+
 For further help, see the README or open an issue on GitHub.
