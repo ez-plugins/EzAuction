@@ -53,6 +53,12 @@ browser:
       display-name: "&aBuy Orders"
       lore:
         - "&7Browse active buy orders."
+    team-listings:
+      slot: 50
+      material: SHIELD
+      display-name: "&bTeam Auctions"
+      lore:
+        - "&7Browse your team's listings."
 confirm:
   title: "&2Confirm Purchase"
   size: 27

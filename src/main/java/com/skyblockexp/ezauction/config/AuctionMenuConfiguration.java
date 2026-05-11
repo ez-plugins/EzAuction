@@ -22,6 +22,7 @@ public final class AuctionMenuConfiguration {
     private static final int DEFAULT_BROWSER_EMPTY_LISTING_SLOT = 22;
     private static final int DEFAULT_BROWSER_LISTINGS_TOGGLE_SLOT = 46;
     private static final int DEFAULT_BROWSER_ORDERS_TOGGLE_SLOT = 52;
+    private static final int DEFAULT_BROWSER_TEAM_LISTINGS_TOGGLE_SLOT = 50;
         private static final ToggleButtonConfiguration DEFAULT_BROWSER_LISTINGS_TOGGLE =
             new ToggleButtonConfiguration(
                 DEFAULT_BROWSER_LISTINGS_TOGGLE_SLOT,
@@ -36,6 +37,13 @@ public final class AuctionMenuConfiguration {
                     Material.PAPER,
                     "&aBuy Orders",
                     List.of("&7Browse active buy orders.")));
+        private static final ToggleButtonConfiguration DEFAULT_BROWSER_TEAM_LISTINGS_TOGGLE =
+            new ToggleButtonConfiguration(
+                DEFAULT_BROWSER_TEAM_LISTINGS_TOGGLE_SLOT,
+                new MenuButtonConfiguration(
+                    Material.SHIELD,
+                    "&bTeam Auctions",
+                    List.of("&7Browse your team's listings.")));
         private static final BrowserMenuConfiguration.SearchButtonConfiguration DEFAULT_BROWSER_SEARCH_BUTTON =
             new BrowserMenuConfiguration.SearchButtonConfiguration(
                 48,
@@ -97,6 +105,7 @@ public final class AuctionMenuConfiguration {
             DEFAULT_BROWSER_EMPTY_LISTING_SLOT,
             DEFAULT_BROWSER_LISTINGS_TOGGLE,
             DEFAULT_BROWSER_ORDERS_TOGGLE,
+            DEFAULT_BROWSER_TEAM_LISTINGS_TOGGLE,
             DEFAULT_BROWSER_SEARCH_BUTTON,
             DEFAULT_BROWSER_SORT_BUTTON,
             DEFAULT_BROWSER_SEARCH_TIPS_BUTTON,
@@ -316,6 +325,7 @@ public final class AuctionMenuConfiguration {
         private final int emptyListingSlot;
         private final ToggleButtonConfiguration listingsToggle;
         private final ToggleButtonConfiguration ordersToggle;
+        private final ToggleButtonConfiguration teamListingsToggle;
         private final SearchButtonConfiguration searchButton;
         private final SortButtonConfiguration sortButton;
         private final SearchTipsButtonConfiguration searchTipsButton;
@@ -323,7 +333,8 @@ public final class AuctionMenuConfiguration {
 
         private BrowserMenuConfiguration(String title, int size, MenuButtonConfiguration filler, int previousSlot,
                 int closeSlot, int nextSlot, int emptyListingSlot, ToggleButtonConfiguration listingsToggle,
-                ToggleButtonConfiguration ordersToggle, SearchButtonConfiguration searchButton,
+                ToggleButtonConfiguration ordersToggle, ToggleButtonConfiguration teamListingsToggle,
+                SearchButtonConfiguration searchButton,
                 SortButtonConfiguration sortButton, SearchTipsButtonConfiguration searchTipsButton,
                 ClaimsButtonConfiguration claimsButton) {
             this.title = title != null ? title : DEFAULT_BROWSER_TITLE;
@@ -336,6 +347,7 @@ public final class AuctionMenuConfiguration {
             this.emptyListingSlot = sanitizeSlot(emptyListingSlot, sanitizedSize, DEFAULT_BROWSER_EMPTY_LISTING_SLOT);
             this.listingsToggle = sanitizeToggle(listingsToggle, sanitizedSize, DEFAULT_BROWSER_LISTINGS_TOGGLE);
             this.ordersToggle = sanitizeToggle(ordersToggle, sanitizedSize, DEFAULT_BROWSER_ORDERS_TOGGLE);
+            this.teamListingsToggle = sanitizeToggle(teamListingsToggle, sanitizedSize, DEFAULT_BROWSER_TEAM_LISTINGS_TOGGLE);
             this.searchButton = sanitizeSearchButton(searchButton, sanitizedSize, DEFAULT_BROWSER_SEARCH_BUTTON);
             this.sortButton = sanitizeSortButton(sortButton, sanitizedSize, DEFAULT_BROWSER_SORT_BUTTON);
             this.searchTipsButton = searchTipsButton != null ? searchTipsButton : DEFAULT_BROWSER_SEARCH_TIPS_BUTTON;
@@ -363,6 +375,8 @@ public final class AuctionMenuConfiguration {
                     section.getConfigurationSection("toggles.listings"), size, DEFAULT_BROWSER.listingsToggle);
             ToggleButtonConfiguration ordersToggle = ToggleButtonConfiguration.from(
                     section.getConfigurationSection("toggles.orders"), size, DEFAULT_BROWSER.ordersToggle);
+            ToggleButtonConfiguration teamListingsToggle = ToggleButtonConfiguration.from(
+                    section.getConfigurationSection("toggles.team-listings"), size, DEFAULT_BROWSER.teamListingsToggle);
             SearchButtonConfiguration searchButton = SearchButtonConfiguration.from(
                     section.getConfigurationSection("search"), size, DEFAULT_BROWSER.searchButton);
             SortButtonConfiguration sortButton = SortButtonConfiguration.from(
@@ -372,7 +386,7 @@ public final class AuctionMenuConfiguration {
             ClaimsButtonConfiguration claimsButton = ClaimsButtonConfiguration.from(
                     section.getConfigurationSection("claims"), size, DEFAULT_BROWSER.claimsButton);
             return new BrowserMenuConfiguration(title, size, filler, previous, close, next, emptySlot, listingsToggle,
-                    ordersToggle, searchButton, sortButton, searchTipsButton, claimsButton);
+                    ordersToggle, teamListingsToggle, searchButton, sortButton, searchTipsButton, claimsButton);
         }
 
         public String title() {
@@ -411,6 +425,10 @@ public final class AuctionMenuConfiguration {
             return ordersToggle;
         }
 
+        public ToggleButtonConfiguration teamListingsToggle() {
+            return teamListingsToggle;
+        }
+
         public SearchButtonConfiguration searchButton() {
             return searchButton;
         }
@@ -439,6 +457,7 @@ public final class AuctionMenuConfiguration {
                     + ", emptyListingSlot=" + emptyListingSlot
                     + ", listingsToggle=" + listingsToggle
                     + ", ordersToggle=" + ordersToggle
+                    + ", teamListingsToggle=" + teamListingsToggle
                     + ", searchButton=" + searchButton
                     + ", sortButton=" + sortButton
                     + ", searchTipsButton=" + searchTipsButton
@@ -463,6 +482,7 @@ public final class AuctionMenuConfiguration {
                     && Objects.equals(filler, that.filler)
                     && Objects.equals(listingsToggle, that.listingsToggle)
                     && Objects.equals(ordersToggle, that.ordersToggle)
+                    && Objects.equals(teamListingsToggle, that.teamListingsToggle)
                     && Objects.equals(searchButton, that.searchButton)
                     && Objects.equals(sortButton, that.sortButton)
                     && Objects.equals(searchTipsButton, that.searchTipsButton)
@@ -472,7 +492,7 @@ public final class AuctionMenuConfiguration {
         @Override
         public int hashCode() {
             return Objects.hash(title, size, filler, previousSlot, closeSlot, nextSlot, emptyListingSlot, listingsToggle,
-                    ordersToggle, searchButton, sortButton, searchTipsButton, claimsButton);
+                    ordersToggle, teamListingsToggle, searchButton, sortButton, searchTipsButton, claimsButton);
         }
 
         public static final class SearchButtonConfiguration {

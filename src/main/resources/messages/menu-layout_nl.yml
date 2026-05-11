@@ -29,6 +29,12 @@ browser:
       display-name: "&aAankooporders"
       lore:
         - "&7Bekijk actieve aankooporders."
+    team-listings:
+      slot: 50
+      material: SHIELD
+      display-name: "&bTeamveilingen"
+      lore:
+        - "&7Bekijk de aanbiedingen van je team."
 confirm:
   title: "&2Bevestig aankoop"
   size: 27

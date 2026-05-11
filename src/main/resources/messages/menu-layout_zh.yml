@@ -30,6 +30,12 @@ browser:
       display-name: "&a求购订单"
       lore:
         - "&7浏览进行中的求购订单。"
+    team-listings:
+      slot: 50
+      material: SHIELD
+      display-name: "&b队伍拍卖"
+      lore:
+        - "&7浏览你队伍的拍卖品。"
 confirm:
   title: "&2确认购买"
   size: 27

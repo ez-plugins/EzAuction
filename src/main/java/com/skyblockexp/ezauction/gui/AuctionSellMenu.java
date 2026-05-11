@@ -158,6 +158,13 @@ public class AuctionSellMenu {
     }
 
     /**
+     * Opens the sell menu for the team auction target.
+     */
+    public void openTeamSell(Player player) {
+        openSellMenu(player, SellMenuHolder.Target.TEAM);
+    }
+
+    /**
      * Opens the sell menu for the live auction target.
      * Used by the /liveauction sell command.
      */
@@ -570,6 +577,9 @@ public class AuctionSellMenu {
         if (holder.target() == Target.LIVE && liveAuctionManager != null) {
             // LIVE flow
             result = liveAuctionManager.createLiveListing(player, state.item(), state.price(), state.duration());
+        } else if (holder.target() == Target.TEAM) {
+            // Team auction flow
+            result = auctionManager.createTeamListing(player, state.item(), state.price(), state.duration());
         } else {
             // Normal AH flow (fallback)
             result = auctionManager.createListing(player, state.item(), state.price(), state.duration());
