@@ -71,8 +71,15 @@ public class MysqlAuctionListingStorage implements AuctionStorage, DistributedAu
                     + "price DOUBLE NOT NULL,"
                     + "expiry BIGINT NOT NULL,"
                     + "deposit DOUBLE NOT NULL,"
-                    + "item LONGTEXT NOT NULL"
+                    + "item LONGTEXT NOT NULL,"
+                    + "team_uuid CHAR(36) NULL"
                     + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+            // Migration: add team_uuid column to existing tables that pre-date team auctions
+            try {
+                statement.executeUpdate("ALTER TABLE `" + listingsTable + "` ADD COLUMN team_uuid CHAR(36) NULL");
+            } catch (SQLException ignored) {
+                // Column already exists — safe to ignore
+            }
             statement.executeUpdate("CREATE TABLE IF NOT EXISTS `" + ordersTable + "` ("
                     + "id VARCHAR(36) NOT NULL PRIMARY KEY,"
                     + "buyer_uuid CHAR(36) NOT NULL,"
@@ -108,7 +115,7 @@ public class MysqlAuctionListingStorage implements AuctionStorage, DistributedAu
         if (!isReady()) {
             return AuctionStorageSnapshot.empty();
         }
-        String listingsQuery = "SELECT id, seller_uuid, price, expiry, deposit, item FROM `" + listingsTable + "`";
+        String listingsQuery = "SELECT id, seller_uuid, price, expiry, deposit, item, team_uuid FROM `" + listingsTable + "`";
         try (Connection connection = getConnection();
                 PreparedStatement statement = connection.prepareStatement(listingsQuery);
                 ResultSet resultSet = statement.executeQuery()) {
@@ -129,7 +136,7 @@ public class MysqlAuctionListingStorage implements AuctionStorage, DistributedAu
                 if (item == null || item.getType() == Material.AIR || item.getAmount() <= 0) {
                     continue;
                 }
-                listings.put(id, new AuctionListing(id, sellerId, price, expiry, item, deposit));
+                listings.put(id, new AuctionListing(id, sellerId, price, expiry, item, deposit, parseUuid(resultSet.getString("team_uuid"))));
             }
         } catch (SQLException ex) {
             logger.log(Level.SEVERE,
@@ -238,12 +245,13 @@ public class MysqlAuctionListingStorage implements AuctionStorage, DistributedAu
             return;
         }
         String insert = "INSERT INTO `" + listingsTable
-                + "` (id, seller_uuid, price, expiry, deposit, item) VALUES (?, ?, ?, ?, ?, ?)"
+                + "` (id, seller_uuid, price, expiry, deposit, item, team_uuid) VALUES (?, ?, ?, ?, ?, ?, ?)"
                 + " ON DUPLICATE KEY UPDATE seller_uuid = VALUES(seller_uuid),"
                 + " price = VALUES(price),"
                 + " expiry = VALUES(expiry),"
                 + " deposit = VALUES(deposit),"
-                + " item = VALUES(item)";
+                + " item = VALUES(item),"
+                + " team_uuid = VALUES(team_uuid)";
         try (Connection connection = getConnection();
                 PreparedStatement statement = connection.prepareStatement(insert)) {
             statement.setString(1, listing.id());
@@ -252,6 +260,7 @@ public class MysqlAuctionListingStorage implements AuctionStorage, DistributedAu
             statement.setLong(4, listing.expiryEpochMillis());
             statement.setDouble(5, listing.deposit());
             statement.setString(6, ItemStackSerialization.serialize(listing.item(), logger));
+            statement.setString(7, listing.teamId() != null ? listing.teamId().toString() : null);
             statement.executeUpdate();
         } catch (SQLException ex) {
             logger.log(Level.SEVERE,
