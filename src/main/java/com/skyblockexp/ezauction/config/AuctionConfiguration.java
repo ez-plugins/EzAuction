@@ -11,6 +11,7 @@ import java.util.Objects;
 
 public final class AuctionConfiguration {
     private final boolean debug;
+    private final boolean teamAuctionsEnabled;
 
     private final int baseListingLimit;
     private final AuctionStorageConfiguration storageConfiguration;
@@ -34,6 +35,20 @@ public final class AuctionConfiguration {
             AuctionHologramConfiguration hologramConfiguration,
             LiveAuctionConfiguration liveAuctionConfiguration, List<Duration> durationOptions,
             boolean debug) {
+        this(baseListingLimit, storageConfiguration, listingRules, menuConfiguration, menuInteractionConfiguration,
+                valueConfiguration, messageConfiguration, backendMessages, commandMessageConfiguration,
+                hologramConfiguration, liveAuctionConfiguration, durationOptions, debug, true);
+    }
+
+        public AuctionConfiguration(int baseListingLimit, AuctionStorageConfiguration storageConfiguration,
+            AuctionListingRules listingRules, AuctionMenuConfiguration menuConfiguration,
+            AuctionMenuInteractionConfiguration menuInteractionConfiguration,
+            AuctionValueConfiguration valueConfiguration, AuctionMessageConfiguration messageConfiguration,
+            AuctionBackendMessages backendMessages,
+            AuctionCommandMessageConfiguration commandMessageConfiguration,
+            AuctionHologramConfiguration hologramConfiguration,
+            LiveAuctionConfiguration liveAuctionConfiguration, List<Duration> durationOptions,
+            boolean debug, boolean teamAuctionsEnabled) {
         this.baseListingLimit = Math.max(0, baseListingLimit);
         this.storageConfiguration = storageConfiguration != null
                 ? storageConfiguration
@@ -61,10 +76,15 @@ public final class AuctionConfiguration {
                 : LiveAuctionConfiguration.defaults();
         this.durationOptions = sanitizeDurationOptions(durationOptions);
         this.debug = debug;
+        this.teamAuctionsEnabled = teamAuctionsEnabled;
     }
 
     public boolean debug() {
         return debug;
+    }
+
+    public boolean teamAuctionsEnabled() {
+        return teamAuctionsEnabled;
     }
 
     public int baseListingLimit() {
@@ -120,7 +140,7 @@ public final class AuctionConfiguration {
                 AuctionMenuConfiguration.defaults(), AuctionMenuInteractionConfiguration.defaults(),
                 AuctionValueConfiguration.defaults(), AuctionMessageConfiguration.defaults(),
                 AuctionBackendMessages.defaults(), AuctionCommandMessageConfiguration.defaults(),
-                AuctionHologramConfiguration.defaults(), LiveAuctionConfiguration.defaults(), List.of(), false);
+                AuctionHologramConfiguration.defaults(), LiveAuctionConfiguration.defaults(), List.of(), false, true);
     }
 
     /**

@@ -38,3 +38,6 @@ live-auctions:
 
 history-gui:
   enabled: true # Set to false to disable the auction history GUI and related commands.
+
+team-auctions:
+  enabled: true # Set to false to disable team-scoped auction listings.

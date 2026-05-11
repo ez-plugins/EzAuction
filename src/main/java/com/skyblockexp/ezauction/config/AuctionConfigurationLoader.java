@@ -88,11 +88,12 @@ public final class AuctionConfigurationLoader {
         ConfigurationSection liveAuctionSection = getSection(baseConfiguration, "live-auctions");
         LiveAuctionConfiguration liveAuctionConfiguration = LiveAuctionConfiguration.from(liveAuctionSection);
 
+        boolean debug = baseConfiguration != null && baseConfiguration.isBoolean("debug") && baseConfiguration.getBoolean("debug");
+        boolean teamAuctionsEnabled = baseConfiguration == null || baseConfiguration.getBoolean("team-auctions.enabled", true);
         AuctionConfiguration result = new AuctionConfiguration(baseLimit, storageConfiguration, listingRules,
                 menuConfiguration, menuInteractionConfiguration, valueConfiguration, messageConfiguration,
                 backendMessages, commandMessageConfiguration, hologramConfiguration, liveAuctionConfiguration,
-                durationOptions,
-                baseConfiguration != null && baseConfiguration.isBoolean("debug") ? baseConfiguration.getBoolean("debug") : false);
+                durationOptions, debug, teamAuctionsEnabled);
         plugin.getLogger().log(Level.CONFIG, "Loaded auction configuration: {0}", result);
         return result;
     }
