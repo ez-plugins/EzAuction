@@ -60,7 +60,7 @@ jobs:
       - name: Resolve built artifact
         id: artifact
         run: |
-          ARTIFACT="$(ls target/ezauction-*.jar \
+          ARTIFACT="$(ls target/*.jar \
             | grep -v 'original' | head -n 1)"
           if [ -z "$ARTIFACT" ]; then
             echo "No release JAR found in target/" >&2
