@@ -1,0 +1,202 @@
+name: Release
+
+"on":
+  workflow_dispatch:
+    inputs:
+      version:
+        description: >-
+          Release version (for example: 2.2.0).
+          Leave empty to use pom version without -SNAPSHOT.
+        required: false
+        type: string
+      prerelease:
+        description: "Mark GitHub release as pre-release"
+        required: true
+        default: false
+        type: boolean
+      publish_modrinth:
+        description: "Publish to Modrinth"
+        required: true
+        default: true
+        type: boolean
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    name: Build, Changelog, Release, Publish
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+
+      - name: Resolve release version
+        id: version
+        run: |
+          INPUT_VERSION="${{ github.event.inputs.version }}"
+          if [ -n "$INPUT_VERSION" ]; then
+            RELEASE_VERSION="$INPUT_VERSION"
+          else
+            POM_VERSION="$(mvn -q help:evaluate \
+              -Dexpression=project.version -DforceStdout)"
+            RELEASE_VERSION="${POM_VERSION%-SNAPSHOT}"
+          fi
+          TAG="v${RELEASE_VERSION}"
+          echo "release_version=$RELEASE_VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Build and test
+        run: mvn --batch-mode --no-transfer-progress clean verify
+
+      - name: Resolve built artifact
+        id: artifact
+        run: |
+          ARTIFACT="$(ls target/ezauction-*.jar \
+            | grep -v 'original' | head -n 1)"
+          if [ -z "$ARTIFACT" ]; then
+            echo "No release JAR found in target/" >&2
+            exit 1
+          fi
+          echo "path=$ARTIFACT" >> "$GITHUB_OUTPUT"
+
+      - name: Extract changelog entry
+        id: changelog
+        shell: bash
+        run: |
+          VERSION="${{ steps.version.outputs.release_version }}"
+          if [ ! -f CHANGELOG.md ]; then
+            echo "CHANGELOG.md not found." >&2
+            exit 1
+          fi
+
+          awk -v ver="$VERSION" '
+            BEGIN { in_section=0; found=0 }
+            /^## \[/ {
+              if (in_section==1) exit
+              if ($0 ~ "^## \\[" ver "\\]") { in_section=1; found=1; next }
+            }
+            {
+              if (in_section==1) print
+            }
+            END {
+              if (found==0) exit 2
+            }
+          ' CHANGELOG.md > RELEASE_NOTES.tmp || true
+
+          if [ ! -s RELEASE_NOTES.tmp ]; then
+            awk '
+              BEGIN { in_unreleased=0; found=0 }
+              /^## \[/ {
+                if (in_unreleased==1) exit
+                if ($0 ~ /^## \[Unreleased\]/) {
+                  in_unreleased=1; found=1; next
+                }
+              }
+              {
+                if (in_unreleased==1) print
+              }
+              END {
+                if (found==0) exit 2
+              }
+            ' CHANGELOG.md > RELEASE_NOTES.tmp || true
+          fi
+
+          if [ ! -s RELEASE_NOTES.tmp ]; then
+            {
+              echo 'No detailed changelog section' \
+                'found for this release version.'
+              echo ''
+              echo 'Please update CHANGELOG.md with a' \
+                '`## [x.y.z] - YYYY-MM-DD` section.'
+            } > RELEASE_NOTES.tmp
+          fi
+
+          {
+            echo 'notes<<EOF'
+            cat RELEASE_NOTES.tmp
+            echo 'EOF'
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: EzAuction ${{ steps.version.outputs.release_version }}
+          prerelease: ${{ github.event.inputs.prerelease == 'true' }}
+          body: ${{ steps.changelog.outputs.notes }}
+          files: ${{ steps.artifact.outputs.path }}
+
+      - name: Publish to Modrinth
+        if: ${{ github.event.inputs.publish_modrinth == 'true' }}
+        uses: Kir-Antipov/mc-publish@v3.3
+        with:
+          files: ${{ steps.artifact.outputs.path }}
+          name: EzAuction ${{ steps.version.outputs.release_version }}
+          version: ${{ steps.version.outputs.release_version }}
+          version-type: >-
+            ${{ github.event.inputs.prerelease == 'true' && 'beta' || 'release' }}
+          changelog: ${{ steps.changelog.outputs.notes }}
+          dependencies: |
+            placeholder-api(optional)
+            vault(optional)
+            teams-api(optional)
+            discordsrv(optional)
+            ezshops(optional)
+          loaders: |
+            paper
+            spigot
+            bukkit
+          game-versions: ">=1.21"
+          modrinth-id: ${{ vars.MODRINTH_PROJECT_ID }}
+          modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
+
+      # ──────────────────────────────────────────────────────────────────────
+      #  DISCORD NOTIFICATION
+      # ──────────────────────────────────────────────────────────────────────
+      - name: Post Discord notification
+        if: always()
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.EZAUCTION_RELEASE_DISCORD_WEBHOOK }}
+        run: |
+          [[ -z "$DISCORD_WEBHOOK" ]] && { echo "No webhook set, skipping."; exit 0; }
+
+          VERSION="${{ steps.version.outputs.release_version }}"
+          TAG="${{ steps.version.outputs.tag }}"
+          REPO="${{ github.repository }}"
+          GH_URL="https://github.com/${REPO}/releases/tag/${TAG}"
+          MODRINTH_URL="https://modrinth.com/plugin/${{ vars.MODRINTH_PROJECT_ID }}/version/${VERSION}"
+
+          # Truncate changelog to fit Discord's 4096-char embed description limit.
+          CHANGELOG=$(head -c 3800 RELEASE_NOTES.tmp 2>/dev/null || true)
+
+          PAYLOAD=$(jq -n \
+            --arg version  "$VERSION" \
+            --arg gh_url   "$GH_URL" \
+            --arg modrinth "$MODRINTH_URL" \
+            --arg changelog "$CHANGELOG" \
+            '{
+              embeds: [{
+                title:       ("🚀 EzAuction " + $version + " released"),
+                url:         $gh_url,
+                color:       15777856,
+                description: $changelog,
+                fields: [
+                  { name: "GitHub Release", value: ("[View on GitHub]("    + $gh_url   + ")"), inline: true },
+                  { name: "Modrinth",       value: ("[Download on Modrinth](" + $modrinth + ")"), inline: true }
+                ],
+                footer: { text: "EzAuction" }
+              }]
+            }')
+
+          curl --fail -s -X POST "$DISCORD_WEBHOOK" \
+            -H "Content-Type: application/json" \
+            -d "$PAYLOAD"
