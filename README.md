@@ -1,7 +1,8 @@
 # EzAuction
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Build](https://img.shields.io/badge/build-passing-brightgreen)](https://github.com/Gyvex/ezauction/actions)
+[![Build](https://github.com/Gyvex/ezauction/actions/workflows/ci.yml/badge.svg)](https://github.com/Gyvex/ezauction/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/Gyvex/ezauction/graph/badge.svg)](https://codecov.io/gh/Gyvex/ezauction)
 [![Java](https://img.shields.io/badge/java-21%2B-blue)](https://adoptium.net/)
 
 **EzAuction** is a modern, extensible Minecraft auction plugin for Bukkit/Spigot servers. It features a user-friendly GUI, robust API, and comprehensive event system for both server owners and plugin developers.
