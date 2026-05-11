@@ -12,6 +12,7 @@ public final class SellMenuState {
     private double price;
     private int durationIndex;
     private final Double recommendedPrice;
+    private int quantity;
 
     private final Duration[] durationOptions;
     private final AuctionListingRules listingRules;
@@ -30,10 +31,18 @@ public final class SellMenuState {
         this.defaultDurationIndex = Math.max(0, defaultDurationIndex);
         this.durationIndex = normalizeIndex(defaultDurationIndex);
         this.recommendedPrice = recommendedPrice;
+        this.quantity = Math.max(1, this.item.getAmount());
     }
 
     public ItemStack item() {
         return item.clone();
+    }
+
+    /** Returns a clone of the item with its amount set to the current {@link #quantity()}. */
+    public ItemStack itemWithQuantity() {
+        ItemStack copy = item.clone();
+        copy.setAmount(quantity);
+        return copy;
     }
 
     public double price() {
@@ -42,6 +51,17 @@ public final class SellMenuState {
 
     public void setPrice(double price) {
         this.price = price;
+    }
+
+    public int quantity() {
+        return quantity;
+    }
+
+    /**
+     * Adjusts the quantity by {@code delta}, clamped to {@code [1, item.getAmount()]}.
+     */
+    public void adjustQuantity(int delta) {
+        quantity = Math.max(1, Math.min(item.getAmount(), quantity + delta));
     }
 
     public Double recommendedPrice() {
