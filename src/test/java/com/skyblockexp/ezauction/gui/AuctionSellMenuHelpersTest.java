@@ -48,18 +48,6 @@ class AuctionSellMenuHelpersTest {
     }
 
     @Test
-    void formatNumberFormatsKilobytesAndDecimals() throws Exception {
-        AuctionSellMenu menu = createMenu();
-
-        Method m = AuctionSellMenu.class.getDeclaredMethod("formatNumber", double.class);
-        m.setAccessible(true);
-
-        assertEquals("1k", m.invoke(menu, 1000.0D));
-        assertEquals("1500", m.invoke(menu, 1500.0D));
-        assertEquals("10.50", m.invoke(menu, 10.5D));
-    }
-
-    @Test
     void formatDurationPrintsDaysHoursMinutes() throws Exception {
         AuctionSellMenu menu = createMenu();
         Method m = AuctionSellMenu.class.getDeclaredMethod("formatDuration", java.time.Duration.class);

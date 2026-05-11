@@ -12,6 +12,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/). Version
 
 ### Added
 
+![Team Auctions](https://i.ibb.co/vCYzR3R6/image.png)
+
 - **Team Auctions**: team-scoped listings visible and purchasable only by members of the seller's team.
   - New command: `/auction team` — browse team listings (hidden when disabled or TeamsAPI absent).
   - New command: `/auction team sell` — list held item as a team auction.
