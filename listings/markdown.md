@@ -1,21 +1,24 @@
-# EzAuction
+**EzAuction** is a fully-featured Minecraft auction house plugin for Paper, Spigot, Purpur, and Bukkit servers. Players list items for timed sale, create reserve-balance buy orders, and browse the live market through a smooth, paginated GUI - all backed by Vault economy, MySQL or YAML persistence, PlaceholderAPI support, and optional Discord webhook notifications.
 
+Whether you're running a survival, skyblock, or factions server, EzAuction gives players a click-friendly, permission-controlled marketplace with timed listings, offline-safe returns, enchantment search, live broadcast auctions, and team auction support through [TeamsAPI](https://modrinth.com/plugin/teams-api).
 
-Menu-first marketplace with listings, buy orders, and async safety nets.
+| | |
+|---|---|
+| **Platforms** | Paper, Spigot, Purpur, Bukkit 1.13 – 26.1.* |
+| **Java** | 21+ |
+| **Storage** | YAML (built-in) · MySQL |
+| **Languages** | English · Dutch · Spanish · Chinese |
+| **Dependencies** | Vault + any economy plugin |
 
-- **Paper / Spigot / Purpur / Bukkit 1.7 - 1.21.***
-- **Vault economy required**
-- YAML fallback + MySQL
-- English/Dutch/Spanish/Chinese menus included
-- PlaceholderAPI stats
+> **Requires Vault and a compatible economy plugin such as [EzEconomy](https://modrinth.com/plugin/ezeconomy) to process currency.**
 
-Pre-release of EzAuction 1.0.1 is available [in the Discord server of EzPlugins](https://discord.gg/yWP95XfmBS), saving 4+ MB in .jar size by removing use of several libraries.
-
-> **Requires Vault and a compatible economy plugin to process currency.**
-
-## Why EzAuction?
+## Why Use EzAuction?
 - **Menu-first trading** – Paginated browsers, sell/order editors, and confirmation popups keep every transaction guided and click-friendly.
 - **Listings + buy orders** – Run timed sales, reserve balance for buy requests, and fulfill either side straight from the GUI or command flow.
+- **Team auctions** – [TeamsAPI](https://modrinth.com/plugin/teams-api) integration lets team members co-list and co-claim auctions, perfect for faction and skyblock economies.
+
+![Team Auction GUI](TEAM_AUCTION_SCREENSHOT_URL)
+
 - **Async persistence & fallbacks** – Listings and history write through dedicated executors, automatically falling back to YAML storage if MySQL is unreachable.
 - **Offline-safe returns** – Expired or undeliverable items go to a claimable stash with login reminders and `/auction claim` recovery.
 - **Rank-aware limits** – Plug in a custom `AuctionListingLimitResolver` service to scale slot caps with ranks, islands, or progression data.
@@ -23,18 +26,19 @@ Pre-release of EzAuction 1.0.1 is available [in the Discord server of EzPlugins]
 
 ## Feature Highlights
 - **Configurable menus & translations** – Override browser/confirm layouts, filler glass, and button text across the bundled English, Dutch, Spanish, and Chinese menu files.
-- **Flexible storage** – Start on lightweight YAML or flip to production-ready MySQL with SSL flags and table prefixes.
+- **Flexible storage** – Start on lightweight YAML or flip to production-ready MySQL with connection pooling, SSL flags, and table prefixes.
 - **Asynchronous history** – Background save queues batch player history writes to keep gameplay responsive, even during heavy auction traffic.
 - **Player protections** – Deposit refunds, balance checks, expiry sweeps, and inventory-aware delivery prevent dupes and lost currency.
-- **PlaceholderAPI hooks** – Drop `%ezauction_*%` placeholders into scoreboards or holograms to surface active listings, orders, limits, or pending returns.
+- **PlaceholderAPI support** – Drop `%ezauction_*%` placeholders into scoreboards, holograms, or chat to surface active listings, orders, limits, and pending returns.
 - **Integration-ready API** – Register Bukkit services to override listing caps or provide custom value providers without forking the plugin.
-- **Enchant-aware search** – Type queries like `sharpness v`, `fortune 3`, or `minecraft:looting` to surface listings and buy orders carrying the matching enchantments, including stored book enchants. Matching works with roman numerals, numeric levels, namespaced keys, and underscore/space differences so players can zero in on the exact enchant stack they need.
+- **Enchant-aware search** – Search `sharpness v`, `fortune 3`, or `minecraft:looting` to find listings and buy orders carrying exact enchantment stacks - supports roman numerals, numeric levels, namespaced keys, and underscore/space variants.
+- **Shulker box previews** – Buyers can inspect shulker contents directly from the auction browser before purchasing.
 
 ## Discord Integration
 - **Standalone webhook** – Post colour-coded embed notifications to any Discord channel by pasting a webhook URL into `discord.yml`. No DiscordSRV or bot setup required.
 - **DiscordSRV support** – Optionally route notifications through an existing DiscordSRV installation with optional account-linking and role-gating per event.
 - **Four event types** – Receive a message whenever an auction is listed, sold, bid on, or cancelled, each styled with its own accent colour (green / blue / yellow / red).
-- **Live admin commands** – Configure, enable, disable, and test the webhook in-game with `/auctiondiscord webhook` — changes take effect instantly without a restart.
+- **Live admin commands** – Configure, enable, disable, and test the webhook in-game with `/auctiondiscord webhook` - changes take effect instantly without a restart.
 - **Async & non-blocking** – All HTTP calls run on a background thread; a failed delivery is logged at WARNING level and never interrupts gameplay.
 
 <details>
@@ -45,10 +49,10 @@ Pre-release of EzAuction 1.0.1 is available [in the Discord server of EzPlugins]
    ```
    /auctiondiscord webhook set url https://discord.com/api/webhooks/YOUR_ID/YOUR_TOKEN
    ```
-3. Verify with `/auctiondiscord webhook test` — a test embed will appear in your channel immediately.
+3. Verify with `/auctiondiscord webhook test` - a test embed will appear in your channel immediately.
 
 ```yml
-# discord.yml — webhook section
+# discord.yml - webhook section
 webhook:
   enabled: true
   url: "https://discord.com/api/webhooks/123456789/YOURTOKEN"
@@ -61,7 +65,7 @@ webhook:
     auction_cancel: true
 ```
 
-For the full DiscordSRV integration guide and all options, see [docs/integration/discord.md](../integration/discord.md).
+For the full DiscordSRV integration guide and all options, see the [Discord integration docs](https://ez-plugins.github.io/ezauction/integrations/discord/).
 </details>
 
 ## Hologram Features
@@ -117,13 +121,13 @@ holograms:
 <details>
 <summary>Installation & Configuration</summary>
 
-**Need more details?** See the [full configuration guide](https://github.com/ez-plugins/EzAuction/blob/main/docs/configuration.md) for all YAML, MySQL, menu, and advanced settings options.
+**Need more details?** See the [full documentation](https://ez-plugins.github.io/ezauction/) for all YAML, MySQL, menu, and advanced settings options.
 
 ### Requirements
 | Requirement | Notes |
 |-------------|-------|
-| Java 17+ | Matches the Paper 1.21.4 API target used by EzAuction. |
-| Paper or Purpur 1.21+ | The plugin relies on modern Paper server APIs. |
+| Java 21+ | Matches the Paper 1.21+ API target used by EzAuction. |
+| Paper / Spigot / Purpur 1.21+ | The plugin relies on Paper-compatible server APIs. |
 | Vault | Provides the economy bridge for deposits, buy orders, and payouts. |
 | Economy plugin (recommended: [EzEconomy](https://www.spigotmc.org/resources/1-21-ezeconomy-modern-vault-economy-plugin-for-minecraft-servers.130975/)) | A Vault-compatible provider is required. EzEconomy is recommended for best compatibility and modern features. |
 | Optional: [EzShops](https://www.spigotmc.org/resources/1-21-%E2%9A%A0%EF%B8%8F-ezshops-%E2%9A%A0%EF%B8%8F-dynamic-shops-gui-player-shops-sell-hand-inv.129780/) | Unlock live value overlays via `values.mode = ezshops-buy` or `ezshops-sell`. |
@@ -304,15 +308,13 @@ materials:
 </details>
 
 ## Support & Links
-- Need help? Route players to your Discord, website, or ticket bot and mention EzAuction for faster triage.
-- Share update logs, bug reports, or feature requests on your resource discussion thread to keep the roadmap flowing.
-- Document any custom listing-limit resolvers so staff know which ranks or island levels unlock extra slots.
-- Direct support: [Join our Discord server](https://discord.gg/yWP95XfmBS)
-- [EzEconomy: Modern Vault Economy Plugin](https://www.spigotmc.org/resources/1-21-ezeconomy-modern-vault-economy-plugin-for-minecraft-servers.130975/)
-- [EzShops: Dynamic Player Shops & GUI](https://www.spigotmc.org/resources/1-21-%E2%9A%A0%EF%B8%8F-ezshops-%E2%9A%A0%EF%B8%8F-dynamic-shops-gui-player-shops-sell-hand-inv.129780/)
+- **Discord:** [Join the EzPlugins server](https://discord.gg/yWP95XfmBS) for help, bug reports, and release announcements.
+- **Documentation:** [ez-plugins.github.io/ezauction](https://ez-plugins.github.io/ezauction/)
+- **[EzEconomy](https://modrinth.com/plugin/ezeconomy)** - Modern Vault economy plugin, recommended for best compatibility.
+- **[EzShops](https://www.spigotmc.org/resources/1-21-%E2%9A%A0%EF%B8%8F-ezshops-%E2%9A%A0%EF%B8%8F-dynamic-shops-gui-player-shops-sell-hand-inv.129780/)** - Dynamic player shops and GUI, integrates with EzAuction value overlays.
 
 ---
 
-**Ready to modernize your marketplace?**
+**Ready to add an auction house to your Minecraft server?**
 
-Deploy EzAuction today and give your players a polished, automated trading hub!
+Deploy EzAuction today - a polished, GUI-driven auction house plugin for Paper, Spigot, Purpur, and Bukkit. Download, drop in the jar, configure Vault, and your players are trading in minutes.

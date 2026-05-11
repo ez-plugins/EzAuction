@@ -5,7 +5,29 @@ on:
   pull_request:
 
 jobs:
+  validate-yml:
+    name: Validate YAML resources
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install yamllint
+        run: pip install --quiet yamllint
+
+      - name: Lint plugin YAML resources
+        run: |
+          yamllint -d '{extends: relaxed, rules: {line-length: {max: 200}}}' \
+            src/main/resources/auction.yml \
+            src/main/resources/auction-storage.yml \
+            src/main/resources/auction-values.yml \
+            src/main/resources/discord.yml \
+            src/main/resources/orders-only.yml \
+            src/main/resources/messages/
+
   build:
+    needs: validate-yml
     runs-on: ubuntu-latest
 
     steps:
