@@ -15,6 +15,7 @@ import com.skyblockexp.ezauction.config.AuctionCommandMessageConfiguration;
 import com.skyblockexp.ezauction.gui.AuctionMenu;
 import com.skyblockexp.ezauction.gui.AuctionOrderMenu;
 import com.skyblockexp.ezauction.gui.AuctionSellMenu;
+import com.skyblockexp.ezauction.gui.BrowserView;
 import com.skyblockexp.ezauction.gui.LiveAuctionMenu;
 import com.skyblockexp.ezauction.gui.SellMenuHolder.Target;
 
@@ -149,6 +150,11 @@ public class AuctionCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
+        if (subcommand.equals("team")) {
+            handleTeam(player, label, args);
+            return true;
+        }
+
         sendUsage(player, label);
         return true;
     }
@@ -254,6 +260,26 @@ public class AuctionCommand implements CommandExecutor, TabCompleter {
             return;
         }
         liveAuctionMenu.open(player);
+    }
+
+    private void handleTeam(Player player, String label, String[] args) {
+        if (!player.hasPermission("ezauction.auction.team")) {
+            sendMessage(player, ChatColor.RED + "You do not have permission to use team auctions.");
+            return;
+        }
+        if (!auctionManager.isTeamAuctionsAvailable()) {
+            sendMessage(player, ChatColor.RED + "Team auctions are not available on this server.");
+            return;
+        }
+        if (args.length >= 2 && args[1].equalsIgnoreCase("sell")) {
+            if (!player.hasPermission("ezauction.auction.team.sell")) {
+                sendMessage(player, ChatColor.RED + "You do not have permission to create team auction listings.");
+                return;
+            }
+            auctionSellMenu.openTeamSell(player);
+            return;
+        }
+        auctionMenu.openBrowser(player, BrowserView.TEAM_LISTINGS, 0);
     }
 
     private void sendUsage(Player player, String label) {
