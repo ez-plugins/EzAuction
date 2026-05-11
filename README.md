@@ -2,11 +2,11 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Build](https://img.shields.io/badge/build-passing-brightgreen)](https://github.com/Gyvex/ezauction/actions)
-[![Java](https://img.shields.io/badge/java-17%2B-blue)](https://adoptium.net/)
+[![Java](https://img.shields.io/badge/java-21%2B-blue)](https://adoptium.net/)
 
 **EzAuction** is a modern, extensible Minecraft auction plugin for Bukkit/Spigot servers. It features a user-friendly GUI, robust API, and comprehensive event system for both server owners and plugin developers.
 
-**Version 2.0.0** introduces enhanced GUI navigation, detailed confirmation dialogs, and full compatibility with EzShops 2.0.0+.
+**Version 2.0.0** introduced enhanced GUI navigation, detailed confirmation dialogs, and full compatibility with EzShops 2.0.0+. **Version 2.2.0** adds Team Auctions — team-scoped listings visible and purchasable only by your team, powered by the optional [TeamsAPI](https://github.com/ez-plugins/teams-api) soft-dependency.
 
 ---
 
@@ -30,8 +30,8 @@
 ---
 
 ## 📦 Requirements
-- Java 17 or higher ([Adoptium](https://adoptium.net/))
-- Bukkit/Spigot/Paper server (1.17+ recommended)
+- Java 21 or higher ([Adoptium](https://adoptium.net/))
+- Paper server 1.21+ (Bukkit/Spigot compatible)
 
 ## 🚀 Installation
 
@@ -58,6 +58,7 @@
 - Actively maintained and open source
 - **NEW in 2.0.1** Orders-Only Mode
   If you only want the Orders feature (buy orders, no auction house), set `orders-only-mode: true` in `orders-only.yml`. This disables all auction house features and enables the `/orders` and `/order` commands for players to create and manage buy orders.
+- **NEW in 2.2.0**: Team Auctions — team-scoped listings visible and purchasable only by members of the seller's team. Requires the optional [TeamsAPI](https://github.com/ez-plugins/teams-api) soft-dependency. Toggle with `team-auctions.enabled` in `auction.yml`.
 
 ## ⚙️ Configuration
 Default configuration files are generated on first run in `plugins/EzAuction/`.
@@ -93,6 +94,8 @@ When `orders-only-mode` is enabled, all other auction commands are disabled.
 | `/auction cancel`      | Cancel your active listing         | `ezauction.cancel`        |
 | `/auction reload`      | Reload plugin configuration        | `ezauction.admin.reload`  |
 | `/auction history [player]` | View your auction history (or another player's, if permitted) | `ezauction.auction.history` / `ezauction.auction.history.others` |
+| `/auction team`             | Browse team-scoped auction listings                           | `ezauction.auction.team`                                          |
+| `/auction team sell`        | List held item as a team auction                              | `ezauction.auction.team.sell`                                     |
 
 **Key Permissions:**
 
@@ -103,6 +106,8 @@ When `orders-only-mode` is enabled, all other auction commands are disabled.
 
 - `ezauction.auction.history`: View your own auction history in the GUI
 - `ezauction.auction.history.others`: View other players' auction history (if permitted)
+- `ezauction.auction.team`: Browse team-scoped auction listings (hidden when disabled or TeamsAPI absent)
+- `ezauction.auction.team.sell`: Create team-scoped listings via `/auction team sell`
 
 See the [docs/permissions.md](docs/permissions.md) for a full list.
 
