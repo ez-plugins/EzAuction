@@ -63,7 +63,7 @@ public final class YamlAuctionStorage implements AuctionStorage {
         Map<UUID, List<ItemStack>> returns = new HashMap<>();
 
         if (listingsFile != null && listingsFile.exists()) {
-            YamlConfiguration configuration = YamlConfiguration.loadConfiguration(listingsFile);
+            YamlConfiguration configuration = ItemStackSerializer.loadSafe(listingsFile);
             ConfigurationSection listingsSection = configuration.getConfigurationSection("listings");
             if (listingsSection != null) {
                 for (String id : listingsSection.getKeys(false)) {
@@ -94,7 +94,7 @@ public final class YamlAuctionStorage implements AuctionStorage {
         }
 
         if (returnsFile != null && returnsFile.exists()) {
-            YamlConfiguration configuration = YamlConfiguration.loadConfiguration(returnsFile);
+            YamlConfiguration configuration = ItemStackSerializer.loadSafe(returnsFile);
             ConfigurationSection section = configuration.getConfigurationSection("returns");
             if (section != null) {
                 for (String key : section.getKeys(false)) {
@@ -110,9 +110,22 @@ public final class YamlAuctionStorage implements AuctionStorage {
                     List<?> serializedItems = section.getList(key);
                     if (serializedItems != null) {
                         for (Object object : serializedItems) {
-                            if (object instanceof ItemStack stack && stack.getType() != Material.AIR
-                                    && stack.getAmount() > 0) {
-                                items.add(stack.clone());
+                            if (object instanceof String base64) {
+                                // New format: base64-encoded item.
+                                try {
+                                    ItemStack stack = ItemStackSerializer.deserialize(base64);
+                                    if (stack != null && stack.getType() != Material.AIR && stack.getAmount() > 0) {
+                                        items.add(stack);
+                                    }
+                                } catch (Exception e) {
+                                    plugin.getLogger().log(Level.WARNING,
+                                            "Failed to deserialize a return item for player " + key + "; item will be skipped.", e);
+                                }
+                            } else if (object instanceof ItemStack stack) {
+                                // Legacy: YAML-serialised ItemStack (backward compatibility).
+                                if (stack.getType() != Material.AIR && stack.getAmount() > 0) {
+                                    items.add(stack.clone());
+                                }
                             }
                         }
                     }
@@ -140,7 +153,12 @@ public final class YamlAuctionStorage implements AuctionStorage {
             listingSection.set("price", listing.price());
             listingSection.set("expiry", listing.expiryEpochMillis());
             listingSection.set("deposit", listing.deposit());
-            listingSection.set("item", listing.item());
+            try {
+                listingSection.set("item-data", ItemStackSerializer.serialize(listing.item()));
+            } catch (IOException e) {
+                plugin.getLogger().log(Level.WARNING,
+                        "Failed to serialize item for listing " + listing.id() + "; it will not be saved.", e);
+            }
             if (listing.teamId() != null) {
                 listingSection.set("team-id", listing.teamId().toString());
             }
@@ -152,7 +170,12 @@ public final class YamlAuctionStorage implements AuctionStorage {
             orderSection.set("price", order.offeredPrice());
             orderSection.set("expiry", order.expiryEpochMillis());
             orderSection.set("reserved", order.reservedAmount());
-            orderSection.set("item", order.requestedItem());
+            try {
+                orderSection.set("item-data", ItemStackSerializer.serialize(order.requestedItem()));
+            } catch (IOException e) {
+                plugin.getLogger().log(Level.WARNING,
+                        "Failed to serialize item for order " + order.id() + "; it will not be saved.", e);
+            }
         }
         try {
             configuration.save(listingsFile);
@@ -170,15 +193,20 @@ public final class YamlAuctionStorage implements AuctionStorage {
         YamlConfiguration configuration = new YamlConfiguration();
         ConfigurationSection section = configuration.createSection("returns");
         for (Map.Entry<UUID, List<ItemStack>> entry : returnsByPlayer.entrySet()) {
-            List<ItemStack> serialized = new ArrayList<>();
+            List<String> encoded = new ArrayList<>();
             for (ItemStack stack : entry.getValue()) {
                 if (stack == null || stack.getType() == Material.AIR || stack.getAmount() <= 0) {
                     continue;
                 }
-                serialized.add(stack.clone());
+                try {
+                    encoded.add(ItemStackSerializer.serialize(stack));
+                } catch (IOException e) {
+                    plugin.getLogger().log(Level.WARNING,
+                            "Failed to serialize a return item for player " + entry.getKey() + "; it will not be saved.", e);
+                }
             }
-            if (!serialized.isEmpty()) {
-                section.set(entry.getKey().toString(), serialized);
+            if (!encoded.isEmpty()) {
+                section.set(entry.getKey().toString(), encoded);
             }
         }
         try {
@@ -214,7 +242,7 @@ public final class YamlAuctionStorage implements AuctionStorage {
         }
         long expiry = section.getLong("expiry");
         double deposit = EconomyUtils.normalizeCurrency(section.getDouble("deposit", 0.0D));
-        ItemStack item = section.getItemStack("item");
+        ItemStack item = loadItemCompat("listing " + id, section);
         if (item == null || item.getType() == Material.AIR || item.getAmount() <= 0) {
             plugin.getLogger().warning("Ignoring auction listing " + id + " because the item is invalid.");
             return null;
@@ -254,7 +282,7 @@ public final class YamlAuctionStorage implements AuctionStorage {
             reserved = price;
         }
         long expiry = section.getLong("expiry");
-        ItemStack template = section.getItemStack("item");
+        ItemStack template = loadItemCompat("order " + id, section);
         if (template == null || template.getType() == Material.AIR || template.getAmount() <= 0) {
             plugin.getLogger().warning("Ignoring auction order " + id + " because the item template is invalid.");
             return null;
@@ -273,5 +301,28 @@ public final class YamlAuctionStorage implements AuctionStorage {
         if (!file.exists() && !file.createNewFile()) {
             throw new IOException("Unable to create file " + file);
         }
+    }
+
+    /**
+     * Loads an {@link ItemStack} from a configuration section, trying the new Base64
+     * {@code item-data} key first and falling back to the legacy YAML {@code item} key.
+     *
+     * <p>The legacy key may produce {@code ERROR} log entries from Bukkit's YAML
+     * constructor when the data was written on a Paper server and is now being loaded on
+     * Spigot. These entries disappear once the file is re-saved in the new format.
+     */
+    private ItemStack loadItemCompat(String contextId, ConfigurationSection section) {
+        String itemData = section.getString("item-data");
+        if (itemData != null && !itemData.isEmpty()) {
+            try {
+                return ItemStackSerializer.deserialize(itemData);
+            } catch (Exception e) {
+                plugin.getLogger().log(Level.WARNING,
+                        "Failed to deserialize item for " + contextId + '.', e);
+                return null;
+            }
+        }
+        // Legacy: YAML-serialised ItemStack written before v2.2.1 or by a Paper server.
+        return section.getItemStack("item");
     }
 }

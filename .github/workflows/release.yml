@@ -146,8 +146,7 @@ jobs:
             ${{ github.event.inputs.prerelease == 'true' && 'beta' || 'release' }}
           changelog: ${{ steps.changelog.outputs.notes }}
           dependencies: |
-            placeholder-api(optional)
-            vault(optional)
+            placeholderapi(optional)
             teams-api(optional)
             discordsrv(optional)
             ezshops(optional)
