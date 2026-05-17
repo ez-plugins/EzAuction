@@ -1,0 +1,46 @@
+name: Spigot Smoke
+
+on:
+  push:
+  pull_request:
+
+# Confirm that the YAML storage layer is fully functional on Spigot servers.
+# The smoke tests exercise:
+#   - ItemStackSerializer Base64 round-trips
+#   - YamlAuctionHistoryStorage: fresh install + item round-trip
+#   - YamlAuctionStorage: fresh install + listing / order / returns round-trips
+#
+# These tests specifically guard against the "Material cannot be null" ERROR
+# that occurred when item data written by a Paper server was loaded on Spigot
+# (the Bukkit YAML constructor auto-deserialized items before our code could
+# handle them). The new item-data (Base64) format avoids the auto-deserialization
+# entirely.
+
+jobs:
+  spigot-smoke:
+    name: YAML item storage round-trip (Spigot compat)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: Run smoke tests
+        run: |
+          mvn -B test \
+            -Dtest="com.skyblockexp.ezauction.storage.yaml.YamlAuctionStorageSmokeTest" \
+            -DfailIfNoTests=true
+
+      - name: Upload test reports on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: spigot-smoke-reports
+          path: target/surefire-reports/

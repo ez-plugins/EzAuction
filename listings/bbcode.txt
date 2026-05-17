@@ -4,6 +4,11 @@
 [SIZE=2]Paper / Spigot / Purpur / Bukkit 1.7 - 1.21.* • Vault economy • YAML fallback + MySQL • English/Dutch/Spanish/Chinese menus included • PlaceholderAPI stats
 [COLOR=#ff6600]Requires Vault and a compatible economy plugin to process currency.[/COLOR][/SIZE][/CENTER]
 
+[SIZE=4][B]What's New — v2.2.1[/B][/SIZE]
+[LIST]
+[*][B][COLOR=#55ff55]Fixed[/COLOR] Spigot compatibility[/B] – Item data is now stored as a Base64 byte stream ([icode]item-data[/icode] key via [icode]BukkitObjectOutputStream[/icode]) instead of YAML-native serialization. This removes the [icode][ERROR] Material cannot be null[/icode] startup errors that appeared when loading YAML data written by a Paper 1.21+ server on a Spigot server. Existing saves migrate automatically on the next save cycle.
+[/LIST]
+
 [SIZE=4][B]Why EzAuction?[/B][/SIZE]
 [LIST]
 [*][B]Menu-first trading[/B] – Paginated browsers, sell/order editors, and confirmation popups keep every transaction guided and click-friendly.
@@ -17,6 +22,8 @@
 [*][B]Offline-safe returns[/B] – Expired or undeliverable items go to a claimable stash with login reminders and `/auction claim` recovery.
 [*][B]Rank-aware limits[/B] – Plug in a custom `AuctionListingLimitResolver` service to scale slot caps with ranks, islands, or progression data.
 [*][B]Smart value overlays[/B] – Surface configured price hints or pipe in [URL='https://www.spigotmc.org/resources/1-21-%E2%9A%A0%EF%B8%8F-ezshops-%E2%9A%A0%EF%B8%8F-dynamic-pricing-gui-player-shops-sell-hand-inv.129780/']EzShops [/URL]buy/sell estimates directly into menu lore.[IMG]https://i.ibb.co/fzcXWVjq/ez-auction-shop-pricing.png[/IMG]
+[*][B]Team auctions[/B] – [URL='https://modrinth.com/plugin/teams-api']TeamsAPI[/URL] integration lets team members co-list and co-claim auctions, perfect for faction and skyblock economies.
+[IMG]https://i.ibb.co/vCYzR3R6/image.png[/IMG]
 [/LIST]
 [SIZE=4][B]Feature Highlights[/B][/SIZE]
 [LIST]
@@ -109,6 +116,13 @@ holograms:
 [*][B]Curate from the live menu[/B] – The Live Auctions GUI shows queue position, seller names, price summaries, and quick actions to refresh or jump back into the main browser.
 [/LIST]
 
+[SIZE=4][B]Team Auctions[/B][/SIZE]
+[LIST]
+[*][B]Scope listings to your team[/B] – Enable [icode]team-auctions.enabled[/icode] in [icode]auction.yml[/icode] so sellers can post under [icode]/auction team sell[/icode] and only members of the seller's team can see and purchase those listings.
+[*][B]Private team browser[/B] – [icode]/auction team[/icode] opens a dedicated tab showing only your team's active listings; the tab is hidden entirely when team auctions are disabled or TeamsAPI is absent.
+[*][B]Optional soft-dependency[/B] – Powered by the optional [URL='https://modrinth.com/plugin/teams-api']TeamsAPI[/URL] plugin. Standard auctions continue to work normally without it.
+[/LIST]
+
 [B]Commands & Permissions[/B]
 [table]
 [tr][th]Command[/th][th]Description[/th][th]Permission[/th][/tr]
@@ -118,6 +132,8 @@ holograms:
 [tr][td]/auction cancel [id][/td][td]Review and cancel active listings or buy orders.[/td][td]ezauction.auction[/td][/tr]
 [tr][td]/auction history [buy|sell][/td][td]Show the latest transactions for each category.[/td][td]ezauction.auction.history[/td][/tr]
 [tr][td]/auction live[/td][td]Preview upcoming live auction broadcasts and refresh the queue.[/td][td]ezauction.auction.live[/td][/tr]
+[tr][td]/auction team[/td][td]Browse team-scoped listings (hidden when disabled or TeamsAPI absent).[/td][td]ezauction.auction.team[/td][/tr]
+[tr][td]/auction team sell[/td][td]List the held item as a team auction visible only to your team members.[/td][td]ezauction.auction.team.sell[/td][/tr]
 [tr][td]/auction claim[/td][td]Withdraw stored return items.[/td][td]ezauction.auction[/td][/tr]
 [tr][td]/auction search <query>[/td][td]Open the auction browser filtered by item name, enchantment, or keyword.[/td][td]ezauction.auction.search[/td][/tr]
 [tr][td]/auctionhologram <create|remove|list> [args][/td][td]Manage auction holograms: create, remove, or list in-world auction displays.[/td][td]ezauction.hologram.manage[/td][/tr]

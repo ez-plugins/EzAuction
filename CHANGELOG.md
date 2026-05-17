@@ -8,6 +8,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/). Version
 
 ---
 
+## [2.2.1] - 2026-05-17
+
+### Fixed
+
+- **Spigot compatibility** – `ItemStack` data is now stored as a Base64-encoded byte stream (`item-data` key) via `BukkitObjectOutputStream` instead of YAML-native serialization. This eliminates the `[ERROR] Material cannot be null` log entries that appeared during startup when loading YAML files written by a Paper 1.21+ server on a Spigot server. Existing files are migrated to the new format automatically on the next save cycle; the old `item` key is still read as a fallback during the transition.
+- **Smoke test coverage** – Added `YamlAuctionStorageSmokeTest` (8 tests) and a dedicated `spigot-smoke.yml` GitHub Actions workflow to guard this code path in CI.
+
+---
+
 ## [2.2.0] - 2026-05-11
 
 ### Added

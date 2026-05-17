@@ -123,7 +123,7 @@ public final class YamlAuctionHistoryStorage implements AuctionHistoryStorage {
         if (historyFile == null || !historyFile.exists()) {
             return entries;
         }
-        YamlConfiguration configuration = YamlConfiguration.loadConfiguration(historyFile);
+        YamlConfiguration configuration = ItemStackSerializer.loadSafe(historyFile);
         ConfigurationSection historySection = configuration.getConfigurationSection("history");
         if (historySection == null) {
             return entries;
@@ -199,7 +199,19 @@ public final class YamlAuctionHistoryStorage implements AuctionHistoryStorage {
             }
         }
         String counterpartName = section.getString("counterpart-name");
-        ItemStack item = section.getItemStack("item");
+        ItemStack item = null;
+        String itemData = section.getString("item-data");
+        if (itemData != null && !itemData.isEmpty()) {
+            try {
+                item = ItemStackSerializer.deserialize(itemData);
+            } catch (Exception e) {
+                plugin.getLogger().log(Level.WARNING, "Failed to deserialize item from auction history entry.", e);
+            }
+        } else {
+            // Legacy: YAML-serialised ItemStack written before v2.2.1 or by a Paper server.
+            // Paper-written data may not be deserializable on Spigot; the item will be null.
+            item = section.getItemStack("item");
+        }
         if (item != null) {
             item = item.clone();
         }
@@ -223,7 +235,12 @@ public final class YamlAuctionHistoryStorage implements AuctionHistoryStorage {
             section.set("counterpart-name", entry.counterpartName());
         }
         if (entry.item() != null) {
-            section.set("item", entry.item());
+            try {
+                section.set("item-data", ItemStackSerializer.serialize(entry.item()));
+            } catch (IOException e) {
+                plugin.getLogger().log(Level.WARNING,
+                        "Failed to serialize item for auction history entry; it will not be persisted.", e);
+            }
         }
     }
 

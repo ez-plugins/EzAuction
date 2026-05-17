@@ -12,12 +12,16 @@ Whether you're running a survival, skyblock, or factions server, EzAuction gives
 
 > **Requires Vault and a compatible economy plugin such as [EzEconomy](https://modrinth.com/plugin/ezeconomy) to process currency.**
 
+## What's New — v2.2.1
+
+- **Fixed: Spigot compatibility** – Item data is now stored as a Base64 byte stream (`item-data` key via `BukkitObjectOutputStream`) instead of YAML-native serialization. This removes the `[ERROR] Material cannot be null` startup errors that occurred when loading YAML data written by a Paper 1.21+ server on a Spigot server. Existing saves migrate to the new format automatically on the next save cycle.
+
 ## Why Use EzAuction?
 - **Menu-first trading** – Paginated browsers, sell/order editors, and confirmation popups keep every transaction guided and click-friendly.
 - **Listings + buy orders** – Run timed sales, reserve balance for buy requests, and fulfill either side straight from the GUI or command flow.
 - **Team auctions** – [TeamsAPI](https://modrinth.com/plugin/teams-api) integration lets team members co-list and co-claim auctions, perfect for faction and skyblock economies.
 
-![Team Auction GUI](TEAM_AUCTION_SCREENSHOT_URL)
+![Team Auction GUI](https://i.ibb.co/vCYzR3R6/image.png)
 
 - **Async persistence & fallbacks** – Listings and history write through dedicated executors, automatically falling back to YAML storage if MySQL is unreachable.
 - **Offline-safe returns** – Expired or undeliverable items go to a claimable stash with login reminders and `/auction claim` recovery.
