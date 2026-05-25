@@ -2,8 +2,8 @@ package com.skyblockexp.ezauction.gui;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import com.skyblockexp.ezauction.AuctionListing;
-import com.skyblockexp.ezauction.AuctionOrder;
+import com.skyblockexp.ezauction.model.AuctionListing;
+import com.skyblockexp.ezauction.model.AuctionOrder;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.time.Duration;
@@ -29,7 +29,7 @@ class AuctionMenuSortTest {
 
     @Test
     void listingQuantitySortPlacesLargerStacksFirst() throws ReflectiveOperationException {
-        Enum<?> sort = getEnumConstant("com.skyblockexp.ezauction.gui.AuctionMenu$ListingSort", "QUANTITY_HIGH_LOW");
+        Enum<?> sort = getEnumConstant("com.skyblockexp.ezauction.gui.menu.AuctionMenu$ListingSort", "QUANTITY_HIGH_LOW");
         Method method = sort.getClass().getDeclaredMethod("sort", List.class);
         method.setAccessible(true);
 
@@ -47,7 +47,7 @@ class AuctionMenuSortTest {
 
     @Test
     void orderNameSortArrangesAlphabetically() throws ReflectiveOperationException {
-        Enum<?> sort = getEnumConstant("com.skyblockexp.ezauction.gui.AuctionMenu$OrderSort", "ITEM_A_Z");
+        Enum<?> sort = getEnumConstant("com.skyblockexp.ezauction.gui.menu.AuctionMenu$OrderSort", "ITEM_A_Z");
         Method method = sort.getClass().getDeclaredMethod("sort", List.class);
         method.setAccessible(true);
 

@@ -1,6 +1,6 @@
 package com.skyblockexp.ezauction.hologram;
 
-import com.skyblockexp.ezauction.AuctionManager;
+import com.skyblockexp.ezauction.service.AuctionManager;
 import com.skyblockexp.ezauction.transaction.AuctionTransactionService;
 import com.skyblockexp.ezauction.compat.HologramDisplay;
 import com.skyblockexp.ezauction.compat.HologramPlatform;

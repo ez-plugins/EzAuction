@@ -88,12 +88,18 @@ public final class AuctionConfigurationLoader {
         ConfigurationSection liveAuctionSection = getSection(baseConfiguration, "live-auctions");
         LiveAuctionConfiguration liveAuctionConfiguration = LiveAuctionConfiguration.from(liveAuctionSection);
 
+        ConfigurationSection displaySection = getSection(baseConfiguration, "display");
+        AuctionDisplayConfiguration displayConfiguration = AuctionDisplayConfiguration.from(displaySection);
+        // Apply date format globally — DateUtil is a static utility
+        com.skyblockexp.ezauction.util.DateUtil.setDateFormat(displayConfiguration.dateFormat());
+
         boolean debug = baseConfiguration != null && baseConfiguration.isBoolean("debug") && baseConfiguration.getBoolean("debug");
         boolean teamAuctionsEnabled = baseConfiguration == null || baseConfiguration.getBoolean("team-auctions.enabled", true);
+        int claimExpiryDays = baseConfiguration != null ? baseConfiguration.getInt("claim.expiry-days", 7) : 7;
         AuctionConfiguration result = new AuctionConfiguration(baseLimit, storageConfiguration, listingRules,
                 menuConfiguration, menuInteractionConfiguration, valueConfiguration, messageConfiguration,
                 backendMessages, commandMessageConfiguration, hologramConfiguration, liveAuctionConfiguration,
-                durationOptions, debug, teamAuctionsEnabled);
+                durationOptions, debug, teamAuctionsEnabled, displayConfiguration, claimExpiryDays);
         plugin.getLogger().log(Level.CONFIG, "Loaded auction configuration: {0}", result);
         return result;
     }

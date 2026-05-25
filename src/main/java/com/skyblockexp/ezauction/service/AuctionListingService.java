@@ -1,7 +1,9 @@
 package com.skyblockexp.ezauction.service;
 import com.skyblockexp.ezauction.transaction.AuctionTransactionService;
 
-import com.skyblockexp.ezauction.*;
+import com.skyblockexp.ezauction.model.AuctionListing;
+import com.skyblockexp.ezauction.model.AuctionOperationResult;
+import com.skyblockexp.ezauction.model.AuctionOrder;
 import com.skyblockexp.ezauction.event.AuctionListingCreateEvent;
 import com.skyblockexp.ezauction.event.AuctionListingSellEvent;
 import com.skyblockexp.ezauction.event.AuctionListingSoldEvent;
@@ -327,5 +329,19 @@ public class AuctionListingService {
 
     public Map<String, AuctionListing> getListings() {
         return listings;
+    }
+
+    /**
+     * Removes a live-auction listing from the active store and persists the change.
+     * Called by {@code LiveAuctionService} when a live auction resolves (sold or unsold)
+     * so that the slot no longer counts against the seller's listing limit.
+     *
+     * @param listingId the ID of the listing to remove
+     */
+    public void resolveLiveListing(String listingId) {
+        if (listingId == null || listingId.isEmpty()) return;
+        if (listings.remove(listingId) != null) {
+            persistenceManager.saveListings(new ArrayList<>(listings.values()), new ArrayList<>(orders.values()));
+        }
     }
 }

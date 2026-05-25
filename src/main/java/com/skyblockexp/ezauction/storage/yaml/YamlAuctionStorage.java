@@ -1,7 +1,7 @@
 package com.skyblockexp.ezauction.storage.yaml;
 
-import com.skyblockexp.ezauction.AuctionListing;
-import com.skyblockexp.ezauction.AuctionOrder;
+import com.skyblockexp.ezauction.model.AuctionListing;
+import com.skyblockexp.ezauction.model.AuctionOrder;
 import com.skyblockexp.ezauction.EzAuctionPlugin;
 import com.skyblockexp.ezauction.storage.AuctionStorage;
 import com.skyblockexp.ezauction.storage.AuctionStorageSnapshot;

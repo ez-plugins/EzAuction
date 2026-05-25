@@ -1,6 +1,6 @@
 package com.skyblockexp.ezauction.transaction;
 
-import com.skyblockexp.ezauction.AuctionOperationResult;
+import com.skyblockexp.ezauction.model.AuctionOperationResult;
 
 import com.skyblockexp.ezauction.config.AuctionBackendMessages;
 import com.skyblockexp.ezauction.util.EconomyUtils;
@@ -25,6 +25,10 @@ public class AuctionTransactionService {
     private final Economy economy;
     private final AuctionBackendMessages.EconomyMessages messages;
     private final AuctionBackendMessages.FallbackMessages fallbackMessages;
+    /** Optional currency display template — e.g. {@code "{amount} coins"}. Null/empty = use Vault/default. */
+    private volatile String currencyTemplate = null;
+    /** Optional number format for the {@code {amount}} placeholder inside the template. */
+    private volatile java.text.DecimalFormat decimalFormat = null;
 
     public AuctionTransactionService(JavaPlugin plugin, Economy economy,
             AuctionBackendMessages.EconomyMessages messages,
@@ -186,8 +190,42 @@ public class AuctionTransactionService {
         }
     }
 
+    /**
+     * Configures an optional currency display override. When set, the {@code template} is used
+     * instead of Vault's {@code economy.format()} — replace {@code {amount}} with the formatted number.
+     *
+     * @param template      e.g. {@code "{amount} coins"} or {@code "$&a{amount}"}. Null/blank = disable override.
+     * @param numberPattern {@link java.text.DecimalFormat} pattern for {@code {amount}}, e.g. {@code "#,##0.00"}.
+     */
+    public void setCurrencyFormat(String template, String numberPattern) {
+        this.currencyTemplate = (template != null && !template.isBlank()) ? template : null;
+        if (numberPattern != null && !numberPattern.isBlank()) {
+            try {
+                this.decimalFormat = new java.text.DecimalFormat(numberPattern);
+            } catch (IllegalArgumentException ignored) {
+                this.decimalFormat = null;
+            }
+        } else {
+            this.decimalFormat = null;
+        }
+    }
+
     public String formatCurrency(double amount) {
         double normalized = EconomyUtils.normalizeCurrency(amount);
+        // If a custom currency template is configured, use it instead of Vault/default
+        String template = this.currencyTemplate;
+        if (template != null) {
+            String formattedNumber;
+            java.text.DecimalFormat fmt = this.decimalFormat;
+            if (fmt != null) {
+                synchronized (fmt) {
+                    formattedNumber = fmt.format(normalized);
+                }
+            } else {
+                formattedNumber = String.format(Locale.US, "%.2f", normalized);
+            }
+            return template.replace("{amount}", formattedNumber);
+        }
         if (economy != null) {
             return economy.format(normalized);
         }

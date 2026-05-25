@@ -45,11 +45,34 @@ Browse all active buy orders.
 
 ## `/liveauction`
 
-Join the live auction queue.
+Browse live auctions, sell items into the queue, and manage your entries.
 
 | Sub-command | Usage | Permission | Description |
 |-------------|-------|-----------|-------------|
 | *(none)* | `/liveauction` | `ezauction.live` | Open the live auction viewer |
+| `sell` | `/liveauction sell` | `ezauction.auction.live.sell` | Open the sell menu to queue an item for the live auction |
+| `cancel` | `/liveauction cancel` | `ezauction.auction.live.sell` | Remove your own item from the live queue |
+| `cancel <id>` | `/liveauction cancel <id>` | `ezauction.auction.live.admin` | Force-cancel an active live auction by ID |
+
+---
+
+## `/bid`
+
+Interact with an active live auction you are participating in.
+
+**Aliases:** `/livebid`
+
+| Sub-command | Usage | Permission | Description |
+|-------------|-------|-----------|-------------|
+| *(none)* | `/bid` | `ezauction.bid` | Show your current session status or list active auctions |
+| `<amount>` | `/bid 500` | `ezauction.bid` | Place a bid in your active live auction |
+| `select <id>` | `/bid select abc123` | `ezauction.bid` | Join a specific live auction by its ID |
+| `leave` | `/bid leave` | `ezauction.bid` | Leave the current live auction session |
+| `notify [on\|off]` | `/bid notify off` | `ezauction.auction.live.notify` | Toggle live auction countdown notifications |
+| `notify display <types…>` | `/bid notify display ACTION_BAR` | `ezauction.auction.live.notify` | Set which EzCountdown display types to use |
+| `mutechat [on\|off]` | `/bid mutechat on` | `ezauction.bid` | Silence all other chat while in a live auction |
+
+> **EzCountdown required** — `notify display` only takes effect when EzCountdown is installed and `ezcountdown-enabled: true` is set in `auction.yml`.
 
 ---
 

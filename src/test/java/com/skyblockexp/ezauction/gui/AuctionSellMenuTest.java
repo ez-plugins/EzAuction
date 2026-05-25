@@ -1,4 +1,5 @@
 package com.skyblockexp.ezauction.gui;
+import com.skyblockexp.ezauction.gui.menu.AuctionSellMenu;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -9,13 +10,13 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.skyblockexp.ezauction.AuctionManager;
+import com.skyblockexp.ezauction.service.AuctionManager;
 import com.skyblockexp.ezauction.transaction.AuctionTransactionService;
 import com.skyblockexp.ezauction.compat.LoreItemTagStorage;
 import com.skyblockexp.ezauction.config.AuctionListingRules;
 import com.skyblockexp.ezauction.config.AuctionMenuInteractionConfiguration;
 import com.skyblockexp.ezauction.config.AuctionMessageConfiguration;
-import com.skyblockexp.ezauction.gui.SellMenuHolder.Target;
+import com.skyblockexp.ezauction.gui.holder.SellMenuHolder.Target;
 import com.skyblockexp.ezauction.util.ItemValueProvider;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;

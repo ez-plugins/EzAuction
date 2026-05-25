@@ -47,6 +47,11 @@ order:
 live:
   disabled: "&cLas subastas en vivo están deshabilitadas actualmente."
   queue-instant: "&eLos anuncios de subastas en vivo se transmiten al instante; no hay cola disponible."
+  sell-button-label: "Iniciar subasta en vivo"
+  sell-button-lore: "Vende un artículo a través de la cola de subastas en vivo."
+  cancel-button-label: "Cancelar mi subasta"
+  cancel-button-lore: "Elimina tu artículo de la cola de subastas en vivo."
+  my-auction-badge: "&e► TU SUBASTA"
 activity:
   title-prefix: "Mi Actividad"
   tab-listings-label: "Mis listados"

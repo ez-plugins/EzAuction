@@ -573,7 +573,10 @@ public final class AuctionMessageConfiguration {
     public record LiveMessages(String disabled, String queueInstant, String inventoryTitle, String closeLabel,
             String closeLore, String refreshLabel, String refreshLore, String browseLabel, String browseLore,
             String backLabel, String backLore, String infoTitle, String infoLoreLine1, String infoLoreLine2,
-            String emptyQueueTitle, String emptyQueueLore) {
+            String emptyQueueTitle, String emptyQueueLore,
+            String sellButtonLabel, String sellButtonLore,
+            String cancelButtonLabel, String cancelButtonLore,
+            String myAuctionBadge) {
 
         private static final String DEFAULT_DISABLED = "&cLive auctions are currently disabled.";
         private static final String DEFAULT_QUEUE_INSTANT =
@@ -592,6 +595,11 @@ public final class AuctionMessageConfiguration {
         private static final String DEFAULT_INFO_LORE_2 = "Listings are broadcast from first to last.";
         private static final String DEFAULT_EMPTY_QUEUE_TITLE = "No Queued Auctions";
         private static final String DEFAULT_EMPTY_QUEUE_LORE = "The live auction queue is currently empty.";
+        private static final String DEFAULT_SELL_BUTTON_LABEL = "Start Live Auction";
+        private static final String DEFAULT_SELL_BUTTON_LORE = "Sell an item via the live auction queue.";
+        private static final String DEFAULT_CANCEL_BUTTON_LABEL = "Cancel My Auction";
+        private static final String DEFAULT_CANCEL_BUTTON_LORE = "Remove your item from the live queue.";
+        private static final String DEFAULT_MY_AUCTION_BADGE = "&e\u25ba YOUR AUCTION";
 
         public LiveMessages {
             disabled = normalize(disabled, DEFAULT_DISABLED);
@@ -610,13 +618,20 @@ public final class AuctionMessageConfiguration {
             infoLoreLine2 = normalize(infoLoreLine2, DEFAULT_INFO_LORE_2);
             emptyQueueTitle = normalize(emptyQueueTitle, DEFAULT_EMPTY_QUEUE_TITLE);
             emptyQueueLore = normalize(emptyQueueLore, DEFAULT_EMPTY_QUEUE_LORE);
+            sellButtonLabel = normalize(sellButtonLabel, DEFAULT_SELL_BUTTON_LABEL);
+            sellButtonLore = normalize(sellButtonLore, DEFAULT_SELL_BUTTON_LORE);
+            cancelButtonLabel = normalize(cancelButtonLabel, DEFAULT_CANCEL_BUTTON_LABEL);
+            cancelButtonLore = normalize(cancelButtonLore, DEFAULT_CANCEL_BUTTON_LORE);
+            myAuctionBadge = normalize(myAuctionBadge, DEFAULT_MY_AUCTION_BADGE);
         }
 
         public static LiveMessages defaults() {
             return new LiveMessages(DEFAULT_DISABLED, DEFAULT_QUEUE_INSTANT, DEFAULT_INVENTORY_TITLE, DEFAULT_CLOSE_LABEL,
                     DEFAULT_CLOSE_LORE, DEFAULT_REFRESH_LABEL, DEFAULT_REFRESH_LORE, DEFAULT_BROWSE_LABEL,
                     DEFAULT_BROWSE_LORE, DEFAULT_BACK_LABEL, DEFAULT_BACK_LORE, DEFAULT_INFO_TITLE,
-                    DEFAULT_INFO_LORE_1, DEFAULT_INFO_LORE_2, DEFAULT_EMPTY_QUEUE_TITLE, DEFAULT_EMPTY_QUEUE_LORE);
+                    DEFAULT_INFO_LORE_1, DEFAULT_INFO_LORE_2, DEFAULT_EMPTY_QUEUE_TITLE, DEFAULT_EMPTY_QUEUE_LORE,
+                    DEFAULT_SELL_BUTTON_LABEL, DEFAULT_SELL_BUTTON_LORE,
+                    DEFAULT_CANCEL_BUTTON_LABEL, DEFAULT_CANCEL_BUTTON_LORE, DEFAULT_MY_AUCTION_BADGE);
         }
 
         public static LiveMessages from(ConfigurationSection section) {
@@ -639,7 +654,12 @@ public final class AuctionMessageConfiguration {
                     section.getString("info-lore-1"),
                     section.getString("info-lore-2"),
                     section.getString("empty-title"),
-                    section.getString("empty-lore"));
+                    section.getString("empty-lore"),
+                    section.getString("sell-button-label"),
+                    section.getString("sell-button-lore"),
+                    section.getString("cancel-button-label"),
+                    section.getString("cancel-button-lore"),
+                    section.getString("my-auction-badge"));
         }
     }
 

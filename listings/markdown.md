@@ -12,9 +12,18 @@ Whether you're running a survival, skyblock, or factions server, EzAuction gives
 
 > **Requires Vault and a compatible economy plugin such as [EzEconomy](https://modrinth.com/plugin/ezeconomy) to process currency.**
 
-## What's New — v2.2.1
+## What's New — v2.3.0
 
-- **Fixed: Spigot compatibility** – Item data is now stored as a Base64 byte stream (`item-data` key via `BukkitObjectOutputStream`) instead of YAML-native serialization. This removes the `[ERROR] Material cannot be null` startup errors that occurred when loading YAML data written by a Paper 1.21+ server on a Spigot server. Existing saves migrate to the new format automatically on the next save cycle.
+- **Live auction seller management** – Players with `ezauction.auction.live.sell` can now queue items directly from the Live Auction browser (sell button in the GUI) or via `/liveauction sell`. On enqueue, a chat message confirms the queue position. `/liveauction cancel` removes the entry and refunds the deposit; a cancel button also appears in the GUI while the player has a queued entry. Admins with `ezauction.auction.live.admin` can force-cancel any active auction with `/liveauction cancel <id>`.
+- **`/bid` command** (alias `/livebid`) – Dedicated command for live auction interactions: place bids (`/bid <amount>`), view session status, and manage per-player countdown preferences. Bids can also be placed by clicking the suggestion in the live auction chat message.
+- **Per-player notification preferences** – Toggle countdowns with `/bid notify [on|off]` and select display type with `/bid notify display <types…>`. Preferences persist across restarts in `live-preferences.yml` (or a MySQL table).
+- **EzCountdown integration** (optional soft-dependency) – Display live auction countdowns via `ACTION_BAR`, `BOSS_BAR`, `TITLE`, `SCOREBOARD`, or `CHAT`.
+- **Clickable bid messages & item hover previews** – The bid announcement in chat links directly to `/bid <next-minimum>`; hovering the item name shows enchantments, potion effects, and shulker box contents.
+- **Five new Bukkit events** – `LiveAuctionStartedEvent` (cancellable), `LiveAuctionBidPlacedEvent` (cancellable), `LiveAuctionEndedEvent`, `LiveAuctionPlayerJoinedEvent`, `LiveAuctionPlayerLeftEvent`.
+- **Live Auctions shortcut in Auction House** – A quick-access button (slot 47, beacon) in the main `/auction` browser opens the Live Auction picker directly, without having to type `/liveauction`.
+- **Claim GUI** – `/auction claim` and the Claims button in the browser now open a 54-slot GUI showing each pending return item with its expiry date displayed in the item lore. A single **Claim All** button collects everything at once; a **Back** button returns to the auction browser.
+- **Configurable claim expiry** – Set `claim.expiry-days` in `auction.yml` (default `7`) to control how many days pending return items are held before expiry is shown in the Claim GUI.
+- **First-bid minimum fix** – The opening bid on a live auction now only requires the starting price; the increment is applied to subsequent bids only. Sending an empty `/bid` response automatically places the minimum bid.
 
 ## Why Use EzAuction?
 - **Menu-first trading** – Paginated browsers, sell/order editors, and confirmation popups keep every transaction guided and click-friendly.
@@ -103,9 +112,14 @@ holograms:
 4. Encourage `/auction history` so buyers and sellers can audit their latest activity right from chat.
 
 ## Live Auctions
-- **Queue the spotlight listings** – Flip `live-auctions.enabled` on (and `queue-enabled` if you want a rolling lineup) so fresh sales are staged for broadcast and visible through `/auction live`.
-- **Hype them in chat** – Keep `display-in-chat` enabled to announce the next queued listing every `announcement-interval-ticks` ticks using your Vault currency formatting.
-- **Curate from the live menu** – The Live Auctions GUI shows queue position, seller names, price summaries, and quick actions to refresh or jump back into the main browser.
+- **Queue the spotlight listings** – Flip `live-auctions.enabled` on (and `queue-enabled` if you want a rolling lineup) so fresh sales are staged for broadcast and visible through `/liveauction`.
+- **Sell from the GUI** – The Live Auction browser shows a sell button for players with `ezauction.auction.live.sell`. One click opens the sell menu pre-configured for the live queue — no command needed.
+- **Queue position feedback** – After queuing an item, the seller receives a chat confirmation with their position number. If the queue is disabled, the auction starts immediately and a different confirmation is shown.
+- **Cancel anytime** – A cancel button appears in the GUI while the player has a queued entry; clicking it (or running `/liveauction cancel`) dequeues the item and refunds the deposit.
+- **Admin force-cancel** – OPs and players with `ezauction.auction.live.admin` can stop an active auction immediately via `/liveauction cancel <auction-id>`. All bids are refunded and the item is returned to the seller.
+- **`/bid` command** – Bidders place bids with `/bid <amount>` or by clicking the clickable suggestion in chat. `/bid notify` and `/bid notify display` manage per-player countdown preferences.
+- **Hype them in chat** – Keep `display-in-chat` enabled to broadcast live listings every `announcement-interval-ticks` ticks with clickable bid links and hover previews on the item name.
+- **Curate from the live menu** – The Live Auctions GUI shows queue position, seller names, price summaries, and highlights your own entry with a badge and enchant glow.
 
 ## Commands & Permissions
 | Command | Description | Permission |
@@ -116,6 +130,11 @@ holograms:
 | `/auction cancel [id]` | Review and cancel active listings or buy orders. | ezauction.auction |
 | `/auction history [buy/sell]` | Show the latest transactions for each category. | ezauction.auction.history |
 | `/auction live` | Preview upcoming live auction broadcasts and refresh the queue. | ezauction.auction.live |
+| `/liveauction` | Open the live auction viewer. | ezauction.live |
+| `/liveauction sell` | Queue the held item for the live auction. | ezauction.auction.live.sell |
+| `/liveauction cancel` | Cancel your own queued live auction entry and receive a deposit refund. | ezauction.auction.live.sell |
+| `/liveauction cancel <id>` | Force-cancel an active live auction by ID. Refunds all bidders and returns the item. (Admin) | ezauction.auction.live.admin |
+| `/bid [amount]` | Place a bid or view session status in an active live auction. | ezauction.bid |
 | `/auction claim` | Withdraw stored return items. | ezauction.auction |
 | `/auction search <query>` | Open the auction browser filtered by item name, enchantment, or keyword. | ezauction.auction.search |
 | `/auctionhologram <create/remove/list> [args]` | Manage auction holograms: create, remove, or list in-world auction displays. | ezauction.hologram.manage |

@@ -28,16 +28,71 @@ holograms:
   # Vertical offset applied when spawning holograms above the target block.
   height-offset: 1.75
 live-auctions:
-  enabled: false
+  enabled: true
   # When enabled, new listings are pushed into a live announcement queue that can be consumed sequentially.
   queue-enabled: true
   # Broadcast queued live auctions to the server chat.
   display-in-chat: true
   # Interval (in ticks) between live auction broadcasts when chat display is enabled.
   announcement-interval-ticks: 200
+  # If a bid is placed within this many seconds of the auction ending, the timer is reset to this value
+  # to prevent last-second sniping. Set to 0 to disable anti-snipe protection.
+  min-time-before-finish-seconds: 5
+  countdown:
+    # Whether to use EzCountdown for per-player display notifications (ACTION_BAR, BOSS_BAR, etc.).
+    # Requires EzCountdown soft-dependency. When false, only chat-based reminders are used.
+    ezcountdown-enabled: false
+    # Automatically use EzCountdown if the plugin is installed, regardless of ezcountdown-enabled.
+    # Set to false to rely solely on ezcountdown-enabled for manual control.
+    ezcountdown-auto-detect: true
+    # Which EzCountdown display types to use by default. Each player can override this in their preferences.
+    # Valid values: ACTION_BAR, BOSS_BAR, CHAT, TITLE, SCOREBOARD
+    display-types:
+      - ACTION_BAR
+    # Format string for the EzCountdown display. Use {formatted} for the default formatted countdown.
+    format-message: "{formatted}"
+    # Message to show when a countdown starts (leave blank to skip).
+    start-message: ""
+    # Message to show when the countdown ends.
+    end-message: "Auction ended!"
+    # Duration in seconds for the EzCountdown display. Should match the live auction broadcast interval.
+    duration-seconds: 60
+    # Interval (in seconds) for periodic chat countdown reminders (0 = disabled; use chat-reminder-at-seconds instead).
+    chat-reminder-interval-seconds: 0
+    # Send chat reminders at these specific seconds remaining (only used when interval is 0).
+    chat-reminder-at-seconds:
+      - 30
+      - 10
+      - 5
+  bidding:
+    # Minimum bid increment as a percentage of the current price (0 = no minimum).
+    minimum-bid-increment-percent: 5.0
+    # Minimum bid increment as a fixed amount (applied after percentage, whichever is higher).
+    minimum-bid-increment-fixed: 10.0
+  # When true, enables the optional per-player chat filter that mutes non-auction messages
+  # while a player is actively participating in a live auction. Players must opt-in via /bid mutechat on.
+  chat-filter-feature-enabled: false
 
 history-gui:
   enabled: true # Set to false to disable the auction history GUI and related commands.
 
+display:
+  # Date/time format used when showing listing expiry times (java.time.format.DateTimeFormatter pattern).
+  date-format: "dd-MM-yy HH:mm:ss"
+  # Currency display template. Use {amount} as the placeholder for the formatted number.
+  # Leave blank to use Vault's economy.format() output (recommended when using a Vault economy plugin).
+  # Examples:  "{amount} coins"  "$&a{amount}"  "{amount}€"
+  currency-format: ""
+  # Number format pattern (DecimalFormat) applied to {amount} when currency-format is set.
+  # Only used when currency-format is non-empty. Default produces "1,234.56".
+  currency-number-format: "#,##0.00"
+
+# Uses TeamsAPI to make Faction Auctions possible
+# Download on Modrinth: https://modrinth.com/plugin/teams-api
 team-auctions:
   enabled: true # Set to false to disable team-scoped auction listings.
+
+# Settings for item claiming (items returned from expired/cancelled auctions or fulfilled buy orders).
+claim:
+  # Number of days before unclaimed return items expire and are removed. Set to 0 to disable expiry.
+  expiry-days: 7

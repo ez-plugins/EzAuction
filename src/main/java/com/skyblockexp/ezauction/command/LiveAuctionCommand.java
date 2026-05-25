@@ -1,16 +1,22 @@
 package com.skyblockexp.ezauction.command;
 
-import com.skyblockexp.ezauction.AuctionManager;
+import com.skyblockexp.ezauction.service.AuctionManager;
+import com.skyblockexp.ezauction.model.AuctionOperationResult;
+import com.skyblockexp.ezauction.config.AuctionBackendMessages;
 import com.skyblockexp.ezauction.config.AuctionCommandMessageConfiguration;
-import com.skyblockexp.ezauction.gui.AuctionSellMenu;
-import com.skyblockexp.ezauction.gui.LiveAuctionMenu;
-import com.skyblockexp.ezauction.gui.SellMenuHolder.Target;
+import com.skyblockexp.ezauction.gui.menu.AuctionSellMenu;
+import com.skyblockexp.ezauction.gui.menu.LiveAuctionMenu;
+import com.skyblockexp.ezauction.gui.holder.SellMenuHolder.Target;
+import com.skyblockexp.ezauction.live.LiveAuctionEntry;
+import com.skyblockexp.ezauction.live.LiveAuctionService;
 import com.skyblockexp.ezauction.live.LiveSellContext;
+import com.skyblockexp.ezauction.live.component.LiveAuctionComponentBuilder;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Optional;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -29,15 +35,30 @@ public class LiveAuctionCommand implements CommandExecutor, TabCompleter {
     private final LiveAuctionMenu liveAuctionMenu;
     private final AuctionSellMenu auctionSellMenu;
     private final AuctionCommandMessageConfiguration messages;
+    private final LiveAuctionService liveAuctionService;
+    private final AuctionBackendMessages.LiveMessages backendMessages;
 
     public LiveAuctionCommand(AuctionManager auctionManager,
                               LiveAuctionMenu liveAuctionMenu,
                               AuctionSellMenu auctionSellMenu,
-                              AuctionCommandMessageConfiguration messages) {
+                              AuctionCommandMessageConfiguration messages,
+                              LiveAuctionService liveAuctionService,
+                              AuctionBackendMessages.LiveMessages backendMessages) {
         this.auctionManager = Objects.requireNonNull(auctionManager, "auctionManager");
         this.liveAuctionMenu = Objects.requireNonNull(liveAuctionMenu, "liveAuctionMenu");
         this.auctionSellMenu = Objects.requireNonNull(auctionSellMenu, "auctionSellMenu");
         this.messages = messages != null ? messages : AuctionCommandMessageConfiguration.defaults();
+        this.liveAuctionService = liveAuctionService;
+        this.backendMessages = backendMessages != null ? backendMessages : AuctionBackendMessages.LiveMessages.defaults();
+    }
+
+    /** Backward-compatible 4-arg constructor. */
+    public LiveAuctionCommand(AuctionManager auctionManager,
+                              LiveAuctionMenu liveAuctionMenu,
+                              AuctionSellMenu auctionSellMenu,
+                              AuctionCommandMessageConfiguration messages) {
+        this(auctionManager, liveAuctionMenu, auctionSellMenu, messages, null,
+                AuctionBackendMessages.LiveMessages.defaults());
     }
 
     @Override
@@ -79,6 +100,39 @@ public class LiveAuctionCommand implements CommandExecutor, TabCompleter {
                 auctionSellMenu.openSellMenu(player, Target.LIVE);
                 return true;
             }
+            case "cancel" -> {
+                if (liveAuctionService == null) {
+                    sendMessage(player, colorize("&cLive auction service unavailable."));
+                    return true;
+                }
+                if (args.length >= 2 && !args[1].equalsIgnoreCase("queue")) {
+                    // Force-cancel active auction by ID (admin)
+                    if (!player.hasPermission("ezauction.auction.live.admin")) {
+                        sendMessage(player, messages.live().noPermission());
+                        return true;
+                    }
+                    String auctionId = args[1];
+                    AuctionOperationResult result = liveAuctionService.forceCancel(auctionId);
+                    sendMessage(player, result.success() ? result.message()
+                            : colorize(backendMessages.notFound().replace("{id}", auctionId)));
+                } else {
+                    // Cancel own queued entry
+                    if (!player.hasPermission("ezauction.auction.live.sell")) {
+                        sendMessage(player, messages.sell().noPermission());
+                        return true;
+                    }
+                    Optional<LiveAuctionEntry> removed = liveAuctionService.dequeueForSeller(player.getUniqueId());
+                    if (removed.isEmpty()) {
+                        sendMessage(player, colorize(backendMessages.cancelNoEntry()));
+                    } else {
+                        LiveAuctionEntry entry = removed.get();
+                        auctionManager.cancelListing(player.getUniqueId(), entry.listing().id());
+                        String itemName = LiveAuctionComponentBuilder.describeItem(entry.listing().item());
+                        sendMessage(player, colorize(backendMessages.queueCancelled().replace("{item}", itemName)));
+                    }
+                }
+                return true;
+            }
             default -> {
                 sendMessage(player, messages.usage().live()
                         .replace("{label}", label.toLowerCase(Locale.ENGLISH)));
@@ -90,7 +144,7 @@ public class LiveAuctionCommand implements CommandExecutor, TabCompleter {
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (args.length == 1) {
-            return Arrays.asList("sell");
+            return Arrays.asList("sell", "cancel");
         }
         return Collections.emptyList();
     }

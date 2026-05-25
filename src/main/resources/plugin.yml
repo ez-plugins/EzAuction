@@ -3,7 +3,7 @@ version: ${project.version}
 main: com.skyblockexp.ezauction.EzAuctionPlugin
 author: Shadow48402
 description: Standalone auction house plugin for EzAuction-powered Minecraft servers (requires Vault + economy provider).
-softdepend: [Vault, EzShops, SkyblockExperienceCommon, EzScoreboard, PlaceholderAPI, DiscordSRV, TeamsAPI]
+softdepend: [Vault, EzShops, SkyblockExperienceCommon, EzScoreboard, PlaceholderAPI, DiscordSRV, TeamsAPI, EzCountdown]
 api-version: 1.13
 commands:
   auction:
@@ -36,6 +36,8 @@ commands:
     usage: |
       /<command> - Open the live auction browser.
       /<command> sell - Open the live auction sell menu.
+      /<command> cancel - Cancel your queued live auction.
+      /<command> cancel <id> - Force-cancel an active live auction (admin).
     permission: ezauction.auction.live
     permission-message: You do not have permission to view live auctions.
   orders:
@@ -54,6 +56,19 @@ commands:
     usage: /order - Place a new buy order for the item in your hand.
     permission: ezauction.auction.order
     permission-message: You do not have permission to use this command.
+  bid:
+    description: Interact with active live auctions — place bids, join/leave, and manage notifications.
+    usage: |
+      /<command> - Open the live auction picker or show your active auction.
+      /<command> <amount> - Place a bid on your current live auction.
+      /<command> select <id> - Join a specific live auction.
+      /<command> leave - Leave your current live auction.
+      /<command> notify [on|off] - Toggle live auction notifications.
+      /<command> notify display <types...> - Set EzCountdown display types.
+      /<command> mutechat [on|off] - Mute non-auction chat while in a live auction.
+    aliases: [livebid]
+    permission: ezauction.bid
+    permission-message: You do not have permission to interact with live auctions.
 permissions:
   ezauction.auction:
     description: Allows players to access the /auction command.
@@ -91,3 +106,12 @@ permissions:
   ezauction.auction.live.sell:
     description: Allows players to open the live auction sell menu.
     default: true
+  ezauction.bid:
+    description: Allows players to use the /bid command to interact with live auctions.
+    default: true
+  ezauction.auction.live.notify:
+    description: Allows players to configure their live auction notification preferences.
+    default: true
+  ezauction.auction.live.admin:
+    description: Allows force-cancelling active live auctions.
+    default: op

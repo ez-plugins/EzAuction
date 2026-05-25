@@ -8,8 +8,9 @@ import org.bukkit.inventory.ItemStack;
 import java.util.List;
 import java.util.UUID;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import com.skyblockexp.ezauction.config.AuctionBackendMessages;
-import com.skyblockexp.ezauction.AuctionOperationResult;
+import com.skyblockexp.ezauction.model.AuctionOperationResult;
 
 /**
  * Handles claim and return logic for auction items.
@@ -18,7 +19,7 @@ public class AuctionClaimService {
         /**
          * Returns an item from a cancelled or expired listing to the seller's inventory or pending returns.
          */
-        public void returnListingItem(com.skyblockexp.ezauction.AuctionListing listing, Map<UUID, List<ItemStack>> pendingReturns) {
+        public void returnListingItem(com.skyblockexp.ezauction.model.AuctionListing listing, Map<UUID, List<ItemStack>> pendingReturns) {
             if (listing == null) return;
             ItemStack item = listing.item();
             if (item == null || item.getType() == org.bukkit.Material.AIR || item.getAmount() <= 0) return;
@@ -64,9 +65,9 @@ public class AuctionClaimService {
         /**
          * Attempts to claim a listing for a buyer, removing it from the listings map and updating pending returns.
          */
-        public boolean claimListing(String listingId, Map<String, com.skyblockexp.ezauction.AuctionListing> listings, Map<UUID, List<ItemStack>> pendingReturns) {
+        public boolean claimListing(String listingId, Map<String, com.skyblockexp.ezauction.model.AuctionListing> listings, Map<UUID, List<ItemStack>> pendingReturns) {
             if (listingId == null || listingId.isEmpty()) return false;
-            com.skyblockexp.ezauction.AuctionListing listing = listings.remove(listingId);
+            com.skyblockexp.ezauction.model.AuctionListing listing = listings.remove(listingId);
             if (listing == null) return false;
             // No-op: actual item delivery is handled elsewhere
             return true;
@@ -82,12 +83,14 @@ public class AuctionClaimService {
                 updated.add(item.clone());
                 return updated;
             });
+            // Notify the outer class to update expiry for this player.
+            AuctionClaimService.this.touchExpiry(playerId);
         }
 
         /**
          * Delivers an order item to the buyer, or stores it in pending returns if inventory is full.
          */
-        public void deliverOrderItem(com.skyblockexp.ezauction.AuctionOrder order, ItemStack item, Map<UUID, List<ItemStack>> pendingReturns) {
+        public void deliverOrderItem(com.skyblockexp.ezauction.model.AuctionOrder order, ItemStack item, Map<UUID, List<ItemStack>> pendingReturns) {
             if (order == null || item == null || item.getType() == org.bukkit.Material.AIR || item.getAmount() <= 0) return;
             ItemStack toDeliver = item.clone();
             UUID buyerId = order.buyerId();
@@ -109,18 +112,20 @@ public class AuctionClaimService {
         }
     private final Map<UUID, List<ItemStack>> pendingReturns;
     private final AuctionBackendMessages backendMessages;
+    private final Map<UUID, Long> claimExpiries;
+    private final int claimExpiryDays;
     private final String CLAIM_COMMAND = "/auction claim";
 
-
-    /**
-     * Constructs a new AuctionClaimService.
-     *
-     * @param pendingReturns  Map of player UUIDs to their pending return items
-     * @param backendMessages Backend messages for claim notifications
-     */
     public AuctionClaimService(Map<UUID, List<ItemStack>> pendingReturns, AuctionBackendMessages backendMessages) {
+        this(pendingReturns, backendMessages, new ConcurrentHashMap<>(), 7);
+    }
+
+    public AuctionClaimService(Map<UUID, List<ItemStack>> pendingReturns, AuctionBackendMessages backendMessages,
+                               Map<UUID, Long> claimExpiries, int claimExpiryDays) {
         this.pendingReturns = pendingReturns;
         this.backendMessages = backendMessages;
+        this.claimExpiries = claimExpiries;
+        this.claimExpiryDays = Math.max(1, claimExpiryDays);
     }
 
 
@@ -193,10 +198,12 @@ public class AuctionClaimService {
         }
         if (availableAmount <= 0) {
             pendingReturns.remove(playerId);
+            claimExpiries.remove(playerId);
             return AuctionOperationResult.failure(formatMessage(backendMessages.claim().noneAvailable()));
         }
         if (remaining.isEmpty()) {
             pendingReturns.remove(playerId);
+            claimExpiries.remove(playerId);
         } else {
             pendingReturns.put(playerId, remaining);
         }
@@ -244,5 +251,39 @@ public class AuctionClaimService {
 
     private String pluralSuffix(int amount) {
         return amount == 1 ? "" : "s";
+    }
+
+    /**
+     * Updates the expiry timestamp for a player to {@code now + claimExpiryDays} days.
+     * Called whenever items are stored for a player.
+     */
+    void touchExpiry(UUID playerId) {
+        if (playerId == null) return;
+        long expiryMs = System.currentTimeMillis() + ((long) claimExpiryDays * 86_400_000L);
+        claimExpiries.put(playerId, expiryMs);
+    }
+
+    /**
+     * Sets an expiry for a player only if they do not already have one (used for items loaded from disk).
+     */
+    public void initExpiry(UUID playerId) {
+        if (playerId == null) return;
+        claimExpiries.putIfAbsent(playerId,
+                System.currentTimeMillis() + ((long) claimExpiryDays * 86_400_000L));
+    }
+
+    /** Returns the expiry timestamp (epoch ms) for a player's pending items, or {@code 0} if unknown. */
+    public long getClaimExpiryMs(UUID playerId) {
+        return claimExpiries.getOrDefault(playerId, 0L);
+    }
+
+    /** Removes any tracked expiry for the given player (called when all items are claimed). */
+    public void removeExpiry(UUID playerId) {
+        claimExpiries.remove(playerId);
+    }
+
+    /** Returns the underlying expiry map (for use by other services). */
+    public Map<UUID, Long> claimExpiries() {
+        return claimExpiries;
     }
 }

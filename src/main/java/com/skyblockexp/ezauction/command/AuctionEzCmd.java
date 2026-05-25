@@ -1,12 +1,12 @@
 package com.skyblockexp.ezauction.command;
 
-import com.skyblockexp.ezauction.AuctionManager;
+import com.skyblockexp.ezauction.service.AuctionManager;
 import com.skyblockexp.ezauction.config.AuctionListingRules;
 import com.skyblockexp.ezauction.config.AuctionCommandMessageConfiguration;
-import com.skyblockexp.ezauction.gui.AuctionMenu;
-import com.skyblockexp.ezauction.gui.AuctionOrderMenu;
-import com.skyblockexp.ezauction.gui.AuctionSellMenu;
-import com.skyblockexp.ezauction.gui.LiveAuctionMenu;
+import com.skyblockexp.ezauction.gui.menu.AuctionMenu;
+import com.skyblockexp.ezauction.gui.menu.AuctionOrderMenu;
+import com.skyblockexp.ezauction.gui.menu.AuctionSellMenu;
+import com.skyblockexp.ezauction.gui.menu.LiveAuctionMenu;
 import com.skyblockexp.ezauction.transaction.AuctionTransactionHistory;
 import com.skyblockexp.ezauction.transaction.AuctionTransactionService;
 import org.bukkit.command.Command;

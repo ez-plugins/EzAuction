@@ -50,6 +50,11 @@ order:
 live:
   disabled: "&cLive auctions are currently disabled."
   queue-instant: "&eLive auction announcements are broadcast instantly; no queue is available."
+  sell-button-label: "Start Live Auction"
+  sell-button-lore: "Sell an item via the live auction queue."
+  cancel-button-label: "Cancel My Auction"
+  cancel-button-lore: "Remove your item from the live queue."
+  my-auction-badge: "&e\u25ba YOUR AUCTION"
 activity:
   title-prefix: "My Activity"
   tab-listings-label: "My Listings"

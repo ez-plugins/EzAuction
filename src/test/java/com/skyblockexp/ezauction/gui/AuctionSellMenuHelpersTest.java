@@ -1,8 +1,9 @@
 package com.skyblockexp.ezauction.gui;
+import com.skyblockexp.ezauction.gui.menu.AuctionSellMenu;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import com.skyblockexp.ezauction.AuctionManager;
+import com.skyblockexp.ezauction.service.AuctionManager;
 import com.skyblockexp.ezauction.transaction.AuctionTransactionService;
 import com.skyblockexp.ezauction.compat.ItemTagStorage;
 import com.skyblockexp.ezauction.config.AuctionListingRules;

@@ -3,8 +3,8 @@ package com.skyblockexp.ezauction.history;
 
 import com.skyblockexp.ezauction.transaction.AuctionTransactionType;
 
-import com.skyblockexp.ezauction.AuctionListing;
-import com.skyblockexp.ezauction.AuctionOrder;
+import com.skyblockexp.ezauction.model.AuctionListing;
+import com.skyblockexp.ezauction.model.AuctionOrder;
 import com.skyblockexp.ezauction.transaction.AuctionTransactionHistory;
 import com.skyblockexp.ezauction.config.AuctionBackendMessages;
 import org.bukkit.plugin.java.JavaPlugin;

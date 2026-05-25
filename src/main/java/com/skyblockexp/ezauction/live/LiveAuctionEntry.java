@@ -1,6 +1,6 @@
 package com.skyblockexp.ezauction.live;
 
-import com.skyblockexp.ezauction.AuctionListing;
+import com.skyblockexp.ezauction.model.AuctionListing;
 import java.util.Objects;
 import java.util.UUID;
 import org.bukkit.inventory.ItemStack;

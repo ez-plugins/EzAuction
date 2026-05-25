@@ -15,6 +15,10 @@ parent: Reference
 | `ezauction.cancel` | true | Cancel own active listings |
 | `ezauction.hologram` | true | Use auction hologram commands |
 | `ezauction.live` | true | Use live auction features and commands |
+| `ezauction.bid` | true | Use `/bid` — place bids, join/leave sessions, toggle mute-chat |
+| `ezauction.auction.live.notify` | true | Toggle and configure countdown notifications via `/bid notify` |
+| `ezauction.auction.live.sell` | true | Sell items into the live auction queue via `/liveauction sell` or the GUI button |
+| `ezauction.auction.live.admin` | op | Force-cancel active live auctions via `/liveauction cancel <id>` |
 | `ezauction.auction.order` | true | Open buy-orders menu and browser |
 | `ezauction.auction.history` | true | View own transaction history |
 | `ezauction.auction.history.others` | op | View another player's transaction history |
@@ -36,6 +40,8 @@ ezauction.use
 ezauction.sell
 ezauction.cancel
 ezauction.live
+ezauction.bid
+ezauction.auction.live.notify
 ezauction.auction.order
 ezauction.auction.history
 ezauction.auction.team

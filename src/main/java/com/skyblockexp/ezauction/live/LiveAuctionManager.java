@@ -2,7 +2,9 @@
 package com.skyblockexp.ezauction.live;
 
 import com.skyblockexp.ezauction.transaction.AuctionTransactionService;
-import com.skyblockexp.ezauction.*;
+import com.skyblockexp.ezauction.model.AuctionListing;
+import com.skyblockexp.ezauction.model.AuctionOperationResult;
+import com.skyblockexp.ezauction.service.AuctionManager;
 import com.skyblockexp.ezauction.config.AuctionBackendMessages;
 import com.skyblockexp.ezauction.config.AuctionListingRules;
 import com.skyblockexp.ezauction.config.LiveAuctionConfiguration;
@@ -184,17 +186,7 @@ public final class LiveAuctionManager {
     }
 
     private String formatDuration(Duration duration) {
-        long totalMinutes = duration.toMinutes();
-        long days = totalMinutes / (60 * 24);
-        totalMinutes %= 60 * 24;
-        long hours = totalMinutes / 60;
-        long minutes = totalMinutes % 60;
-        List<String> parts = new ArrayList<>();
-        if (days > 0) parts.add(days + "d");
-        if (hours > 0) parts.add(hours + "h");
-        if (minutes > 0 && days == 0) parts.add(minutes + "m");
-        if (parts.isEmpty()) parts.add("0m");
-        return String.join(" ", parts);
+        return com.skyblockexp.ezauction.util.DateUtil.formatDuration(duration);
     }
 
     private String colorize(String s) {

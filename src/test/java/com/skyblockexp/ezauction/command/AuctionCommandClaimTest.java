@@ -4,11 +4,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.skyblockexp.ezauction.AuctionManager;
-import com.skyblockexp.ezauction.gui.AuctionMenu;
-import com.skyblockexp.ezauction.gui.AuctionOrderMenu;
-import com.skyblockexp.ezauction.gui.AuctionSellMenu;
-import com.skyblockexp.ezauction.gui.LiveAuctionMenu;
+import com.skyblockexp.ezauction.service.AuctionManager;
+import com.skyblockexp.ezauction.gui.menu.AuctionMenu;
+import com.skyblockexp.ezauction.gui.menu.AuctionOrderMenu;
+import com.skyblockexp.ezauction.gui.menu.AuctionSellMenu;
+import com.skyblockexp.ezauction.gui.menu.LiveAuctionMenu;
 import com.skyblockexp.ezauction.transaction.AuctionTransactionHistory;
 import com.skyblockexp.ezauction.transaction.AuctionTransactionService;
 import com.skyblockexp.ezauction.config.AuctionListingRules;
@@ -26,7 +26,7 @@ class AuctionCommandClaimTest {
         PlayerMock player = server.addPlayer("p");
 
         AuctionManager manager = mock(AuctionManager.class);
-        when(manager.claimReturnItems(player)).thenReturn(new com.skyblockexp.ezauction.AuctionOperationResult(true, "ok"));
+        when(manager.claimReturnItems(player)).thenReturn(new com.skyblockexp.ezauction.model.AuctionOperationResult(true, "ok"));
 
         AuctionCommand cmd = new AuctionCommand(
                 manager,

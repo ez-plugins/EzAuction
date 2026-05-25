@@ -6,10 +6,10 @@ import static org.mockito.Mockito.verify;
 
 import org.bukkit.Material;
 import org.bukkit.command.Command;
-import com.skyblockexp.ezauction.AuctionManager;
-import com.skyblockexp.ezauction.gui.AuctionMenu;
-import com.skyblockexp.ezauction.gui.AuctionOrderMenu;
-import com.skyblockexp.ezauction.gui.AuctionSellMenu;
+import com.skyblockexp.ezauction.service.AuctionManager;
+import com.skyblockexp.ezauction.gui.menu.AuctionMenu;
+import com.skyblockexp.ezauction.gui.menu.AuctionOrderMenu;
+import com.skyblockexp.ezauction.gui.menu.AuctionSellMenu;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

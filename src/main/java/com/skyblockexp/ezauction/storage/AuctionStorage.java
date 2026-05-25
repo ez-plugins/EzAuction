@@ -1,7 +1,7 @@
 package com.skyblockexp.ezauction.storage;
 
-import com.skyblockexp.ezauction.AuctionListing;
-import com.skyblockexp.ezauction.AuctionOrder;
+import com.skyblockexp.ezauction.model.AuctionListing;
+import com.skyblockexp.ezauction.model.AuctionOrder;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;

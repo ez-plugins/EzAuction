@@ -26,7 +26,8 @@ No arguments. Players with `ezauction.auction` can open the GUI.
 | Listings toggle | Filter to active auction listings |
 | Orders toggle | Switch to the buy-orders view |
 | Team Auctions toggle | View team-scoped listings (requires TeamsAPI) |
-| Claims / Returns | Quick-open the pending returns menu |
+| Live Auctions | Quick-access shortcut to open the Live Auction picker directly (same as `/liveauction`) |
+| Claims / Returns | Open the Claim GUI showing pending return items with expiry dates and a one-click Claim All button |
 | My Activity | View your own listings and orders |
 
 ## Search patterns
