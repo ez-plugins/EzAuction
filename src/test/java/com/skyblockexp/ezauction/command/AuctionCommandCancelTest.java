@@ -4,10 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.skyblockexp.ezauction.AuctionManager;
-import com.skyblockexp.ezauction.gui.AuctionMenu;
-import com.skyblockexp.ezauction.gui.AuctionOrderMenu;
-import com.skyblockexp.ezauction.gui.AuctionSellMenu;
+import com.skyblockexp.ezauction.service.AuctionManager;
+import com.skyblockexp.ezauction.gui.menu.AuctionMenu;
+import com.skyblockexp.ezauction.gui.menu.AuctionOrderMenu;
+import com.skyblockexp.ezauction.gui.menu.AuctionSellMenu;
 import org.bukkit.command.Command;
 import org.junit.jupiter.api.Test;
 import org.mockbukkit.mockbukkit.MockBukkit;
@@ -34,7 +34,7 @@ class AuctionCommandCancelTest {
             mock(com.skyblockexp.ezauction.transaction.AuctionTransactionHistory.class),
             mock(com.skyblockexp.ezauction.transaction.AuctionTransactionService.class),
             mock(com.skyblockexp.ezauction.config.AuctionListingRules.class),
-            mock(com.skyblockexp.ezauction.gui.LiveAuctionMenu.class),
+            mock(com.skyblockexp.ezauction.gui.menu.LiveAuctionMenu.class),
             null);
         boolean handled = cmd.onCommand(player, mock(Command.class), "auction", new String[]{"cancel"});
         assertTrue(handled);

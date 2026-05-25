@@ -25,6 +25,8 @@ public final class AuctionConfiguration {
     private final AuctionHologramConfiguration hologramConfiguration;
     private final LiveAuctionConfiguration liveAuctionConfiguration;
     private final List<Duration> durationOptions;
+    private final AuctionDisplayConfiguration displayConfiguration;
+    private final int claimExpiryDays;
 
         public AuctionConfiguration(int baseListingLimit, AuctionStorageConfiguration storageConfiguration,
             AuctionListingRules listingRules, AuctionMenuConfiguration menuConfiguration,
@@ -37,7 +39,8 @@ public final class AuctionConfiguration {
             boolean debug) {
         this(baseListingLimit, storageConfiguration, listingRules, menuConfiguration, menuInteractionConfiguration,
                 valueConfiguration, messageConfiguration, backendMessages, commandMessageConfiguration,
-                hologramConfiguration, liveAuctionConfiguration, durationOptions, debug, true);
+                hologramConfiguration, liveAuctionConfiguration, durationOptions, debug, true,
+                AuctionDisplayConfiguration.defaults(), 7);
     }
 
         public AuctionConfiguration(int baseListingLimit, AuctionStorageConfiguration storageConfiguration,
@@ -49,6 +52,37 @@ public final class AuctionConfiguration {
             AuctionHologramConfiguration hologramConfiguration,
             LiveAuctionConfiguration liveAuctionConfiguration, List<Duration> durationOptions,
             boolean debug, boolean teamAuctionsEnabled) {
+        this(baseListingLimit, storageConfiguration, listingRules, menuConfiguration, menuInteractionConfiguration,
+                valueConfiguration, messageConfiguration, backendMessages, commandMessageConfiguration,
+                hologramConfiguration, liveAuctionConfiguration, durationOptions, debug, teamAuctionsEnabled,
+                AuctionDisplayConfiguration.defaults(), 7);
+    }
+
+        public AuctionConfiguration(int baseListingLimit, AuctionStorageConfiguration storageConfiguration,
+            AuctionListingRules listingRules, AuctionMenuConfiguration menuConfiguration,
+            AuctionMenuInteractionConfiguration menuInteractionConfiguration,
+            AuctionValueConfiguration valueConfiguration, AuctionMessageConfiguration messageConfiguration,
+            AuctionBackendMessages backendMessages,
+            AuctionCommandMessageConfiguration commandMessageConfiguration,
+            AuctionHologramConfiguration hologramConfiguration,
+            LiveAuctionConfiguration liveAuctionConfiguration, List<Duration> durationOptions,
+            boolean debug, boolean teamAuctionsEnabled, AuctionDisplayConfiguration displayConfiguration) {
+        this(baseListingLimit, storageConfiguration, listingRules, menuConfiguration, menuInteractionConfiguration,
+                valueConfiguration, messageConfiguration, backendMessages, commandMessageConfiguration,
+                hologramConfiguration, liveAuctionConfiguration, durationOptions, debug, teamAuctionsEnabled,
+                displayConfiguration, 7);
+    }
+
+        public AuctionConfiguration(int baseListingLimit, AuctionStorageConfiguration storageConfiguration,
+            AuctionListingRules listingRules, AuctionMenuConfiguration menuConfiguration,
+            AuctionMenuInteractionConfiguration menuInteractionConfiguration,
+            AuctionValueConfiguration valueConfiguration, AuctionMessageConfiguration messageConfiguration,
+            AuctionBackendMessages backendMessages,
+            AuctionCommandMessageConfiguration commandMessageConfiguration,
+            AuctionHologramConfiguration hologramConfiguration,
+            LiveAuctionConfiguration liveAuctionConfiguration, List<Duration> durationOptions,
+            boolean debug, boolean teamAuctionsEnabled, AuctionDisplayConfiguration displayConfiguration,
+            int claimExpiryDays) {
         this.baseListingLimit = Math.max(0, baseListingLimit);
         this.storageConfiguration = storageConfiguration != null
                 ? storageConfiguration
@@ -77,6 +111,9 @@ public final class AuctionConfiguration {
         this.durationOptions = sanitizeDurationOptions(durationOptions);
         this.debug = debug;
         this.teamAuctionsEnabled = teamAuctionsEnabled;
+        this.displayConfiguration = displayConfiguration != null
+                ? displayConfiguration : AuctionDisplayConfiguration.defaults();
+        this.claimExpiryDays = claimExpiryDays > 0 ? claimExpiryDays : 7;
     }
 
     public boolean debug() {
@@ -133,6 +170,14 @@ public final class AuctionConfiguration {
 
     public List<Duration> durationOptions() {
         return durationOptions;
+    }
+
+    public AuctionDisplayConfiguration displayConfiguration() {
+        return displayConfiguration;
+    }
+
+    public int claimExpiryDays() {
+        return claimExpiryDays;
     }
 
     public static AuctionConfiguration defaultConfiguration() {

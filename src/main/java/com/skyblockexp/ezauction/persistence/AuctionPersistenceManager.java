@@ -8,8 +8,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
-import com.skyblockexp.ezauction.AuctionListing;
-import com.skyblockexp.ezauction.AuctionOrder;
+import com.skyblockexp.ezauction.model.AuctionListing;
+import com.skyblockexp.ezauction.model.AuctionOrder;
 import com.skyblockexp.ezauction.EzAuctionPlugin;
 import com.skyblockexp.ezauction.storage.AuctionStorage;
 import com.skyblockexp.ezauction.storage.DistributedAuctionListingStorage;

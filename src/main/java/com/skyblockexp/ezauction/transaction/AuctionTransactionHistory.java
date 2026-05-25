@@ -1,6 +1,6 @@
 package com.skyblockexp.ezauction.transaction;
 
-import com.skyblockexp.ezauction.HistorySaveDispatcher;
+import com.skyblockexp.ezauction.history.HistorySaveDispatcher;
 
 import com.skyblockexp.ezauction.EzAuctionPlugin;
 import com.skyblockexp.ezauction.storage.AuctionHistoryStorage;

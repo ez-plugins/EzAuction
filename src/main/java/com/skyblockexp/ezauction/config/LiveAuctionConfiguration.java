@@ -12,13 +12,23 @@ public final class LiveAuctionConfiguration {
     private final boolean queueEnabled;
     private final boolean displayInChat;
     private final long announcementIntervalTicks;
+    private final LiveAuctionCountdownConfiguration countdownConfiguration;
 
     public LiveAuctionConfiguration(boolean enabled, boolean queueEnabled, boolean displayInChat,
             long announcementIntervalTicks) {
+        this(enabled, queueEnabled, displayInChat, announcementIntervalTicks,
+                LiveAuctionCountdownConfiguration.defaults());
+    }
+
+    public LiveAuctionConfiguration(boolean enabled, boolean queueEnabled, boolean displayInChat,
+            long announcementIntervalTicks, LiveAuctionCountdownConfiguration countdownConfiguration) {
         this.enabled = enabled;
         this.queueEnabled = queueEnabled;
         this.displayInChat = displayInChat;
         this.announcementIntervalTicks = Math.max(0L, announcementIntervalTicks);
+        this.countdownConfiguration = countdownConfiguration != null
+                ? countdownConfiguration
+                : LiveAuctionCountdownConfiguration.defaults();
     }
 
     public boolean enabled() {
@@ -37,6 +47,10 @@ public final class LiveAuctionConfiguration {
         return announcementIntervalTicks;
     }
 
+    public LiveAuctionCountdownConfiguration countdownConfiguration() {
+        return countdownConfiguration;
+    }
+
     public static LiveAuctionConfiguration defaults() {
         return new LiveAuctionConfiguration(false, true, true, 200L);
     }
@@ -49,7 +63,9 @@ public final class LiveAuctionConfiguration {
         boolean queueEnabled = section.getBoolean("queue-enabled", true);
         boolean displayInChat = section.getBoolean("display-in-chat", true);
         long interval = section.getLong("announcement-interval-ticks", 200L);
-        return new LiveAuctionConfiguration(enabled, queueEnabled, displayInChat, interval);
+        LiveAuctionCountdownConfiguration countdownConfig =
+                LiveAuctionCountdownConfiguration.from(section);
+        return new LiveAuctionConfiguration(enabled, queueEnabled, displayInChat, interval, countdownConfig);
     }
 
     @Override

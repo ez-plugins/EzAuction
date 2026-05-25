@@ -1,9 +1,9 @@
 package com.skyblockexp.ezauction.command;
 
-import com.skyblockexp.ezauction.AuctionListing;
-import com.skyblockexp.ezauction.AuctionManager;
-import com.skyblockexp.ezauction.AuctionOperationResult;
-import com.skyblockexp.ezauction.AuctionOrder;
+import com.skyblockexp.ezauction.model.AuctionListing;
+import com.skyblockexp.ezauction.service.AuctionManager;
+import com.skyblockexp.ezauction.model.AuctionOperationResult;
+import com.skyblockexp.ezauction.model.AuctionOrder;
 import com.skyblockexp.ezauction.EzAuctionPlugin;
 import com.skyblockexp.ezauction.transaction.AuctionTransactionHistory;
 import com.skyblockexp.ezauction.transaction.AuctionTransactionHistoryEntry;
@@ -12,12 +12,12 @@ import com.skyblockexp.ezauction.transaction.AuctionTransactionType;
 import com.skyblockexp.ezauction.util.DateUtil;
 import com.skyblockexp.ezauction.config.AuctionListingRules;
 import com.skyblockexp.ezauction.config.AuctionCommandMessageConfiguration;
-import com.skyblockexp.ezauction.gui.AuctionMenu;
-import com.skyblockexp.ezauction.gui.AuctionOrderMenu;
-import com.skyblockexp.ezauction.gui.AuctionSellMenu;
-import com.skyblockexp.ezauction.gui.BrowserView;
-import com.skyblockexp.ezauction.gui.LiveAuctionMenu;
-import com.skyblockexp.ezauction.gui.SellMenuHolder.Target;
+import com.skyblockexp.ezauction.gui.menu.AuctionMenu;
+import com.skyblockexp.ezauction.gui.menu.AuctionOrderMenu;
+import com.skyblockexp.ezauction.gui.menu.AuctionSellMenu;
+import com.skyblockexp.ezauction.gui.view.BrowserView;
+import com.skyblockexp.ezauction.gui.menu.LiveAuctionMenu;
+import com.skyblockexp.ezauction.gui.holder.SellMenuHolder.Target;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -177,17 +177,7 @@ public class AuctionCommand implements CommandExecutor, TabCompleter {
         // Use the same sanitization as the GUI
         String sanitized = org.bukkit.ChatColor.stripColor(query).trim();
         if (!sanitized.isEmpty()) {
-            try {
-                java.lang.reflect.Field field = auctionMenu.getClass().getDeclaredField("activeSearchQueries");
-                field.setAccessible(true);
-                @SuppressWarnings("unchecked")
-                java.util.concurrent.ConcurrentMap<java.util.UUID, String> map = (java.util.concurrent.ConcurrentMap<java.util.UUID, String>) field.get(auctionMenu);
-                map.put(playerId, sanitized);
-            } catch (Exception e) {
-                // fallback: just open the GUI without filter
-                auctionMenu.openBrowser(player);
-                return;
-            }
+            auctionMenu.setSearchQuery(playerId, sanitized);
         }
         auctionMenu.openBrowser(player);
     }
@@ -259,7 +249,8 @@ public class AuctionCommand implements CommandExecutor, TabCompleter {
             sendMessage(player, messages.live().disabled());
             return;
         }
-        liveAuctionMenu.open(player);
+        // When live auctions are enabled, direct players to /liveauction
+        sendMessage(player, messages.live().useSlashLiveAuction());
     }
 
     private void handleTeam(Player player, String label, String[] args) {
@@ -659,7 +650,11 @@ public class AuctionCommand implements CommandExecutor, TabCompleter {
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (args.length == 1) {
-            return filter(args[0], List.of("sell", "order", "cancel", "history", "claim", "live", "team"));
+            List<String> subcommands = new ArrayList<>(List.of("sell", "order", "cancel", "history", "claim", "team"));
+            if (!auctionManager.liveAuctionsEnabled()) {
+                subcommands.add("live");
+            }
+            return filter(args[0], subcommands);
         }
 
         if (args.length == 2 && args[0].equalsIgnoreCase("sell")) {

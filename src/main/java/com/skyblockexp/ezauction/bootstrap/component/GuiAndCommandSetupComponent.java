@@ -1,7 +1,7 @@
 package com.skyblockexp.ezauction.bootstrap.component;
 
 import com.skyblockexp.ezauction.EzAuctionPlugin;
-import com.skyblockexp.ezauction.AuctionManager;
+import com.skyblockexp.ezauction.service.AuctionManager;
 import com.skyblockexp.ezauction.command.AuctionCommand;
 import com.skyblockexp.ezauction.command.AuctionHologramCommand;
 import com.skyblockexp.ezauction.compat.HologramPlatform;
@@ -11,7 +11,14 @@ import com.skyblockexp.ezauction.compat.HologramPlatform;
  * (Stub for further expansion.)
  */
 import com.skyblockexp.ezauction.config.*;
-import com.skyblockexp.ezauction.gui.*;
+import com.skyblockexp.ezauction.gui.menu.AuctionActivityMenu;
+import com.skyblockexp.ezauction.gui.menu.AuctionMenu;
+import com.skyblockexp.ezauction.gui.menu.AuctionOrderMenu;
+import com.skyblockexp.ezauction.gui.menu.AuctionSellMenu;
+import com.skyblockexp.ezauction.gui.menu.BidMenu;
+import com.skyblockexp.ezauction.gui.menu.ClaimMenu;
+import com.skyblockexp.ezauction.gui.menu.LiveAuctionMenu;
+import com.skyblockexp.ezauction.gui.menu.LiveAuctionPickerMenu;
 import com.skyblockexp.ezauction.hologram.*;
 import com.skyblockexp.ezauction.live.*;
 import com.skyblockexp.ezauction.placeholder.*;
@@ -33,6 +40,9 @@ public class GuiAndCommandSetupComponent {
         public final ItemValueProvider shopPriceValueProvider;
         public final Object placeholderExpansion; // Use Object to avoid class loading
         public final Metrics metrics;
+        public final com.skyblockexp.ezauction.gui.menu.LiveAuctionPickerMenu liveAuctionPickerMenu;
+        public final com.skyblockexp.ezauction.gui.menu.BidMenu bidMenu;
+        public final com.skyblockexp.ezauction.gui.menu.ClaimMenu claimMenu;
         public GuiSetupResult(
             AuctionMenu auctionMenu,
             LiveAuctionMenu liveAuctionMenu,
@@ -45,7 +55,10 @@ public class GuiAndCommandSetupComponent {
             ItemValueProvider itemValueProvider,
             ItemValueProvider shopPriceValueProvider,
             Object placeholderExpansion,
-            Metrics metrics
+            Metrics metrics,
+            com.skyblockexp.ezauction.gui.menu.LiveAuctionPickerMenu liveAuctionPickerMenu,
+            com.skyblockexp.ezauction.gui.menu.BidMenu bidMenu,
+            com.skyblockexp.ezauction.gui.menu.ClaimMenu claimMenu
         ) {
             this.auctionMenu = auctionMenu;
             this.liveAuctionMenu = liveAuctionMenu;
@@ -59,6 +72,9 @@ public class GuiAndCommandSetupComponent {
             this.shopPriceValueProvider = shopPriceValueProvider;
             this.placeholderExpansion = placeholderExpansion;
             this.metrics = metrics;
+            this.liveAuctionPickerMenu = liveAuctionPickerMenu;
+            this.bidMenu = bidMenu;
+            this.claimMenu = claimMenu;
         }
     }
 
@@ -69,8 +85,10 @@ public class GuiAndCommandSetupComponent {
         com.skyblockexp.ezauction.transaction.AuctionTransactionService transactionService,
         com.skyblockexp.ezauction.transaction.AuctionTransactionHistory transactionHistory,
         LiveAuctionService liveAuctionService,
+        com.skyblockexp.ezauction.live.registry.LiveBidSessionRegistry liveBidSessionRegistry,
         com.skyblockexp.ezauction.compat.CompatibilityFacade compatibilityFacade,
-        com.skyblockexp.ezauction.compat.ItemTagStorage itemTagStorage
+        com.skyblockexp.ezauction.compat.ItemTagStorage itemTagStorage,
+        com.skyblockexp.ezauction.claim.AuctionClaimService claimService
     ) {
         AuctionValueConfiguration valueConfiguration = configuration.valueConfiguration();
         AuctionMessageConfiguration messageConfiguration = configuration.messageConfiguration();
@@ -112,7 +130,7 @@ public class GuiAndCommandSetupComponent {
             try {
                 Class<?> expansionClass = Class.forName("com.skyblockexp.ezauction.placeholder.EzAuctionPlaceholderExpansion");
                 Object expansion = expansionClass.getConstructor(
-                    com.skyblockexp.ezauction.AuctionManager.class,
+                    com.skyblockexp.ezauction.service.AuctionManager.class,
                     org.bukkit.plugin.PluginDescriptionFile.class
                 ).newInstance(auctionManager, plugin.getDescription());
                 boolean registered = (boolean) expansionClass.getMethod("register").invoke(expansion);
@@ -133,6 +151,18 @@ public class GuiAndCommandSetupComponent {
         } catch (Throwable throwable) {
             plugin.getLogger().warning("Failed to start bStats metrics: " + throwable.getMessage());
         }
+        com.skyblockexp.ezauction.gui.menu.LiveAuctionPickerMenu liveAuctionPickerMenu =
+                new com.skyblockexp.ezauction.gui.menu.LiveAuctionPickerMenu(
+                        plugin, liveAuctionService, transactionService,
+                        configuration.backendMessages().live());
+        com.skyblockexp.ezauction.gui.menu.BidMenu bidMenu = new com.skyblockexp.ezauction.gui.menu.BidMenu(
+                plugin, liveAuctionService, transactionService, liveBidSessionRegistry,
+                configuration.liveAuctionConfiguration().countdownConfiguration().minimumBidIncrementPercent(),
+                configuration.liveAuctionConfiguration().countdownConfiguration().minimumBidIncrementFixed());
+        com.skyblockexp.ezauction.gui.menu.ClaimMenu claimMenu =
+                new com.skyblockexp.ezauction.gui.menu.ClaimMenu(plugin, auctionManager, claimService, auctionMenu);
+        auctionMenu.setClaimMenu(claimMenu);
+        auctionMenu.setLiveAuctionPickerMenu(liveAuctionPickerMenu);
         return new GuiSetupResult(
             auctionMenu,
             liveAuctionMenu,
@@ -145,7 +175,10 @@ public class GuiAndCommandSetupComponent {
             itemValueProvider,
             shopPriceValueProvider,
             tempExpansion,
-            tempMetrics
+            tempMetrics,
+            liveAuctionPickerMenu,
+            bidMenu,
+            claimMenu
         );
     }
 

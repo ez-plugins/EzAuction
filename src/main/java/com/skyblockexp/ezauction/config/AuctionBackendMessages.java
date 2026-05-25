@@ -593,24 +593,185 @@ public final class AuctionBackendMessages {
         }
     }
 
-    public record LiveMessages(String broadcast) {
+    public record LiveMessages(
+            String broadcast,
+            String joined,
+            String left,
+            String bidPlaced,
+            String bidTooLow,
+            String bidNoFunds,
+            String bidSelf,
+            String won,
+            String lost,
+            String endedNoBids,
+            String endedSold,
+            String countdownReminder,
+            String notificationOn,
+            String notificationOff,
+            String chatFilterOn,
+            String chatFilterOff,
+            String displayUpdated,
+            String alreadyIn,
+            String noActive,
+            String bidUsage,
+            String selectPrompt,
+            String selectEntry,
+            String notFound,
+            String inAuction,
+            String queued,
+            String queuedInstant,
+            String alreadyQueued,
+            String queueCancelled,
+            String cancelNoEntry,
+            String activeCancelled,
+            String cancelUsage) {
 
         private static final String DEFAULT_BROADCAST =
                 "&6[Live Auction] &a{seller}&7 is auctioning &b{item}&7 for &6{price}&7.";
+        private static final String DEFAULT_JOINED =
+                "&7[Live] &a{player}&7 joined the auction for &b{item}&7.";
+        private static final String DEFAULT_LEFT =
+                "&7[Live] &a{player}&7 left the live auction.";
+        private static final String DEFAULT_BID_PLACED =
+                "&6[Live Bid] &a{player}&7 bid &6{amount}&7 on &b{item}&7! Minimum next: &6{minimum}&7.";
+        private static final String DEFAULT_BID_TOO_LOW =
+                "&cBid of &6{amount}&c is too low. Minimum next bid: &6{minimum}&c.";
+        private static final String DEFAULT_BID_NO_FUNDS =
+                "&cYou cannot afford to bid &6{amount}&c.";
+        private static final String DEFAULT_BID_SELF =
+                "&cYou cannot bid on your own auction.";
+        private static final String DEFAULT_WON =
+                "&aYou won the auction for &b{item}&a! Paid &6{price}&a.";
+        private static final String DEFAULT_LOST =
+                "&eYou lost the auction for &b{item}&e. Your &6{amount}&e deposit has been refunded.";
+        private static final String DEFAULT_ENDED_NO_BIDS =
+                "&7[Live Auction] The auction for &b{item}&7 ended with no bids.";
+        private static final String DEFAULT_ENDED_SOLD =
+                "&6[Live Auction] &b{item}&7 sold to &a{buyer}&7 for &6{price}&7!";
+        private static final String DEFAULT_COUNTDOWN_REMINDER =
+                "&6[Live] &b{item}&7 ending in &e{seconds}s&7! Top bid: &6{bid}&7 by &a{bidder}&7.";
+        private static final String DEFAULT_NOTIFICATION_ON =
+                "&aLive auction notifications &2enabled&a.";
+        private static final String DEFAULT_NOTIFICATION_OFF =
+                "&7Live auction notifications &cdisabled&7.";
+        private static final String DEFAULT_CHAT_FILTER_ON =
+                "&aChat filter (mute other messages during live auction) &2enabled&a.";
+        private static final String DEFAULT_CHAT_FILTER_OFF =
+                "&7Chat filter &cdisabled&7.";
+        private static final String DEFAULT_DISPLAY_UPDATED =
+                "&aLive auction display types updated to: &e{types}&a.";
+        private static final String DEFAULT_ALREADY_IN =
+                "&eYou are already following this live auction.";
+        private static final String DEFAULT_NO_ACTIVE =
+                "&eThere are no active live auctions right now.";
+        private static final String DEFAULT_BID_USAGE =
+                "&eUsage: &6/bid <amount> &e| &6/bid select <id> &e| &6/bid leave &e| &6/bid notify [on|off] &e| &6/bid mutechat [on|off]";
+        private static final String DEFAULT_SELECT_PROMPT =
+                "&6Active live auctions &7(click or use &e/bid select <id>&7 to join):";
+        private static final String DEFAULT_SELECT_ENTRY =
+                "&7 - &e[{id}] &b{item}&7 by &a{seller}&7 - Bid: &6{bid}&7 (&e{seconds}s&7 left)";
+        private static final String DEFAULT_NOT_FOUND =
+                "&cLive auction '&e{id}&c' not found or already ended.";
+        private static final String DEFAULT_IN_AUCTION =
+                "&6[Live] &7You are following: &b{item}&7 by &a{seller}&7. Current bid: &6{bid}&7.";
+        private static final String DEFAULT_QUEUED =
+                "&aYour &b{item}&a has been added to the live queue at position &e#{position}&a.";
+        private static final String DEFAULT_QUEUED_INSTANT =
+                "&aYour &b{item}&a live auction has started immediately.";
+        private static final String DEFAULT_ALREADY_QUEUED =
+                "&eYou already have an item queued for the live auction.";
+        private static final String DEFAULT_QUEUE_CANCELLED =
+                "&aYour live auction for &b{item}&a has been removed. Item and deposit returned.";
+        private static final String DEFAULT_CANCEL_NO_ENTRY =
+                "&eYou do not have a live auction in the queue to cancel.";
+        private static final String DEFAULT_ACTIVE_CANCELLED =
+                "&c[Live] The auction for &b{item}&c has been forcefully cancelled.";
+        private static final String DEFAULT_CANCEL_USAGE =
+                "&eUsage: &6/liveauction cancel &e(queue) | &6/liveauction cancel <id> &e(active, admin)";
 
         public LiveMessages {
             broadcast = normalize(broadcast, DEFAULT_BROADCAST);
+            joined = normalize(joined, DEFAULT_JOINED);
+            left = normalize(left, DEFAULT_LEFT);
+            bidPlaced = normalize(bidPlaced, DEFAULT_BID_PLACED);
+            bidTooLow = normalize(bidTooLow, DEFAULT_BID_TOO_LOW);
+            bidNoFunds = normalize(bidNoFunds, DEFAULT_BID_NO_FUNDS);
+            bidSelf = normalize(bidSelf, DEFAULT_BID_SELF);
+            won = normalize(won, DEFAULT_WON);
+            lost = normalize(lost, DEFAULT_LOST);
+            endedNoBids = normalize(endedNoBids, DEFAULT_ENDED_NO_BIDS);
+            endedSold = normalize(endedSold, DEFAULT_ENDED_SOLD);
+            countdownReminder = normalize(countdownReminder, DEFAULT_COUNTDOWN_REMINDER);
+            notificationOn = normalize(notificationOn, DEFAULT_NOTIFICATION_ON);
+            notificationOff = normalize(notificationOff, DEFAULT_NOTIFICATION_OFF);
+            chatFilterOn = normalize(chatFilterOn, DEFAULT_CHAT_FILTER_ON);
+            chatFilterOff = normalize(chatFilterOff, DEFAULT_CHAT_FILTER_OFF);
+            displayUpdated = normalize(displayUpdated, DEFAULT_DISPLAY_UPDATED);
+            alreadyIn = normalize(alreadyIn, DEFAULT_ALREADY_IN);
+            noActive = normalize(noActive, DEFAULT_NO_ACTIVE);
+            bidUsage = normalize(bidUsage, DEFAULT_BID_USAGE);
+            selectPrompt = normalize(selectPrompt, DEFAULT_SELECT_PROMPT);
+            selectEntry = normalize(selectEntry, DEFAULT_SELECT_ENTRY);
+            notFound = normalize(notFound, DEFAULT_NOT_FOUND);
+            inAuction = normalize(inAuction, DEFAULT_IN_AUCTION);
+            queued = normalize(queued, DEFAULT_QUEUED);
+            queuedInstant = normalize(queuedInstant, DEFAULT_QUEUED_INSTANT);
+            alreadyQueued = normalize(alreadyQueued, DEFAULT_ALREADY_QUEUED);
+            queueCancelled = normalize(queueCancelled, DEFAULT_QUEUE_CANCELLED);
+            cancelNoEntry = normalize(cancelNoEntry, DEFAULT_CANCEL_NO_ENTRY);
+            activeCancelled = normalize(activeCancelled, DEFAULT_ACTIVE_CANCELLED);
+            cancelUsage = normalize(cancelUsage, DEFAULT_CANCEL_USAGE);
         }
 
         public static LiveMessages defaults() {
-            return new LiveMessages(DEFAULT_BROADCAST);
+            return new LiveMessages(
+                    DEFAULT_BROADCAST, DEFAULT_JOINED, DEFAULT_LEFT,
+                    DEFAULT_BID_PLACED, DEFAULT_BID_TOO_LOW, DEFAULT_BID_NO_FUNDS, DEFAULT_BID_SELF,
+                    DEFAULT_WON, DEFAULT_LOST, DEFAULT_ENDED_NO_BIDS, DEFAULT_ENDED_SOLD,
+                    DEFAULT_COUNTDOWN_REMINDER, DEFAULT_NOTIFICATION_ON, DEFAULT_NOTIFICATION_OFF,
+                    DEFAULT_CHAT_FILTER_ON, DEFAULT_CHAT_FILTER_OFF, DEFAULT_DISPLAY_UPDATED,
+                    DEFAULT_ALREADY_IN, DEFAULT_NO_ACTIVE, DEFAULT_BID_USAGE,
+                    DEFAULT_SELECT_PROMPT, DEFAULT_SELECT_ENTRY, DEFAULT_NOT_FOUND, DEFAULT_IN_AUCTION,
+                    DEFAULT_QUEUED, DEFAULT_QUEUED_INSTANT, DEFAULT_ALREADY_QUEUED,
+                    DEFAULT_QUEUE_CANCELLED, DEFAULT_CANCEL_NO_ENTRY, DEFAULT_ACTIVE_CANCELLED, DEFAULT_CANCEL_USAGE);
         }
 
         public static LiveMessages from(ConfigurationSection section) {
             if (section == null) {
                 return defaults();
             }
-            return new LiveMessages(section.getString("broadcast"));
+            return new LiveMessages(
+                    section.getString("broadcast"),
+                    section.getString("joined"),
+                    section.getString("left"),
+                    section.getString("bid-placed"),
+                    section.getString("bid-too-low"),
+                    section.getString("bid-no-funds"),
+                    section.getString("bid-self"),
+                    section.getString("won"),
+                    section.getString("lost"),
+                    section.getString("ended-no-bids"),
+                    section.getString("ended-sold"),
+                    section.getString("countdown-reminder"),
+                    section.getString("notification-on"),
+                    section.getString("notification-off"),
+                    section.getString("chat-filter-on"),
+                    section.getString("chat-filter-off"),
+                    section.getString("display-updated"),
+                    section.getString("already-in"),
+                    section.getString("no-active"),
+                    section.getString("bid-usage"),
+                    section.getString("select-prompt"),
+                    section.getString("select-entry"),
+                    section.getString("not-found"),
+                    section.getString("in-auction"),
+                    section.getString("queued"),
+                    section.getString("queued-instant"),
+                    section.getString("already-queued"),
+                    section.getString("queue-cancelled"),
+                    section.getString("cancel-no-entry"),
+                    section.getString("active-cancelled"),
+                    section.getString("cancel-usage"));
         }
     }
 

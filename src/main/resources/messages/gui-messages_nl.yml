@@ -47,6 +47,11 @@ order:
 live:
   disabled: "&cLive veilingen zijn momenteel uitgeschakeld."
   queue-instant: "&eLive veilingaankondigingen worden direct uitgezonden; er is geen wachtrij beschikbaar."
+  sell-button-label: "Start live veiling"
+  sell-button-lore: "Verkoop een item via de live veilingwachtrij."
+  cancel-button-label: "Annuleer mijn veiling"
+  cancel-button-lore: "Verwijder je item uit de live wachtrij."
+  my-auction-badge: "&e► JOUW VEILING"
 activity:
   title-prefix: "Mijn Activiteit"
   tab-listings-label: "Mijn Aanbiedingen"

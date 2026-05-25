@@ -5,20 +5,22 @@ import com.skyblockexp.ezauction.bootstrap.component.CompatibilityAndStorageComp
 import com.skyblockexp.ezauction.bootstrap.component.EconomySetupComponent;
 import com.skyblockexp.ezauction.bootstrap.component.GuiAndCommandSetupComponent;
 import com.skyblockexp.ezauction.bootstrap.component.ServiceSetupComponent;
+import com.skyblockexp.ezauction.command.BidCommand;
 import com.skyblockexp.ezauction.command.DiscordCommand;
 import com.skyblockexp.ezauction.command.LiveAuctionCommand;
 import com.skyblockexp.ezauction.command.OrderCommand;
 import com.skyblockexp.ezauction.command.OrdersCommand;
 import com.skyblockexp.ezauction.config.AuctionConfiguration;
 import com.skyblockexp.ezauction.config.AuctionConfigurationLoader;
-import com.skyblockexp.ezauction.gui.AuctionActivityMenuListener;
-import com.skyblockexp.ezauction.gui.AuctionHistoryGUI;
-import com.skyblockexp.ezauction.gui.AuctionHistoryListener;
-import com.skyblockexp.ezauction.gui.AuctionReturnListener;
-import com.skyblockexp.ezauction.gui.AuctionSellMenuListener;
+import com.skyblockexp.ezauction.gui.listener.AuctionActivityMenuListener;
+import com.skyblockexp.ezauction.gui.menu.AuctionHistoryGUI;
+import com.skyblockexp.ezauction.gui.listener.AuctionHistoryListener;
+import com.skyblockexp.ezauction.gui.listener.AuctionReturnListener;
+import com.skyblockexp.ezauction.gui.listener.AuctionSellMenuListener;
 import com.skyblockexp.ezauction.hologram.AuctionHologramListener;
 import com.skyblockexp.ezauction.integration.DiscordIntegration;
 import com.skyblockexp.ezauction.integration.DiscordWebhookNotifier;
+import com.skyblockexp.ezauction.live.LiveAuctionChatFilter;
 import com.skyblockexp.ezauction.live.LiveAuctionEnqueueListener;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.ChatColor;
@@ -93,8 +95,12 @@ public final class PluginRegistry {
                     plugin, configuration,
                     serviceResult.auctionManager, serviceResult.transactionService,
                     serviceResult.transactionHistory, serviceResult.liveAuctionService,
+                    serviceResult.liveBidSessionRegistry,
                     storageResult.compatibilityFacade,
-                    storageResult.compatibilityFacade.itemTagStorage());
+                    storageResult.compatibilityFacade.itemTagStorage(),
+                    serviceResult.claimService);
+            // Wire bid menu into picker so joining an auction opens the bid GUI
+            guiResult.liveAuctionPickerMenu.setBidMenu(guiResult.bidMenu);
             plugin.getLogger().info("[Bootstrap] Step 4/5 OK.");
 
             plugin.getLogger().info("[Bootstrap] Step 5/5 - registering commands and listeners...");
@@ -114,7 +120,8 @@ public final class PluginRegistry {
 
         LiveAuctionCommand liveCmd = new LiveAuctionCommand(
                 serviceResult.auctionManager, guiResult.liveAuctionMenu,
-                guiResult.auctionSellMenu, configuration.commandMessageConfiguration());
+                guiResult.auctionSellMenu, configuration.commandMessageConfiguration(),
+                serviceResult.liveAuctionService, configuration.backendMessages().live());
         registerCommand("liveauction", liveCmd, liveCmd);
 
         registerCommand("orders", new OrdersCommand(guiResult.auctionOrderMenu), null);
@@ -155,11 +162,22 @@ public final class PluginRegistry {
             return true;
         }, null);
         plugin.getServer().getPluginManager().registerEvents(historyListener, plugin);
+
+        BidCommand bidCommand = new BidCommand(
+                serviceResult.auctionManager,
+                serviceResult.liveAuctionService,
+                serviceResult.liveBidSessionRegistry,
+                serviceResult.playerLivePreferencesManager,
+                guiResult.liveAuctionPickerMenu,
+                guiResult.bidMenu,
+                configuration.backendMessages().live());
+        registerCommand("bid", bidCommand, bidCommand);
     }
 
     private void registerListeners() {
         plugin.getServer().getPluginManager().registerEvents(guiResult.auctionMenu, plugin);
         plugin.getServer().getPluginManager().registerEvents(guiResult.liveAuctionMenu, plugin);
+        guiResult.liveAuctionMenu.setSellMenu(guiResult.auctionSellMenu);
         plugin.getServer().getPluginManager().registerEvents(guiResult.auctionOrderMenu, plugin);
         plugin.getServer().getPluginManager().registerEvents(
                 new AuctionSellMenuListener(guiResult.auctionSellMenu), plugin);
@@ -170,7 +188,16 @@ public final class PluginRegistry {
         plugin.getServer().getPluginManager().registerEvents(
                 new AuctionReturnListener(serviceResult.claimService), plugin);
         plugin.getServer().getPluginManager().registerEvents(
-                new LiveAuctionEnqueueListener(serviceResult.liveAuctionService), plugin);
+                new LiveAuctionEnqueueListener(serviceResult.liveAuctionService,
+                        configuration.backendMessages().live()), plugin);
+        plugin.getServer().getPluginManager().registerEvents(guiResult.liveAuctionPickerMenu, plugin);
+        plugin.getServer().getPluginManager().registerEvents(guiResult.bidMenu, plugin);
+        plugin.getServer().getPluginManager().registerEvents(guiResult.claimMenu, plugin);
+        if (configuration.liveAuctionConfiguration().countdownConfiguration().chatFilterFeatureEnabled()) {
+            plugin.getServer().getPluginManager().registerEvents(
+                    new LiveAuctionChatFilter(serviceResult.liveBidSessionRegistry,
+                            serviceResult.playerLivePreferencesManager), plugin);
+        }
         if (guiResult.hologramManager != null) {
             plugin.getServer().getPluginManager().registerEvents(
                     new AuctionHologramListener(guiResult.hologramManager), plugin);

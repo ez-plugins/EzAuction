@@ -223,18 +223,21 @@ public final class AuctionCommandMessageConfiguration {
         }
     }
 
-    public record LiveMessages(String noPermission, String disabled) {
+    public record LiveMessages(String noPermission, String disabled, String useSlashLiveAuction) {
 
         private static final String DEFAULT_NO_PERMISSION = "&cYou do not have permission to view live auctions.";
         private static final String DEFAULT_DISABLED = "&cLive auctions are currently disabled.";
+        private static final String DEFAULT_USE_SLASH_LIVE_AUCTION =
+                "&eLive auctions are managed via &6/liveauction&e. Use &6/liveauction&e to browse or &6/liveauction sell&e to list an item.";
 
         public LiveMessages {
             noPermission = normalize(noPermission, DEFAULT_NO_PERMISSION);
             disabled = normalize(disabled, DEFAULT_DISABLED);
+            useSlashLiveAuction = normalize(useSlashLiveAuction, DEFAULT_USE_SLASH_LIVE_AUCTION);
         }
 
         public static LiveMessages defaults() {
-            return new LiveMessages(DEFAULT_NO_PERMISSION, DEFAULT_DISABLED);
+            return new LiveMessages(DEFAULT_NO_PERMISSION, DEFAULT_DISABLED, DEFAULT_USE_SLASH_LIVE_AUCTION);
         }
 
         public static LiveMessages from(ConfigurationSection section) {
@@ -243,7 +246,8 @@ public final class AuctionCommandMessageConfiguration {
             }
             return new LiveMessages(
                     section.getString("no-permission"),
-                    section.getString("disabled"));
+                    section.getString("disabled"),
+                    section.getString("use-slash-live-auction"));
         }
     }
 

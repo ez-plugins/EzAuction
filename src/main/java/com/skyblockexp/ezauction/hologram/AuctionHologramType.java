@@ -1,8 +1,8 @@
 package com.skyblockexp.ezauction.hologram;
 
-import com.skyblockexp.ezauction.AuctionListing;
-import com.skyblockexp.ezauction.AuctionManager;
-import com.skyblockexp.ezauction.AuctionOrder;
+import com.skyblockexp.ezauction.model.AuctionListing;
+import com.skyblockexp.ezauction.service.AuctionManager;
+import com.skyblockexp.ezauction.model.AuctionOrder;
 import com.skyblockexp.ezauction.transaction.AuctionTransactionService;
 import java.time.Duration;
 import java.util.Locale;

@@ -1,6 +1,6 @@
 package com.skyblockexp.ezauction.storage;
 
-import com.skyblockexp.ezauction.AuctionListing;
+import com.skyblockexp.ezauction.model.AuctionListing;
 
 /**
  * Provides fine-grained persistence hooks for auction listings when multiple

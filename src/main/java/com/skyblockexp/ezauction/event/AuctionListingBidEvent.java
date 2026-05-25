@@ -1,6 +1,6 @@
 package com.skyblockexp.ezauction.event;
 
-import com.skyblockexp.ezauction.AuctionListing;
+import com.skyblockexp.ezauction.model.AuctionListing;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 

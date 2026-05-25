@@ -7,7 +7,7 @@
 
 **EzAuction** is a modern, extensible Minecraft auction plugin for Bukkit/Spigot servers. It features a user-friendly GUI, robust API, and comprehensive event system for both server owners and plugin developers.
 
-**Version 2.0.0** introduced enhanced GUI navigation, detailed confirmation dialogs, and full compatibility with EzShops 2.0.0+. **Version 2.2.0** adds Team Auctions, team-scoped listings visible and purchasable only by your team, powered by the optional [TeamsAPI](https://modrinth.com/plugin/teams-api) soft-dependency.
+**Version 2.0.0** introduced enhanced GUI navigation, detailed confirmation dialogs, and full compatibility with EzShops 2.0.0+. **Version 2.2.0** adds Team Auctions, team-scoped listings visible and purchasable only by your team, powered by the optional [TeamsAPI](https://modrinth.com/plugin/teams-api) soft-dependency. **Version 2.3.0** overhauls the live auction engine — sellers queue items directly from the browser GUI, players bid via the `/bid` command with clickable chat suggestions, per-player countdown preferences persist across restarts, and a new Claim GUI shows pending return items with configurable expiry dates.
 
 ---
 
@@ -60,6 +60,11 @@
 - **NEW in 2.0.1** Orders-Only Mode
   If you only want the Orders feature (buy orders, no auction house), set `orders-only-mode: true` in `orders-only.yml`. This disables all auction house features and enables the `/orders` and `/order` commands for players to create and manage buy orders.
 - **NEW in 2.2.0**: Team Auctions — team-scoped listings visible and purchasable only by members of the seller's team. Requires the optional [TeamsAPI](https://github.com/ez-plugins/teams-api) soft-dependency. Toggle with `team-auctions.enabled` in `auction.yml`.
+- **NEW in 2.3.0**: Live Auction Overhaul — dedicated `/bid` command (alias `/livebid`), clickable bid suggestions in chat, item hover previews, per-player countdown preferences via EzCountdown (optional), opt-in chat filter, and five new Bukkit events.
+- **NEW in 2.3.0**: Live Auction Seller Management — queue items for the live auction directly from the browser GUI or `/liveauction sell`. Receive queue-position feedback on enqueue, cancel your entry via the GUI or `/liveauction cancel`, and admins can force-cancel active auctions with `/liveauction cancel <id>`.
+- **NEW in 2.3.0**: Live Auctions shortcut in Auction House — a quick-access beacon button (slot 47) in the main `/auction` browser opens the Live Auction picker directly.
+- **NEW in 2.3.0**: Claim GUI — `/auction claim` and the Claims button now open a 54-slot GUI showing each pending return item with its expiry date. A Claim All button collects everything; a Back button returns to the browser. Expiry is configurable via `claim.expiry-days` in `auction.yml` (default 7 days).
+- **FIXED in 2.3.0**: First-bid minimum — the opening bid on a live auction now only requires the starting price; the increment applies to subsequent bids only. An empty `/bid` response automatically places the minimum.
 
 ## ⚙️ Configuration
 Default configuration files are generated on first run in `plugins/EzAuction/`.
@@ -97,6 +102,11 @@ When `orders-only-mode` is enabled, all other auction commands are disabled.
 | `/auction history [player]` | View your auction history (or another player's, if permitted) | `ezauction.auction.history` / `ezauction.auction.history.others` |
 | `/auction team`             | Browse team-scoped auction listings                           | `ezauction.auction.team`                                          |
 | `/auction team sell`        | List held item as a team auction                              | `ezauction.auction.team.sell`                                     |
+| `/liveauction`              | Open the live auction viewer                                   | `ezauction.live`                                                  |
+| `/liveauction sell`         | Queue held item for the live auction                           | `ezauction.auction.live.sell`                                     |
+| `/liveauction cancel`       | Cancel your own queued live auction entry                      | `ezauction.auction.live.sell`                                     |
+| `/liveauction cancel <id>`  | Force-cancel an active live auction (admin)                    | `ezauction.auction.live.admin`                                    |
+| `/bid [amount]`             | Place a bid or view session status in a live auction           | `ezauction.bid`                                                   |
 
 **Key Permissions:**
 
@@ -109,6 +119,9 @@ When `orders-only-mode` is enabled, all other auction commands are disabled.
 - `ezauction.auction.history.others`: View other players' auction history (if permitted)
 - `ezauction.auction.team`: Browse team-scoped auction listings (hidden when disabled or TeamsAPI absent)
 - `ezauction.auction.team.sell`: Create team-scoped listings via `/auction team sell`
+- `ezauction.auction.live.sell`: Queue items for live auction and cancel own entries
+- `ezauction.auction.live.admin`: Force-cancel active live auctions by ID
+- `ezauction.bid`: Place bids and manage notification preferences via `/bid`
 
 See the [docs/permissions.md](docs/permissions.md) for a full list.
 

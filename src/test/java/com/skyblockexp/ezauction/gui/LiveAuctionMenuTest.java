@@ -1,4 +1,6 @@
 package com.skyblockexp.ezauction.gui;
+import com.skyblockexp.ezauction.gui.menu.LiveAuctionMenu;
+import com.skyblockexp.ezauction.gui.menu.AuctionMenu;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -6,7 +8,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import com.skyblockexp.ezauction.AuctionManager;
+import com.skyblockexp.ezauction.service.AuctionManager;
 import com.skyblockexp.ezauction.transaction.AuctionTransactionService;
 import com.skyblockexp.ezauction.compat.LoreItemTagStorage;
 import com.skyblockexp.ezauction.config.AuctionMessageConfiguration;

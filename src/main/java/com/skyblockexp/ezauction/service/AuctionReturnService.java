@@ -1,6 +1,6 @@
 package com.skyblockexp.ezauction.service;
 
-import com.skyblockexp.ezauction.AuctionOperationResult;
+import com.skyblockexp.ezauction.model.AuctionOperationResult;
 import com.skyblockexp.ezauction.persistence.AuctionPersistenceManager;
 import com.skyblockexp.ezauction.util.AuctionValidationUtils;
 import org.bukkit.Material;
@@ -17,17 +17,23 @@ public class AuctionReturnService {
     private final Map<UUID, List<ItemStack>> pendingReturns;
     private final AuctionPersistenceManager persistenceManager;
     private final com.skyblockexp.ezauction.config.AuctionBackendMessages backendMessages;
+    private final Map<UUID, Long> claimExpiries;
     private final String CLAIM_COMMAND = "/auction claim";
 
-    /**
-     * Refactored constructor: inject shared pendingReturns and backendMessages.
-     */
     public AuctionReturnService(Map<UUID, List<ItemStack>> pendingReturns,
                                AuctionPersistenceManager persistenceManager,
                                com.skyblockexp.ezauction.config.AuctionBackendMessages backendMessages) {
+        this(pendingReturns, persistenceManager, backendMessages, null);
+    }
+
+    public AuctionReturnService(Map<UUID, List<ItemStack>> pendingReturns,
+                               AuctionPersistenceManager persistenceManager,
+                               com.skyblockexp.ezauction.config.AuctionBackendMessages backendMessages,
+                               Map<UUID, Long> claimExpiries) {
         this.pendingReturns = pendingReturns;
         this.persistenceManager = persistenceManager;
         this.backendMessages = backendMessages;
+        this.claimExpiries = claimExpiries;
     }
 
     /**
@@ -90,11 +96,13 @@ public class AuctionReturnService {
         }
         if (availableAmount <= 0) {
             pendingReturns.remove(playerId);
+            if (claimExpiries != null) claimExpiries.remove(playerId);
             persistenceManager.saveReturns(pendingReturns);
             return AuctionOperationResult.failure(formatMessage(backendMessages.claim().noneAvailable()));
         }
         if (remaining.isEmpty()) {
             pendingReturns.remove(playerId);
+            if (claimExpiries != null) claimExpiries.remove(playerId);
         } else {
             pendingReturns.put(playerId, remaining);
         }
@@ -143,5 +151,14 @@ public class AuctionReturnService {
 
     private String pluralSuffix(int amount) {
         return amount == 1 ? "" : "s";
+    }
+
+    /**
+     * Returns the list of pending return items for the given player, or an empty list if none.
+     */
+    public List<ItemStack> getPendingReturnItems(UUID playerId) {
+        if (playerId == null) return List.of();
+        List<ItemStack> stored = pendingReturns.get(playerId);
+        return stored != null ? List.copyOf(stored) : List.of();
     }
 }

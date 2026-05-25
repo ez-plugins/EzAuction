@@ -19,6 +19,11 @@ All events are in the `com.skyblockexp.ezauction.event` package.
 | `AuctionListingSoldEvent` | ❌ | A listing has been successfully sold |
 | `AuctionOrderCreateEvent` | ✅ | A buy order is created |
 | `AuctionOrderFulfillEvent` | ❌ | A buy order is fulfilled |
+| `LiveAuctionStartedEvent` | ✅ | A live auction becomes active |
+| `LiveAuctionBidPlacedEvent` | ✅ | A player places a valid bid in a live auction |
+| `LiveAuctionEndedEvent` | ❌ | A live auction ends (with or without a winner) |
+| `LiveAuctionPlayerJoinedEvent` | ❌ | A player joins a live auction session |
+| `LiveAuctionPlayerLeftEvent` | ❌ | A player leaves a live auction session |
 
 ---
 
@@ -70,6 +75,73 @@ Fired when a buy order is created. Cancellable.
 ## `AuctionOrderFulfillEvent`
 
 Fired when a buy order is fulfilled. Not cancellable.
+
+---
+
+## `LiveAuctionStartedEvent`
+
+Fired when a live auction becomes active. Cancellable — cancel to prevent the auction from starting.
+
+```java
+public LiveAuctionStartedEvent(LiveAuctionState state)
+
+LiveAuctionState getState()
+boolean isCancelled() / void setCancelled(boolean cancel)
+```
+
+---
+
+## `LiveAuctionBidPlacedEvent`
+
+Fired after bid validation passes but before the bid is committed. Cancellable — cancel to reject the bid silently.
+
+```java
+public LiveAuctionBidPlacedEvent(LiveAuctionState state, Player bidder, double amount)
+
+LiveAuctionState getState()
+Player getBidder()
+double getAmount()
+boolean isCancelled() / void setCancelled(boolean cancel)
+```
+
+---
+
+## `LiveAuctionEndedEvent`
+
+Fired when a live auction ends. Always fires regardless of whether there was a winner. Not cancellable.
+
+```java
+public LiveAuctionEndedEvent(LiveAuctionState state, boolean hadWinner)
+
+LiveAuctionState getState()
+boolean hadWinner()
+```
+
+---
+
+## `LiveAuctionPlayerJoinedEvent`
+
+Fired when a player joins a live auction session via `/bid select`. Not cancellable.
+
+```java
+public LiveAuctionPlayerJoinedEvent(LiveAuctionState state, Player player)
+
+LiveAuctionState getState()
+Player getPlayer()
+```
+
+---
+
+## `LiveAuctionPlayerLeftEvent`
+
+Fired when a player leaves a live auction session via `/bid leave` or when the auction ends. Not cancellable.
+
+```java
+public LiveAuctionPlayerLeftEvent(LiveAuctionState state, Player player)
+
+LiveAuctionState getState()
+Player getPlayer()
+```
 
 ---
 

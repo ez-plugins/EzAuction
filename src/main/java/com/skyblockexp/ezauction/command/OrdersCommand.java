@@ -1,6 +1,6 @@
 package com.skyblockexp.ezauction.command;
 
-import com.skyblockexp.ezauction.gui.AuctionOrderMenu;
+import com.skyblockexp.ezauction.gui.menu.AuctionOrderMenu;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;

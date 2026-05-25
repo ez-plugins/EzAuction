@@ -1,6 +1,6 @@
 package com.skyblockexp.ezauction.placeholder;
 
-import com.skyblockexp.ezauction.AuctionManager;
+import com.skyblockexp.ezauction.service.AuctionManager;
 import com.skyblockexp.ezauction.EzAuctionPlugin;
 import java.util.List;
 import java.util.Locale;

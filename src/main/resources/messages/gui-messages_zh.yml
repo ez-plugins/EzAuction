@@ -47,6 +47,11 @@ order:
 live:
   disabled: "&c现场拍卖当前已禁用。"
   queue-instant: "&e现场拍卖公告会立即广播；无法使用队列。"
+  sell-button-label: "开始现场拍卖"
+  sell-button-lore: "通过现场拍卖队列出售物品。"
+  cancel-button-label: "取消我的拍卖"
+  cancel-button-lore: "将您的物品从现场队列中移除。"
+  my-auction-badge: "&e► 我的拍卖"
 activity:
   title-prefix: "我的活动"
   tab-listings-label: "我的上架"

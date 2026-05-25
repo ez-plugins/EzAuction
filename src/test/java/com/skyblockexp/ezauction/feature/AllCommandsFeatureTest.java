@@ -27,10 +27,10 @@ import org.mockbukkit.mockbukkit.MockBukkit;
 import org.mockbukkit.mockbukkit.ServerMock;
 import org.mockbukkit.mockbukkit.entity.PlayerMock;
 
-import com.skyblockexp.ezauction.AuctionListing;
-import com.skyblockexp.ezauction.AuctionManager;
-import com.skyblockexp.ezauction.AuctionOperationResult;
-import com.skyblockexp.ezauction.AuctionOrder;
+import com.skyblockexp.ezauction.model.AuctionListing;
+import com.skyblockexp.ezauction.service.AuctionManager;
+import com.skyblockexp.ezauction.model.AuctionOperationResult;
+import com.skyblockexp.ezauction.model.AuctionOrder;
 import com.skyblockexp.ezauction.command.AuctionCommand;
 import com.skyblockexp.ezauction.command.DiscordCommand;
 import com.skyblockexp.ezauction.command.LiveAuctionCommand;
@@ -38,11 +38,11 @@ import com.skyblockexp.ezauction.command.OrderCommand;
 import com.skyblockexp.ezauction.command.OrdersCommand;
 import com.skyblockexp.ezauction.config.AuctionCommandMessageConfiguration;
 import com.skyblockexp.ezauction.config.AuctionListingRules;
-import com.skyblockexp.ezauction.gui.AuctionMenu;
-import com.skyblockexp.ezauction.gui.AuctionOrderMenu;
-import com.skyblockexp.ezauction.gui.AuctionSellMenu;
-import com.skyblockexp.ezauction.gui.LiveAuctionMenu;
-import com.skyblockexp.ezauction.gui.SellMenuHolder.Target;
+import com.skyblockexp.ezauction.gui.menu.AuctionMenu;
+import com.skyblockexp.ezauction.gui.menu.AuctionOrderMenu;
+import com.skyblockexp.ezauction.gui.menu.AuctionSellMenu;
+import com.skyblockexp.ezauction.gui.menu.LiveAuctionMenu;
+import com.skyblockexp.ezauction.gui.holder.SellMenuHolder.Target;
 import com.skyblockexp.ezauction.integration.DiscordIntegration;
 import com.skyblockexp.ezauction.transaction.AuctionTransactionHistory;
 import com.skyblockexp.ezauction.transaction.AuctionTransactionService;
@@ -444,7 +444,7 @@ class AllCommandsFeatureTest {
     class AuctionLive {
 
         @Test
-        void live_enabled_opensLiveMenu() {
+        void live_enabled_sendsRedirectMessage() {
             AuctionCommand cmd = buildCmd();
             PlayerMock player = opPlayer("live-happy");
             when(auctionManager.liveAuctionsEnabled()).thenReturn(true);
@@ -452,7 +452,8 @@ class AllCommandsFeatureTest {
             boolean handled = cmd.onCommand(player, mockCommand(), "auction", new String[]{"live"});
 
             assertTrue(handled);
-            verify(liveMenu).open(player);
+            verify(liveMenu, never()).open(any());
+            assertTrue(player.nextMessage() != null, "Expected redirect message when live auctions are enabled");
         }
 
         @Test

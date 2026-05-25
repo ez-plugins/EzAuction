@@ -53,6 +53,40 @@ When enabled and TeamsAPI is present:
 
 See [Team Auctions](../features/team-auctions.md) for the full feature guide.
 
+## Live auctions — countdown
+
+Controls the countdown timer displayed during live auctions. Requires the [EzCountdown](https://modrinth.com/plugin/ezcountdown) soft-dependency for non-chat displays.
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| `live-auctions.countdown.ezcountdown-enabled` | boolean | `false` | Use EzCountdown for rich countdown displays. Requires EzCountdown to be installed. When `false`, only chat reminders are sent. |
+| `live-auctions.countdown.display-types` | list | `[ACTION_BAR]` | EzCountdown display types. Valid values: `ACTION_BAR`, `BOSS_BAR`, `CHAT`, `TITLE`, `SCOREBOARD`. |
+| `live-auctions.countdown.format-message` | string | `"{formatted}"` | Countdown text format. `{formatted}` is replaced with the default HH:MM:SS string from EzCountdown. |
+| `live-auctions.countdown.start-message` | string | `""` | Message shown when the countdown starts (blank = none). |
+| `live-auctions.countdown.end-message` | string | `"Auction ended!"` | Message shown when the countdown reaches zero. |
+| `live-auctions.countdown.duration-seconds` | integer | `60` | How long (seconds) each live auction runs. |
+| `live-auctions.countdown.chat-reminder-interval-seconds` | integer | `0` | Send a chat reminder every N seconds. `0` = disabled. |
+| `live-auctions.countdown.chat-reminder-at-seconds` | list | `[30, 10, 5]` | Send a chat reminder when this many seconds remain. Empty list = disabled. |
+
+## Live auctions — bidding
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| `live-auctions.bidding.minimum-bid-increment-percent` | double | `5.0` | Minimum bid must be at least this % above the current bid. |
+| `live-auctions.bidding.minimum-bid-increment-fixed` | double | `10.0` | Minimum bid must be at least this amount above the current bid. Both percent and fixed are evaluated; the higher result wins. |
+
+## Live auctions — chat filter
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| `live-auctions.chat-filter-feature-enabled` | boolean | `false` | Enable the opt-in chat filter feature. When `true`, players can use `/bid mutechat on` to suppress non-auction chat while in a live auction session. |
+
+## Claim expiry
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| `claim.expiry-days` | integer | `7` | Number of days a pending return item is held before it is considered expired. Shown in the item lore inside the Claim GUI. Minimum effective value is `1`. |
+
 ## Example minimal `auction.yml`
 
 ```yaml
