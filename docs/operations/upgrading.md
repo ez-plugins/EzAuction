@@ -17,6 +17,17 @@ parent: Operations
 {: .warning }
 > Never hot-swap the JAR while the server is running. Always stop first.
 
+## 2.3.0 to 2.3.1
+
+### Fixes in 2.3.1
+
+- **Live auction escrow safety fix** - live auction settlement now handles seller-payout failures safely by refunding the winner and returning the item to the seller.
+- Added regression tests for live auction end-state payout paths.
+
+### Migration steps
+
+No breaking changes. Standard upgrade procedure applies.
+
 ## 2.1.x to 2.2.x
 
 ### New features in 2.2.x
