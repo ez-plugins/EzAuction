@@ -7,7 +7,7 @@
 
 **EzAuction** is a modern, extensible Minecraft auction plugin for Bukkit/Spigot servers. It features a user-friendly GUI, robust API, and comprehensive event system for both server owners and plugin developers.
 
-**Version 2.0.0** introduced enhanced GUI navigation, detailed confirmation dialogs, and full compatibility with EzShops 2.0.0+. **Version 2.2.0** adds Team Auctions, team-scoped listings visible and purchasable only by your team, powered by the optional [TeamsAPI](https://modrinth.com/plugin/teams-api) soft-dependency. **Version 2.3.0** overhauls the live auction engine — sellers queue items directly from the browser GUI, players bid via the `/bid` command with clickable chat suggestions, per-player countdown preferences persist across restarts, and a new Claim GUI shows pending return items with configurable expiry dates.
+**Version 2.0.0** introduced enhanced GUI navigation, detailed confirmation dialogs, and full compatibility with EzShops 2.0.0+. **Version 2.2.0** adds Team Auctions, team-scoped listings visible and purchasable only by your team, powered by the optional [TeamsAPI](https://modrinth.com/plugin/teams-api) soft-dependency. **Version 2.3.0** overhauls the live auction engine — sellers queue items directly from the browser GUI, players bid via the `/bid` command with clickable chat suggestions, per-player countdown preferences persist across restarts, and a new Claim GUI shows pending return items with configurable expiry dates. **Version 2.3.1** hardens live-auction settlement safety by refunding winner escrow if seller payout fails.
 
 ---
 
@@ -65,6 +65,7 @@
 - **NEW in 2.3.0**: Live Auctions shortcut in Auction House — a quick-access beacon button (slot 47) in the main `/auction` browser opens the Live Auction picker directly.
 - **NEW in 2.3.0**: Claim GUI — `/auction claim` and the Claims button now open a 54-slot GUI showing each pending return item with its expiry date. A Claim All button collects everything; a Back button returns to the browser. Expiry is configurable via `claim.expiry-days` in `auction.yml` (default 7 days).
 - **FIXED in 2.3.0**: First-bid minimum — the opening bid on a live auction now only requires the starting price; the increment applies to subsequent bids only. An empty `/bid` response automatically places the minimum.
+- **FIXED in 2.3.1**: Live auction escrow safety — if the economy plugin fails to credit a seller at auction end, the winner is now refunded automatically and the item is returned to the seller.
 
 ## ⚙️ Configuration
 Default configuration files are generated on first run in `plugins/EzAuction/`.

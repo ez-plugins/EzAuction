@@ -8,6 +8,8 @@ description: High-level introduction for server owners
 
 A feature-rich, modern auction house plugin for **Paper 1.21+** servers. EzAuction provides a polished GUI, buy orders, live auctions, team-scoped listings, Discord webhooks, hologram displays, and both YAML and MySQL storage backends.
 
+Current release: **2.3.1** (live auction escrow safety fix and regression coverage).
+
 ## What you will find here
 
 - Fast installation and first-start checklist

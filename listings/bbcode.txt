@@ -4,8 +4,9 @@
 [SIZE=2]Paper / Spigot / Purpur / Bukkit 1.13 – 26.1.* • Java 21+ • Vault economy • YAML (built-in) + MySQL • English · Dutch · Spanish · Chinese menus • PlaceholderAPI • Discord webhooks
 [COLOR=#ff6600]Requires Vault and a compatible economy plugin such as EzEconomy to process currency.[/COLOR][/SIZE][/CENTER]
 
-[SIZE=4][B]What's New – v2.3.0[/B][/SIZE]
+[SIZE=4][B]What's New – v2.3.1[/B][/SIZE]
 [LIST]
+[*][B][COLOR=#ffff55]Fixed[/COLOR] Live auction escrow safety[/B] – If the economy plugin fails to credit the seller at auction end, EzAuction now refunds the winner's escrowed bid automatically and returns the item to the seller. This prevents silent money loss during payout-provider failures.
 [*][B][COLOR=#55ff55]Added[/COLOR] Live auction seller management[/B] – Players with [icode]ezauction.auction.live.sell[/icode] can now queue items directly from the Live Auction browser (sell button) or via [icode]/liveauction sell[/icode]. On enqueue, a chat message confirms the queue position. [icode]/liveauction cancel[/icode] removes the entry and refunds the deposit; a cancel button also appears in the GUI. Admins with [icode]ezauction.auction.live.admin[/icode] can force-cancel any active auction with [icode]/liveauction cancel <id>[/icode].
 [*][B][COLOR=#55ff55]Added[/COLOR] [icode]/bid[/icode] command[/B] (alias [icode]/livebid[/icode]) – Dedicated command for live auction interactions: place bids, view session status, and manage per-player countdown preferences. Bids can also be placed by clicking the suggestion in the live auction chat message.
 [*][B][COLOR=#55ff55]Added[/COLOR] Per-player notification preferences[/B] – Toggle countdowns with [icode]/bid notify [on|off][/icode] and select display type with [icode]/bid notify display <types…>[/icode]. Preferences persist across restarts.

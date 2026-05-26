@@ -12,9 +12,13 @@ Whether you run survival, skyblock, SMP, or factions, EzAuction handles your ser
 
 > **Requires Vault and a compatible economy plugin such as [EzEconomy](https://modrinth.com/plugin/ezeconomy) to process currency.**
 
-## What's New – v2.3.0
+## What's New – v2.3.1
 
-### Live Auction Overhaul
+### Critical Fix
+
+- **Live auction escrow safety** – If the economy plugin fails to credit a seller when a live auction ends, EzAuction now refunds the winner's escrowed bid immediately and safely returns the item to the seller. This prevents silent currency loss during payout-provider failures.
+
+### Highlights from v2.3.0
 
 - **Live auction seller management** – Players with `ezauction.auction.live.sell` can now queue items directly from the Live Auction browser (sell button in the GUI) or via `/liveauction sell`. On enqueue, a chat message confirms the queue position. `/liveauction cancel` removes the entry and refunds the deposit; a cancel button also appears in the GUI while the player has a queued entry. Admins with `ezauction.auction.live.admin` can force-cancel any active auction with `/liveauction cancel <id>`.
 - **`/bid` command** (alias `/livebid`) – Dedicated command for live auction interactions: place bids (`/bid <amount>`), view session status, and manage per-player countdown preferences. Bids can also be placed by clicking the suggestion in the live auction chat message.

@@ -490,43 +490,59 @@ public final class LiveAuctionService {
 
         if (winner != null) {
             double winAmount = state.getEscrow(winner);
-            transactionService.creditSeller(state.entry().sellerId(), winAmount);
+            AuctionOperationResult creditResult =
+                    transactionService.creditSeller(state.entry().sellerId(), winAmount);
 
-            // Refund all losing bidders
+            // Always refund losing bidders regardless of credit outcome
             for (Map.Entry<UUID, Double> escrowEntry : state.escrowSnapshot().entrySet()) {
                 if (!escrowEntry.getKey().equals(winner)) {
                     transactionService.refundOrderBuyer(escrowEntry.getKey(), escrowEntry.getValue());
                 }
             }
 
-            // Deliver item to winner
-            ItemStack wonItem = state.listing().item();
-            if (wonItem != null) {
-                Player winnerPlayer = Bukkit.getPlayer(winner);
-                if (winnerPlayer != null && winnerPlayer.isOnline()) {
-                    Map<Integer, ItemStack> leftover = winnerPlayer.getInventory().addItem(wonItem.clone());
-                    for (ItemStack remainder : leftover.values()) {
-                        addToPendingReturns(winner, remainder);
-                    }
-                    winnerPlayer.sendMessage(fmt(messages.won(),
-                            "item", LiveAuctionComponentBuilder.describeItem(wonItem),
-                            "price", transactionService.formatCurrency(winAmount)));
-                } else {
-                    addToPendingReturns(winner, wonItem.clone());
+            if (!creditResult.success()) {
+                // Economy rejected the deposit — without an explicit refund the winner's escrowed
+                // funds would be permanently lost from the economy.
+                plugin.getLogger().warning("Live auction " + state.id()
+                        + ": failed to credit seller " + state.entry().sellerId()
+                        + " — refunding winner. Reason: " + creditResult.message());
+                transactionService.refundOrderBuyer(winner, winAmount);
+                // Return the item to the seller since the sale could not complete
+                ItemStack returnItem = state.listing().item();
+                if (returnItem != null) {
+                    addToPendingReturns(state.entry().sellerId(), returnItem);
                 }
+                Component endMsg = LiveAuctionComponentBuilder.buildEndComponent(state, "", false, "");
+                broadcastToAll(endMsg);
             } else {
-                // Notify online winner even when item ref is null (shouldn't happen)
-                Player winnerPlayer = Bukkit.getPlayer(winner);
-                if (winnerPlayer != null) {
-                    winnerPlayer.sendMessage(fmt(messages.won(),
-                            "item", LiveAuctionComponentBuilder.describeItem(wonItem),
-                            "price", transactionService.formatCurrency(winAmount)));
+                // Deliver item to winner
+                ItemStack wonItem = state.listing().item();
+                if (wonItem != null) {
+                    Player winnerPlayer = Bukkit.getPlayer(winner);
+                    if (winnerPlayer != null && winnerPlayer.isOnline()) {
+                        Map<Integer, ItemStack> leftover = winnerPlayer.getInventory().addItem(wonItem.clone());
+                        for (ItemStack remainder : leftover.values()) {
+                            addToPendingReturns(winner, remainder);
+                        }
+                        winnerPlayer.sendMessage(fmt(messages.won(),
+                                "item", LiveAuctionComponentBuilder.describeItem(wonItem),
+                                "price", transactionService.formatCurrency(winAmount)));
+                    } else {
+                        addToPendingReturns(winner, wonItem.clone());
+                    }
+                } else {
+                    // Notify online winner even when item ref is null (shouldn't happen)
+                    Player winnerPlayer = Bukkit.getPlayer(winner);
+                    if (winnerPlayer != null) {
+                        winnerPlayer.sendMessage(fmt(messages.won(),
+                                "item", LiveAuctionComponentBuilder.describeItem(wonItem),
+                                "price", transactionService.formatCurrency(winAmount)));
+                    }
                 }
+                Component endMsg = LiveAuctionComponentBuilder.buildEndComponent(
+                        state, transactionService.formatCurrency(winAmount), true, state.topBidderName());
+                broadcastToAll(endMsg);
             }
-
-            Component endMsg = LiveAuctionComponentBuilder.buildEndComponent(
-                    state, transactionService.formatCurrency(winAmount), true, state.topBidderName());
-            broadcastToAll(endMsg);
         } else {
             // No bids — return item to the seller
             ItemStack item = state.listing().item();

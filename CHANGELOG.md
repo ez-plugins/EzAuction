@@ -4,6 +4,13 @@ All notable changes to EzAuction are documented here.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/). Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Release tags use the `v` prefix (e.g. `v2.2.0`).
 
+## [2.3.1] - 2026-05-27
+
+### Fixed
+
+- **Live auction escrow safety** - fixed a critical payout edge case in live auction resolution. If the economy plugin fails to credit the seller when an auction ends, the winner's escrowed bid is now refunded immediately and the item is returned to the seller, preventing silent money loss.
+- **Live auction regression coverage** - added dedicated end-auction tests for seller-credit failure and success paths to prevent escrow-loss regressions.
+
 ## [2.3.0] - 2026-05-25
 
 ### Added
