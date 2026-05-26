@@ -1,6 +1,6 @@
-**EzAuction** is a fully-featured Minecraft auction house plugin for Paper, Spigot, Purpur, and Bukkit servers. Players list items for timed sale, create reserve-balance buy orders, and browse the live market through a smooth, paginated GUI - all backed by Vault economy, MySQL or YAML persistence, PlaceholderAPI support, and optional Discord webhook notifications.
+**EzAuction** is a complete, GUI-driven auction house plugin for Paper, Spigot, Purpur, and Bukkit Minecraft servers. Players list items for timed sale, create reserve-balance buy orders, and compete in real-time live broadcast auctions – all through smooth, paginated menus backed by Vault economy, MySQL or YAML persistence, PlaceholderAPI support, and optional Discord webhook notifications.
 
-Whether you're running a survival, skyblock, or factions server, EzAuction gives players a click-friendly, permission-controlled marketplace with timed listings, offline-safe returns, enchantment search, live broadcast auctions, and team auction support through [TeamsAPI](https://modrinth.com/plugin/teams-api).
+Whether you run survival, skyblock, SMP, or factions, EzAuction handles your server economy: timed listings, offline-safe item returns, enchantment-aware search, live auction sessions with one-click bidding, and team-scoped auctions via [TeamsAPI](https://modrinth.com/plugin/teams-api).
 
 | | |
 |---|---|
@@ -12,22 +12,41 @@ Whether you're running a survival, skyblock, or factions server, EzAuction gives
 
 > **Requires Vault and a compatible economy plugin such as [EzEconomy](https://modrinth.com/plugin/ezeconomy) to process currency.**
 
-## What's New — v2.3.0
+## What's New – v2.3.0
+
+### Live Auction Overhaul
 
 - **Live auction seller management** – Players with `ezauction.auction.live.sell` can now queue items directly from the Live Auction browser (sell button in the GUI) or via `/liveauction sell`. On enqueue, a chat message confirms the queue position. `/liveauction cancel` removes the entry and refunds the deposit; a cancel button also appears in the GUI while the player has a queued entry. Admins with `ezauction.auction.live.admin` can force-cancel any active auction with `/liveauction cancel <id>`.
 - **`/bid` command** (alias `/livebid`) – Dedicated command for live auction interactions: place bids (`/bid <amount>`), view session status, and manage per-player countdown preferences. Bids can also be placed by clicking the suggestion in the live auction chat message.
 - **Per-player notification preferences** – Toggle countdowns with `/bid notify [on|off]` and select display type with `/bid notify display <types…>`. Preferences persist across restarts in `live-preferences.yml` (or a MySQL table).
-- **EzCountdown integration** (optional soft-dependency) – Display live auction countdowns via `ACTION_BAR`, `BOSS_BAR`, `TITLE`, `SCOREBOARD`, or `CHAT`.
-- **Clickable bid messages & item hover previews** – The bid announcement in chat links directly to `/bid <next-minimum>`; hovering the item name shows enchantments, potion effects, and shulker box contents.
+- **[EzCountdown](https://modrinth.com/plugin/ezcountdown) integration** (optional soft-dependency) – Display live auction countdowns via `ACTION_BAR`, `BOSS_BAR`, `TITLE`, `SCOREBOARD`, or `CHAT`.
+- **Clickable bid messages & item hover previews** – The bid announcement in chat links directly to `/bid <next-minimum>`; hovering the item name shows enchantments, potion effects, and shulker box contents on hover.
 - **Five new Bukkit events** – `LiveAuctionStartedEvent` (cancellable), `LiveAuctionBidPlacedEvent` (cancellable), `LiveAuctionEndedEvent`, `LiveAuctionPlayerJoinedEvent`, `LiveAuctionPlayerLeftEvent`.
-- **Live Auctions shortcut in Auction House** – A quick-access button (slot 47, beacon) in the main `/auction` browser opens the Live Auction picker directly, without having to type `/liveauction`.
+- **Live Auctions shortcut in Auction House** – A quick-access beacon button (slot 47) in the main `/auction` browser opens the Live Auction picker directly, without having to type `/liveauction`.
+
+![Live Auction Queue GUI: browse, join, and manage live auctions](https://i.ibb.co/3mgZ7nKC/image.png)
+
+![Clickable bid messages in chat with auto-fill bid link](https://i.ibb.co/8LjtSrdM/image.png)
+
+![Shulker box contents shown on hover in live auction chat](https://i.ibb.co/3mDfTnKc/image.png)
+
+### Fixes & Other Additions
+
 - **Claim GUI** – `/auction claim` and the Claims button in the browser now open a 54-slot GUI showing each pending return item with its expiry date displayed in the item lore. A single **Claim All** button collects everything at once; a **Back** button returns to the auction browser.
 - **Configurable claim expiry** – Set `claim.expiry-days` in `auction.yml` (default `7`) to control how many days pending return items are held before expiry is shown in the Claim GUI.
 - **First-bid minimum fix** – The opening bid on a live auction now only requires the starting price; the increment is applied to subsequent bids only. Sending an empty `/bid` response automatically places the minimum bid.
 
 ## Why Use EzAuction?
+
+![Auction House browser: paginated, searchable listings with price overlays](https://i.ibb.co/ks3WjqQ2/ez-auction-auction-house.png)
+
 - **Menu-first trading** – Paginated browsers, sell/order editors, and confirmation popups keep every transaction guided and click-friendly.
 - **Listings + buy orders** – Run timed sales, reserve balance for buy requests, and fulfill either side straight from the GUI or command flow.
+
+![Buy orders GUI](https://i.ibb.co/27hNgZgx/ez-auction-buy-orders.png)
+
+![Listing editor with price and quantity controls](https://i.ibb.co/KxyrpHQk/ez-auction-listing.png)
+
 - **Team auctions** – [TeamsAPI](https://modrinth.com/plugin/teams-api) integration lets team members co-list and co-claim auctions, perfect for faction and skyblock economies.
 
 ![Team Auction GUI](https://i.ibb.co/vCYzR3R6/image.png)
@@ -36,6 +55,8 @@ Whether you're running a survival, skyblock, or factions server, EzAuction gives
 - **Offline-safe returns** – Expired or undeliverable items go to a claimable stash with login reminders and `/auction claim` recovery.
 - **Rank-aware limits** – Plug in a custom `AuctionListingLimitResolver` service to scale slot caps with ranks, islands, or progression data.
 - **Smart value overlays** – Surface configured price hints or pipe in [EzShops](https://www.spigotmc.org/resources/1-21-%E2%9A%A0%EF%B8%8F-ezshops-%E2%9A%A0%EF%B8%8F-dynamic-pricing-gui-player-shops-sell-hand-inv.129780/) buy/sell estimates directly into menu lore.
+
+![EzShops price overlay in listing lore](https://i.ibb.co/fzcXWVjq/ez-auction-shop-pricing.png)
 
 ## Feature Highlights
 - **Configurable menus & translations** – Override browser/confirm layouts, filler glass, and button text across the bundled English, Dutch, Spanish, and Chinese menu files.
@@ -46,6 +67,8 @@ Whether you're running a survival, skyblock, or factions server, EzAuction gives
 - **Integration-ready API** – Register Bukkit services to override listing caps or provide custom value providers without forking the plugin.
 - **Enchant-aware search** – Search `sharpness v`, `fortune 3`, or `minecraft:looting` to find listings and buy orders carrying exact enchantment stacks - supports roman numerals, numeric levels, namespaced keys, and underscore/space variants.
 - **Shulker box previews** – Buyers can inspect shulker contents directly from the auction browser before purchasing.
+
+![Shulker box contents preview in the auction browser](https://i.ibb.co/5xS8T77Q/image.png)
 
 ## Discord Integration
 - **Standalone webhook** – Post colour-coded embed notifications to any Discord channel by pasting a webhook URL into `discord.yml`. No DiscordSRV or bot setup required.
@@ -112,13 +135,21 @@ holograms:
 4. Encourage `/auction history` so buyers and sellers can audit their latest activity right from chat.
 
 ## Live Auctions
+
+![Live Auction Queue GUI: browse, join, or queue your own item](https://i.ibb.co/3mgZ7nKC/image.png)
+
 - **Queue the spotlight listings** – Flip `live-auctions.enabled` on (and `queue-enabled` if you want a rolling lineup) so fresh sales are staged for broadcast and visible through `/liveauction`.
-- **Sell from the GUI** – The Live Auction browser shows a sell button for players with `ezauction.auction.live.sell`. One click opens the sell menu pre-configured for the live queue — no command needed.
+- **Sell from the GUI** – The Live Auction browser shows a sell button for players with `ezauction.auction.live.sell`. One click opens the sell menu pre-configured for the live queue – no command needed.
 - **Queue position feedback** – After queuing an item, the seller receives a chat confirmation with their position number. If the queue is disabled, the auction starts immediately and a different confirmation is shown.
 - **Cancel anytime** – A cancel button appears in the GUI while the player has a queued entry; clicking it (or running `/liveauction cancel`) dequeues the item and refunds the deposit.
 - **Admin force-cancel** – OPs and players with `ezauction.auction.live.admin` can stop an active auction immediately via `/liveauction cancel <auction-id>`. All bids are refunded and the item is returned to the seller.
 - **`/bid` command** – Bidders place bids with `/bid <amount>` or by clicking the clickable suggestion in chat. `/bid notify` and `/bid notify display` manage per-player countdown preferences.
 - **Hype them in chat** – Keep `display-in-chat` enabled to broadcast live listings every `announcement-interval-ticks` ticks with clickable bid links and hover previews on the item name.
+
+![Live auction chat messages with clickable bid links](https://i.ibb.co/8LjtSrdM/image.png)
+
+![Item hover preview showing enchantments and shulker contents](https://i.ibb.co/3mDfTnKc/image.png)
+
 - **Curate from the live menu** – The Live Auctions GUI shows queue position, seller names, price summaries, and highlights your own entry with a badge and enchant glow.
 
 ## Commands & Permissions
