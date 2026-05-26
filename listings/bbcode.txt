@@ -1,10 +1,10 @@
 [CENTER][SIZE=6][B]EzAuction[/B][/SIZE]
 
-[SIZE=3]Menu-first marketplace with listings, buy orders, and async safety nets[/SIZE]
-[SIZE=2]Paper / Spigot / Purpur / Bukkit 1.7 - 1.21.* • Vault economy • YAML fallback + MySQL • English/Dutch/Spanish/Chinese menus included • PlaceholderAPI stats
-[COLOR=#ff6600]Requires Vault and a compatible economy plugin to process currency.[/COLOR][/SIZE][/CENTER]
+[SIZE=3]Complete GUI-driven auction house for Paper, Spigot & Bukkit: listings, buy orders, live auctions, team markets, and async safety nets[/SIZE]
+[SIZE=2]Paper / Spigot / Purpur / Bukkit 1.13 – 26.1.* • Java 21+ • Vault economy • YAML (built-in) + MySQL • English · Dutch · Spanish · Chinese menus • PlaceholderAPI • Discord webhooks
+[COLOR=#ff6600]Requires Vault and a compatible economy plugin such as EzEconomy to process currency.[/COLOR][/SIZE][/CENTER]
 
-[SIZE=4][B]What's New — v2.3.0[/B][/SIZE]
+[SIZE=4][B]What's New – v2.3.0[/B][/SIZE]
 [LIST]
 [*][B][COLOR=#55ff55]Added[/COLOR] Live auction seller management[/B] – Players with [icode]ezauction.auction.live.sell[/icode] can now queue items directly from the Live Auction browser (sell button) or via [icode]/liveauction sell[/icode]. On enqueue, a chat message confirms the queue position. [icode]/liveauction cancel[/icode] removes the entry and refunds the deposit; a cancel button also appears in the GUI. Admins with [icode]ezauction.auction.live.admin[/icode] can force-cancel any active auction with [icode]/liveauction cancel <id>[/icode].
 [*][B][COLOR=#55ff55]Added[/COLOR] [icode]/bid[/icode] command[/B] (alias [icode]/livebid[/icode]) – Dedicated command for live auction interactions: place bids, view session status, and manage per-player countdown preferences. Bids can also be placed by clicking the suggestion in the live auction chat message.
@@ -12,7 +12,10 @@
 [*][B][COLOR=#55ff55]Added[/COLOR] EzCountdown integration[/B] (optional soft-dependency) – Show live auction countdowns via [icode]ACTION_BAR[/icode], [icode]BOSS_BAR[/icode], [icode]TITLE[/icode], [icode]SCOREBOARD[/icode], or [icode]CHAT[/icode].
 [*][B][COLOR=#55ff55]Added[/COLOR] Clickable bid messages & item hover previews[/B] – The bid announcement in chat links directly to [icode]/bid <next-minimum>[/icode]; hovering the item name shows enchantments, potion effects, and shulker contents.
 [*][B][COLOR=#55ff55]Added[/COLOR] Five new Bukkit events[/B] – [icode]LiveAuctionStartedEvent[/icode] (cancellable), [icode]LiveAuctionBidPlacedEvent[/icode] (cancellable), [icode]LiveAuctionEndedEvent[/icode], [icode]LiveAuctionPlayerJoinedEvent[/icode], [icode]LiveAuctionPlayerLeftEvent[/icode].
-[*][B][COLOR=#55ff55]Added[/COLOR] Live Auctions shortcut in Auction House[/B] – A quick-access button (beacon, slot 47) in the main [icode]/auction[/icode] browser opens the Live Auction picker directly — no need to type [icode]/liveauction[/icode].
+[*][B][COLOR=#55ff55]Added[/COLOR] Live Auctions shortcut in Auction House[/B] – A quick-access button (beacon, slot 47) in the main [icode]/auction[/icode] browser opens the Live Auction picker directly – no need to type [icode]/liveauction[/icode].
+[IMG]https://i.ibb.co/3mgZ7nKC/image.png[/IMG]
+[IMG]https://i.ibb.co/8LjtSrdM/image.png[/IMG]
+[IMG]https://i.ibb.co/3mDfTnKc/image.png[/IMG]
 [*][B][COLOR=#55ff55]Added[/COLOR] Claim GUI[/B] – The Claims button and [icode]/auction claim[/icode] now open a 54-slot GUI showing each pending return item with its expiry date in the lore. A [B]Claim All[/B] button collects everything at once; a [B]Back[/B] button returns to the browser.
 [*][B][COLOR=#55ff55]Added[/COLOR] Configurable claim expiry[/B] – Set [icode]claim.expiry-days[/icode] in [icode]auction.yml[/icode] (default [icode]7[/icode]) to control how many days pending return items are held before expiry is shown in the Claim GUI.
 [*][B][COLOR=#ffff55]Fixed[/COLOR] First-bid minimum[/B] – The opening bid on a live auction now only requires the starting price; the configured increment applies to subsequent bids only. Sending an empty [icode]/bid[/icode] response automatically places the minimum bid.
@@ -57,7 +60,7 @@
 [*][B]Standalone webhook[/B] – Post colour-coded embed notifications to any Discord channel by pasting a webhook URL into [icode]discord.yml[/icode]. No DiscordSRV or bot setup required.
 [*][B]DiscordSRV support[/B] – Optionally route notifications through an existing DiscordSRV installation with optional account-linking and role-gating per event.
 [*][B]Four event types[/B] – Receive a message whenever an auction is listed, sold, bid on, or cancelled, each styled with its own accent colour (green / blue / yellow / red).
-[*][B]Live admin commands[/B] – Configure, enable, disable, and test the webhook in-game with [icode]/auctiondiscord webhook[/icode] — changes take effect instantly without a restart.
+[*][B]Live admin commands[/B] – Configure, enable, disable, and test the webhook in-game with [icode]/auctiondiscord webhook[/icode] – changes take effect instantly without a restart.
 [*][B]Async & non-blocking[/B] – All HTTP calls run on a background thread; a failed delivery is logged at WARNING level and never interrupts gameplay.
 [/LIST]
 
@@ -66,11 +69,11 @@
 [*]Open the target Discord channel → [B]Edit Channel[/B] → [B]Integrations[/B] → [B]Webhooks[/B] → [B]New Webhook[/B] → [B]Copy Webhook URL[/B].
 [*]In-game or via console, run:
 [code]/auctiondiscord webhook set url https://discord.com/api/webhooks/YOUR_ID/YOUR_TOKEN[/code]
-[*]Verify with [icode]/auctiondiscord webhook test[/icode] — a test embed will appear in your channel immediately.
+[*]Verify with [icode]/auctiondiscord webhook test[/icode] – a test embed will appear in your channel immediately.
 [/LIST]
 
 [code=yml]
-# discord.yml — webhook section
+# discord.yml – webhook section
 webhook:
   enabled: true
   url: "https://discord.com/api/webhooks/123456789/YOURTOKEN"
@@ -119,14 +122,17 @@ holograms:
 [/LIST]
 
 [SIZE=4][B]Live Auctions[/B][/SIZE]
+[IMG]https://i.ibb.co/3mgZ7nKC/image.png[/IMG]
 [LIST]
 [*][B]Queue the spotlight listings[/B] – Flip [icode]live-auctions.enabled[/icode] on (and [icode]queue-enabled[/icode] if you want a rolling lineup) so fresh sales are staged for broadcast and visible through [icode]/liveauction[/icode].
-[*][B]Sell from the GUI[/B] – The Live Auction browser shows a sell button for players with [icode]ezauction.auction.live.sell[/icode]. One click opens the sell menu pre-configured for the live queue — no command needed.
+[*][B]Sell from the GUI[/B] – The Live Auction browser shows a sell button for players with [icode]ezauction.auction.live.sell[/icode]. One click opens the sell menu pre-configured for the live queue – no command needed.
 [*][B]Queue position feedback[/B] – After queuing, the seller receives a chat confirmation with their position number. If the queue is disabled, the auction starts immediately with a different confirmation message.
 [*][B]Cancel anytime[/B] – A cancel button appears in the GUI while the player has a queued entry; clicking it (or running [icode]/liveauction cancel[/icode]) dequeues the item and refunds the deposit.
 [*][B]Admin force-cancel[/B] – OPs and admins with [icode]ezauction.auction.live.admin[/icode] can stop an active auction immediately via [icode]/liveauction cancel <auction-id>[/icode]. All bids are refunded and the item returned to the seller.
 [*][B][icode]/bid[/icode] command[/B] – Bidders place bids with [icode]/bid <amount>[/icode] or by clicking the clickable suggestion in chat. [icode]/bid notify[/icode] and [icode]/bid notify display[/icode] manage per-player countdown preferences.
 [*][B]Hype them in chat[/B] – Keep [icode]display-in-chat[/icode] enabled to broadcast live listings every [icode]announcement-interval-ticks[/icode] ticks with clickable bid links and hover previews on the item name.
+[IMG]https://i.ibb.co/8LjtSrdM/image.png[/IMG]
+[IMG]https://i.ibb.co/3mDfTnKc/image.png[/IMG]
 [*][B]Curate from the live menu[/B] – The Live Auctions GUI shows queue position, seller names, price summaries, and highlights your own entry with a badge and enchant glow.
 [/LIST]
 
