@@ -4,6 +4,12 @@ All notable changes to EzAuction are documented here.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/). Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Release tags use the `v` prefix (e.g. `v2.2.0`).
 
+## [2.3.2] - 2026-06-29
+
+### Fixed
+
+- **Buy Orders GUI inventory theft vulnerability** - fixed a critical security issue where players could steal items from the Buy Orders overview. Both the `/orders` command and the Buy Orders tab in `/ah` were unprotected, allowing players to drag items out of the GUI into their inventory, or place items into the GUI (which would be deleted on close). All item interactions in buy order displays are now cancelled, and items are cloned so the backing order data is never directly accessible.
+
 ## [2.3.1] - 2026-05-27
 
 ### Fixed
