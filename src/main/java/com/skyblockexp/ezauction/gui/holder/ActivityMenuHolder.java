@@ -1,38 +1,22 @@
 package com.skyblockexp.ezauction.gui.holder;
 import com.skyblockexp.ezauction.gui.view.ActivityTab;
 
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.InventoryHolder;
-
 import java.util.UUID;
 
 /**
  * Inventory holder for the My Activity menu.
+ * Extends {@link AbstractAuctionHolder} so that the shared drag and click guards
+ * in {@code AuctionMenu} automatically protect this inventory from item theft.
  */
-public class ActivityMenuHolder implements InventoryHolder {
-    private final UUID owner;
+public class ActivityMenuHolder extends AbstractAuctionHolder {
     private final ActivityTab tab;
-    private Inventory inventory;
 
     public ActivityMenuHolder(UUID owner, ActivityTab tab) {
-        this.owner = owner;
+        super(owner);
         this.tab = tab;
-    }
-
-    public UUID owner() {
-        return owner;
     }
 
     public ActivityTab tab() {
         return tab;
-    }
-
-    public void setInventory(Inventory inventory) {
-        this.inventory = inventory;
-    }
-
-    @Override
-    public Inventory getInventory() {
-        return inventory;
     }
 }

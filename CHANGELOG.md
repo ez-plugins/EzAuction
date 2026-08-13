@@ -14,10 +14,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/). Version
 - **Placement confirmation shows coordinates** — the success message for `/auctionhologram <type>` now reports the exact spawn coordinates and world (e.g. `Placed … hologram at 12,66,-4 (world)`), matching where the hologram actually landed (the targeted block plus the configured `height-offset`).
 - **Existing orphans stay orphaned** — holograms placed before this fix carry no marker; reach them with `--untagged` (also matches other plugins' TextDisplays). Run `list --untagged` before `clear --untagged`.
 - **Hardened** — spherical distance filtering for removal, removed a latent `ConcurrentModificationException` in the update loop, and made `max-holograms` enforcement live with a distinct denial message.
-
-### Added
-
-- `holograms.removal-radius` (10.0), `holograms.max-removal-radius` (64.0), and `holograms.allow-untagged-removal` (true) config keys.
+- **Buy Orders GUI inventory theft vulnerability** - fixed a critical security issue where players could steal items from the Buy Orders overview. Both the `/orders` command and the Buy Orders tab in `/ah` were unprotected, allowing players to drag items out of the GUI into their inventory, or place items into the GUI (which would be deleted on close). All item interactions in buy order displays are now cancelled, and items are cloned so the backing order data is never directly accessible.
 
 ## [2.3.1] - 2026-05-27
 

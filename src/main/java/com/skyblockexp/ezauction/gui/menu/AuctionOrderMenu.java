@@ -6,6 +6,7 @@ import com.skyblockexp.ezauction.transaction.AuctionTransactionService;
 import com.skyblockexp.ezauction.compat.ItemTagStorage;
 import com.skyblockexp.ezauction.component.gui.order.OrderMenuState;
 import com.skyblockexp.ezauction.component.gui.order.OrderMenuHolder;
+import com.skyblockexp.ezauction.gui.holder.ReadOnlyMenuHolder;
 import com.skyblockexp.ezauction.config.AuctionListingRules;
 import com.skyblockexp.ezauction.config.AuctionMenuInteractionConfiguration;
 import com.skyblockexp.ezauction.config.AuctionMessageConfiguration;
@@ -185,9 +186,12 @@ public class AuctionOrderMenu implements Listener {
         // Fetch all open orders from the auctionManager
         List<ItemStack> openOrders = auctionManager.getOpenOrdersForPlayer(player);
         int size = Math.max(27, ((openOrders.size() + 8) / 9) * 9); // fit items in rows
-        Inventory overview = Bukkit.createInventory(player, size, colorize("&eYour Open Orders"));
+        ReadOnlyMenuHolder holder = new ReadOnlyMenuHolder(player.getUniqueId());
+        Inventory overview = Bukkit.createInventory(holder, size, colorize("&eYour Open Orders"));
+        holder.setInventory(overview);
         for (int i = 0; i < openOrders.size() && i < size; i++) {
-            overview.setItem(i, openOrders.get(i));
+            ItemStack item = openOrders.get(i);
+            overview.setItem(i, item != null ? item.clone() : null);
         }
         player.openInventory(overview);
     }
@@ -227,9 +231,12 @@ public class AuctionOrderMenu implements Listener {
             }
         }
         int size = Math.max(27, ((openOrders.size() + 8) / 9) * 9); // fit items in rows
-        Inventory overview = Bukkit.createInventory(player, size, colorize("&eAll Open Orders"));
+        ReadOnlyMenuHolder holder = new ReadOnlyMenuHolder(player.getUniqueId());
+        Inventory overview = Bukkit.createInventory(holder, size, colorize("&eAll Open Orders"));
+        holder.setInventory(overview);
         for (int i = 0; i < openOrders.size() && i < size; i++) {
-            overview.setItem(i, openOrders.get(i));
+            ItemStack item = openOrders.get(i);
+            overview.setItem(i, item != null ? item.clone() : null);
         }
         player.openInventory(overview);
     }
