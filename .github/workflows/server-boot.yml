@@ -171,8 +171,11 @@ jobs:
           fi
           wait "$PID" 2>/dev/null || true
 
-          echo "=================== BOOT LOG (tail) ==================="
-          tail -n 60 "$LOG" || true
+          echo "=================== BOOT LOG (EzAuction/Vault/EzEconomy context) ==================="
+          grep -nE "EzAuction|Vault|EzEconomy|Bootstrap|SEVERE|ERROR" "$LOG" | head -80 || true
+          echo "=============================================================================="
+          echo "=================== FULL BOOT LOG ==================="
+          cat "$LOG" || true
           echo "======================================================="
 
           # --- Assertions ---
@@ -206,8 +209,8 @@ jobs:
           fi
           echo "Boot smoke test PASSED for ${{ matrix.server.name }}."
 
-      - name: Upload server log on failure
-        if: failure()
+      - name: Upload server log
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: server-boot-${{ matrix.server.name }}-log
