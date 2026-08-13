@@ -1,4 +1,5 @@
 package com.skyblockexp.ezauction.gui.menu;
+import com.skyblockexp.ezauction.compat.Scheduler;
 
 import com.skyblockexp.ezauction.service.AuctionManager;
 import com.skyblockexp.ezauction.model.AuctionOperationResult;
@@ -32,10 +33,10 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * <p>Layout:</p>
  * <ul>
- *   <li>Slots 0-44 — pending items (first 45 shown; each item lore shows expiry date)</li>
- *   <li>Slot 45 — Back button (returns to main auction browser)</li>
- *   <li>Slot 49 — Claim All button</li>
- *   <li>Other bottom-row slots — gray pane filler</li>
+ *   <li>Slots 0-44 - pending items (first 45 shown; each item lore shows expiry date)</li>
+ *   <li>Slot 45 - Back button (returns to main auction browser)</li>
+ *   <li>Slot 49 - Claim All button</li>
+ *   <li>Other bottom-row slots - gray pane filler</li>
  * </ul>
  */
 public final class ClaimMenu implements Listener {
@@ -187,7 +188,7 @@ public final class ClaimMenu implements Listener {
         switch (slot) {
             case SLOT_BACK -> {
                 player.closeInventory();
-                Bukkit.getScheduler().runTask(plugin, () -> auctionMenu.openBrowser(player));
+                Scheduler.run(plugin, () -> auctionMenu.openBrowser(player));
             }
             case SLOT_CLAIM_ALL -> {
                 AuctionOperationResult result = auctionManager.claimReturnItems(player);
@@ -195,7 +196,7 @@ public final class ClaimMenu implements Listener {
                     player.sendMessage(result.message());
                 }
                 // Refresh or close if all claimed
-                Bukkit.getScheduler().runTask(plugin, () -> {
+                Scheduler.run(plugin, () -> {
                     if (auctionManager.countPendingReturnItems(player.getUniqueId()) > 0) {
                         player.closeInventory();
                         open(player);
@@ -204,7 +205,7 @@ public final class ClaimMenu implements Listener {
                     }
                 });
             }
-            default -> { /* item slots — no action for now */ }
+            default -> { /* item slots - no action for now */ }
         }
     }
 

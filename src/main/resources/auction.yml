@@ -27,6 +27,12 @@ holograms:
   search-radius: 2.5
   # Vertical offset applied when spawning holograms above the target block.
   height-offset: 1.75
+  # Default radius (in blocks) searched by /auctionhologram list|clear|clearall.
+  removal-radius: 10.0
+  # Hard cap on the radius a player may pass to the removal commands.
+  max-removal-radius: 64.0
+  # Allow removing untagged TextDisplay entities via the --untagged flag.
+  allow-untagged-removal: true
 live-auctions:
   enabled: true
   # When enabled, new listings are pushed into a live announcement queue that can be consumed sequentially.

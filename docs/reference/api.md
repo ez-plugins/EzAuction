@@ -105,5 +105,5 @@ Register it via `EzAuctionPlugin#setListingLimitResolver(resolver)`.
 
 ## Related
 
-- [Events](events.md) — all custom Bukkit events
+- [Events](events.md) - all custom Bukkit events
 - [CONTRIBUTING.md](https://github.com/ez-plugins/EzAuction/blob/main/CONTRIBUTING.md)

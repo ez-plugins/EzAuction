@@ -1,4 +1,5 @@
 package com.skyblockexp.ezauction.update;
+import com.skyblockexp.ezauction.compat.Scheduler;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -18,7 +19,7 @@ public final class SpigotUpdateChecker {
     }
 
     public void checkForUpdates() {
-        plugin.getServer().getScheduler().runTaskAsynchronously(plugin, () -> {
+        Scheduler.runAsync(plugin, () -> {
             try {
                 String latestVersion = fetchLatestVersion();
                 if (latestVersion == null || latestVersion.isBlank()) {

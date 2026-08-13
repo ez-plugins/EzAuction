@@ -1,4 +1,5 @@
 package com.skyblockexp.ezauction.gui.menu;
+import com.skyblockexp.ezauction.compat.Scheduler;
 import com.skyblockexp.ezauction.gui.holder.SellMenuHolder;
 
 import com.skyblockexp.ezauction.model.AuctionListing;
@@ -181,7 +182,7 @@ public final class LiveAuctionMenu implements Listener {
             inventory.setItem(SELL_SLOT, sellBtn);
         }
 
-        // Cancel-queue button — only shown if viewer has a queued entry
+        // Cancel-queue button - only shown if viewer has a queued entry
         if (viewerUuid != null && liveAuctionService.hasQueuedEntry(viewerUuid)) {
             ItemStack cancelBtn = createButton(Material.RED_DYE, ChatColor.RED + messages.cancelButtonLabel(),
                     List.of(ChatColor.GRAY + messages.cancelButtonLore()));
@@ -398,16 +399,16 @@ public final class LiveAuctionMenu implements Listener {
             case ACTION_REFRESH -> reopenAsync(player);
             case ACTION_BROWSE -> {
                 player.closeInventory();
-                plugin.getServer().getScheduler().runTask(plugin, () -> auctionMenu.openBrowser(player));
+                Scheduler.run(plugin, () -> auctionMenu.openBrowser(player));
             }
             case ACTION_BACK -> {
                 player.closeInventory();
-                plugin.getServer().getScheduler().runTask(plugin, () -> auctionMenu.openBrowser(player));
+                Scheduler.run(plugin, () -> auctionMenu.openBrowser(player));
             }
             case ACTION_SELL -> {
                 if (player.hasPermission("ezauction.auction.live.sell") && sellMenu != null) {
                     player.closeInventory();
-                    plugin.getServer().getScheduler().runTask(plugin, () -> {
+                    Scheduler.run(plugin, () -> {
                         LiveSellContext.mark(player.getUniqueId());
                         sellMenu.openSellMenu(player, Target.LIVE);
                     });

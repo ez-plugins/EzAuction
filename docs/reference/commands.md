@@ -72,7 +72,7 @@ Interact with an active live auction you are participating in.
 | `notify display <types…>` | `/bid notify display ACTION_BAR` | `ezauction.auction.live.notify` | Set which EzCountdown display types to use |
 | `mutechat [on\|off]` | `/bid mutechat on` | `ezauction.bid` | Silence all other chat while in a live auction |
 
-> **EzCountdown required** — `notify display` only takes effect when EzCountdown is installed and `ezcountdown-enabled: true` is set in `auction.yml`.
+> **EzCountdown required** - `notify display` only takes effect when EzCountdown is installed and `ezcountdown-enabled: true` is set in `auction.yml`.
 
 ---
 
@@ -92,6 +92,23 @@ Manage the Discord integration at runtime.
 | `role set name <n>` | `/auctiondiscord role set name Admin` | `ezauction.discord` | Set required role name |
 | `role clear` | `/auctiondiscord role clear` | `ezauction.discord` | Clear role settings |
 | `role require <bool>` | `/auctiondiscord role require true` | `ezauction.discord` | Toggle role requirement |
+
+---
+
+## `/auctionhologram`
+
+Place and manage in-world auction holograms. Requires `ezauction.hologram` and Minecraft 1.19+ (TextDisplay entities).
+
+| Sub-command | Usage | Permission | Description |
+|-------------|-------|-----------|-------------|
+| `<type>` | `/auctionhologram listings` | `ezauction.hologram` | Place a hologram at the block you are looking at (`listings` or `orders`) |
+| `list [radius] [--untagged]` | `/auctionhologram list 20 --untagged` | `ezauction.hologram` | List nearby holograms, nearest-first |
+| `clear [radius] [--untagged]` | `/auctionhologram clear --untagged` | `ezauction.hologram` | Remove the nearest matching hologram (two-step confirm when `--untagged`) |
+| `clearall [radius] [--untagged]` | `/auctionhologram clearall 32` | `ezauction.hologram` | Remove all matching holograms in range (two-step confirmation) |
+
+> **Two-step confirmation** - `clear --untagged` and `clearall` require a second run within 15 seconds to actually remove anything. The first run only reports what is in range, so staff can verify the blast radius before deleting (especially with `--untagged`, which also matches other plugins' `TextDisplay` entities).
+
+See [Auction Holograms](../features/auction-holograms.md) for the full guide.
 
 ---
 

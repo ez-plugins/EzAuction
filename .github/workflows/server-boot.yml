@@ -1,0 +1,218 @@
+name: Server Boot Smoke
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+# Boots the built EzAuction plugin on real Paper, Folia, and Spigot servers and fails the
+# job if the server log shows boot errors or the plugin never reaches its enabled state.
+#
+# This complements (does not replace) the MockBukkit `mvn verify` (ci.yml). The FoliaLib-style
+# scheduler shim in `compat/Scheduler.java` is what lets the plugin actually boot on Folia's
+# regionised threads. Spigot is built from source via BuildTools (no prebuilt jar is published).
+
+jobs:
+  server-boot:
+    name: Boot EzAuction on ${{ matrix.server.name }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        server:
+          - { name: paper, kind: paper, version: "1.21.1" }
+          - { name: folia, kind: folia, version: "1.21.11" }
+          - { name: spigot, kind: spigot, version: "1.21.1" }
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: Build EzAuction
+        run: mvn -B -q package -DskipTests
+
+      - name: Download Paper server jar
+        if: matrix.server.kind == 'paper'
+        env:
+          USER_AGENT: EzAuction-CI/1.0 (https://github.com/skyblockexp/EzAuction)
+        run: |
+          VERSION="${{ matrix.server.version }}"
+          # PaperMC retired the v2 downloads API; Fill v3 requires a descriptive User-Agent
+          # header and returns the download URL inline (key: server:default). We parse with
+          # python3 (always present on ubuntu-latest) to avoid a jq dependency.
+          API="https://fill.papermc.io/v3/projects/paper/versions/${VERSION}/builds"
+          URL=$(curl -fsSL -H "User-Agent: ${USER_AGENT}" "$API" | python3 -c '
+          import sys, json
+          data = json.load(sys.stdin)
+          stable = [b for b in data if b.get("channel") == "STABLE"]
+          pool = stable if stable else data
+          newest = max(pool, key=lambda b: b["id"])
+          print(newest["downloads"]["server:default"]["url"])
+          ')
+          echo "Resolved Paper download: $URL"
+          curl -fsSL -H "User-Agent: ${USER_AGENT}" "$URL" -o paper.jar
+          test -s paper.jar || { echo "paper.jar is empty" >&2; exit 1; }
+
+      - name: Download Folia server jar
+        if: matrix.server.kind == 'folia'
+        env:
+          USER_AGENT: EzAuction-CI/1.0 (https://github.com/skyblockexp/EzAuction)
+        run: |
+          VERSION="${{ matrix.server.version }}"
+          # Folia publishes prebuilt jars via the same Fill v3 service as Paper. Building from
+          # source is impractical in CI (heavy Gradle build + version-specific task config), so
+          # we download the newest build for the requested Minecraft version.
+          API="https://fill.papermc.io/v3/projects/folia/versions/${VERSION}/builds"
+          URL=$(curl -fsSL -H "User-Agent: ${USER_AGENT}" "$API" | python3 -c '
+          import sys, json
+          data = json.load(sys.stdin)
+          newest = max(data, key=lambda b: b["id"])
+          print(newest["downloads"]["server:default"]["url"])
+          ')
+          echo "Resolved Folia download: $URL"
+          curl -fsSL -H "User-Agent: ${USER_AGENT}" "$URL" -o folia.jar
+          test -s folia.jar || { echo "folia.jar is empty" >&2; exit 1; }
+
+      - name: Build Spigot server jar
+        if: matrix.server.kind == 'spigot'
+        id: spigot
+        timeout-minutes: 90
+        env:
+          GIT_AUTHOR_NAME: ci
+          GIT_AUTHOR_EMAIL: ci@ezauction.local
+          GIT_COMMITTER_NAME: ci
+          GIT_COMMITTER_EMAIL: ci@ezauction.local
+        run: |
+          VERSION="${{ matrix.server.version }}"
+          # Spigot publishes no prebuilt jar, so build it from source with BuildTools.
+          curl -fsSL -o BuildTools.jar "https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar"
+          java -jar BuildTools.jar --rev "$VERSION" --remapped
+          SPIGOT_JAR=$(ls spigot-*.jar | head -1)
+          if [ -z "$SPIGOT_JAR" ]; then
+            echo "Spigot jar not produced by BuildTools" >&2
+            exit 1
+          fi
+          cp "$SPIGOT_JAR" spigot.jar
+          echo "Built $SPIGOT_JAR"
+
+      - name: Prepare server directory
+        run: |
+          mkdir -p servers/${{ matrix.server.name }}/plugins
+          EZ_JAR=$(ls target/EzAuction-*.jar | head -1)
+          if [ "${{ matrix.server.kind }}" = "folia" ]; then
+            # Folia refuses to load plugins that do not declare folia support. Inject the flag
+            # into a copy of the built jar's plugin.yml so the boot actually exercises the plugin.
+            FOLIA_EZ="servers/${{ matrix.server.name }}/plugins/$(basename "$EZ_JAR")"
+            python3 - "$EZ_JAR" "$FOLIA_EZ" <<'PY'
+          import sys, zipfile, io
+          src, dst = sys.argv[1], sys.argv[2]
+          with zipfile.ZipFile(src) as zin, zipfile.ZipFile(dst, "w", zipfile.ZIP_DEFLATED) as zout:
+              for item in zin.infolist():
+                  data = zin.read(item.filename)
+                  if item.filename == "plugin.yml":
+                      text = data.decode("utf-8")
+                      if "folia-supported:" not in text:
+                          text = text.replace("api-version: 1.13\n",
+                                              "api-version: 1.13\nfolia-supported: true\n")
+                      data = text.encode("utf-8")
+                  zout.writestr(item, data)
+          PY
+            echo "Injected folia-supported: true into $(basename "$FOLIA_EZ")"
+          else
+            cp "$EZ_JAR" "servers/${{ matrix.server.name }}/plugins/"
+          fi
+          cp plugins/Vault.jar "servers/${{ matrix.server.name }}/plugins/"
+          cp plugins/ezeconomy-bukkit-3.0.4.jar "servers/${{ matrix.server.name }}/plugins/"
+          case "${{ matrix.server.kind }}" in
+            paper)  cp paper.jar  "servers/${{ matrix.server.name }}/${{ matrix.server.name }}.jar" ;;
+            folia)  cp folia.jar  "servers/${{ matrix.server.name }}/${{ matrix.server.name }}.jar" ;;
+            spigot) cp spigot.jar "servers/${{ matrix.server.name }}/${{ matrix.server.name }}.jar" ;;
+          esac
+
+      - name: Accept EULA
+        run: echo "eula=true" > "servers/${{ matrix.server.name }}/eula.txt"
+
+      - name: Boot server and assert clean enable
+        working-directory: servers/${{ matrix.server.name }}
+        run: |
+          set -euo pipefail
+          SERVER_JAR="${{ matrix.server.name }}.jar"
+          LOG="logs/latest.log"
+          mkdir -p logs
+          # Boot headless; auto-stop once the server reports "Done".
+          timeout 300 java -jar "$SERVER_JAR" nogui > "$LOG" 2>&1 &
+          PID=$!
+          echo "Server PID: $PID"
+          # Wait for the "Done" line (server finished loading) or the process to exit.
+          for i in $(seq 1 600); do
+            if grep -q "Done (" "$LOG" 2>/dev/null; then
+              echo "Server reported Done."
+              break
+            fi
+            if ! kill -0 "$PID" 2>/dev/null; then
+              echo "Server process exited before Done." >&2
+              break
+            fi
+            sleep 1
+          done
+          # Give the plugin a moment to finish onEnable after "Done".
+          sleep 5
+          if kill -0 "$PID" 2>/dev/null; then
+            echo "stop" > /proc/$PID/fd/0 2>/dev/null || true
+            sleep 5
+            kill "$PID" 2>/dev/null || true
+          fi
+          wait "$PID" 2>/dev/null || true
+
+          echo "=================== BOOT LOG (EzAuction/Vault/EzEconomy context) ==================="
+          grep -nE "EzAuction|Vault|EzEconomy|Bootstrap|SEVERE|ERROR" "$LOG" | head -80 || true
+          echo "=============================================================================="
+          echo "=================== FULL BOOT LOG ==================="
+          cat "$LOG" || true
+          echo "======================================================="
+
+          # --- Assertions ---
+          FAIL=0
+          if grep -q "EzAuction plugin enabled." "$LOG"; then
+            echo "PASS: plugin reached enabled state."
+          else
+            echo "FAIL: 'EzAuction plugin enabled.' not found in log."
+            FAIL=1
+          fi
+
+          # Forbidden patterns that indicate a broken boot.
+          for pattern in "SEVERE" "\[Bootstrap\] FATAL" "IllegalStateException" "async thread access" "Exception in thread"; do
+            if grep -qF "$pattern" "$LOG"; then
+              echo "FAIL: forbidden log pattern found: $pattern"
+              FAIL=1
+            fi
+          done
+
+          # Folia-specific region scheduler failures.
+          if [ "${{ matrix.server.kind }}" = "folia" ]; then
+            if grep -qE "Exception|Error" "$LOG" && grep -qiE "RegionizedServer|region scheduler" "$LOG"; then
+              echo "FAIL: Folia region scheduler error detected."
+              FAIL=1
+            fi
+          fi
+
+          if [ "$FAIL" -ne 0 ]; then
+            echo "Boot smoke test FAILED for ${{ matrix.server.name }}."
+            exit 1
+          fi
+          echo "Boot smoke test PASSED for ${{ matrix.server.name }}."
+
+      - name: Upload server log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: server-boot-${{ matrix.server.name }}-log
+          path: servers/${{ matrix.server.name }}/logs/latest.log
+          if-no-files-found: warn

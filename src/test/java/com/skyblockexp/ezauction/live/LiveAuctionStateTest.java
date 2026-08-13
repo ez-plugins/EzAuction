@@ -105,7 +105,7 @@ class LiveAuctionStateTest {
     @Test
     void minimumNextBidPercent_NoIncrement_ReturnsCurrentBid() {
         LiveAuctionState state = makeState(100.0);
-        // Both zero — minimum = current bid (no requirement)
+        // Both zero - minimum = current bid (no requirement)
         assertEquals(100.0, state.minimumNextBid(0, 0), 0.001);
     }
 

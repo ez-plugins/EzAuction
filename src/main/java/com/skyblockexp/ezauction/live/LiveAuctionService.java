@@ -1,4 +1,5 @@
 package com.skyblockexp.ezauction.live;
+import com.skyblockexp.ezauction.compat.Scheduler;
 
 import com.skyblockexp.ezauction.model.AuctionListing;
 import com.skyblockexp.ezauction.model.AuctionOperationResult;
@@ -109,8 +110,7 @@ public final class LiveAuctionService {
         if (!configuration.enabled()) return;
         if (!configuration.queueEnabled() || !configuration.displayInChat()) return;
         long interval = Math.max(1L, configuration.announcementIntervalTicks());
-        announcementTask = plugin.getServer().getScheduler()
-                .runTaskTimer(plugin, this::announceNext, interval, interval);
+        announcementTask = Scheduler.runTimer(plugin, this::announceNext, interval, interval);
         enabled = true;
     }
 
@@ -312,8 +312,7 @@ public final class LiveAuctionService {
             state.extendExpiry(newExpiry);
             BukkitTask oldTask = endTasks.remove(state.id());
             if (oldTask != null) oldTask.cancel();
-            BukkitTask newEndTask = plugin.getServer().getScheduler()
-                    .runTaskLater(plugin, () -> endAuction(state), minFinish * 20L);
+            BukkitTask newEndTask = Scheduler.runLater(plugin, () -> endAuction(state), minFinish * 20L);
             endTasks.put(state.id(), newEndTask);
         }
 
@@ -379,7 +378,7 @@ public final class LiveAuctionService {
 
     /**
      * Registers a callback that is invoked (on the main thread) with the listing ID whenever a
-     * live auction fully resolves — whether sold or returned unsold. Use this to remove the
+     * live auction fully resolves - whether sold or returned unsold. Use this to remove the
      * corresponding entry from the normal listing store and persist the change.
      */
     public void setListingResolutionCallback(Consumer<String> callback) {
@@ -430,8 +429,7 @@ public final class LiveAuctionService {
         }
 
         // Schedule end task
-        BukkitTask endTask = plugin.getServer().getScheduler()
-                .runTaskLater(plugin, () -> endAuction(state), durationSeconds * 20L);
+        BukkitTask endTask = Scheduler.runLater(plugin, () -> endAuction(state), durationSeconds * 20L);
         endTasks.put(state.id(), endTask);
 
         // Schedule chat reminders
@@ -446,7 +444,7 @@ public final class LiveAuctionService {
         for (long secondsMark : cfg.chatReminderAtSeconds()) {
             if (secondsMark > 0 && secondsMark < durationSeconds) {
                 long delayTicks = (durationSeconds - secondsMark) * 20L;
-                BukkitTask t = plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+                BukkitTask t = Scheduler.runLater(plugin, () -> {
                     if (activeAuctions.containsKey(state.id())) {
                         sendReminderToAll(state, secondsMark);
                     }
@@ -459,7 +457,7 @@ public final class LiveAuctionService {
         long intervalSeconds = cfg.chatReminderIntervalSeconds();
         if (intervalSeconds > 0) {
             long intervalTicks = intervalSeconds * 20L;
-            BukkitTask t = plugin.getServer().getScheduler().runTaskTimer(plugin, () -> {
+            BukkitTask t = Scheduler.runTimer(plugin, () -> {
                 if (activeAuctions.containsKey(state.id())) {
                     sendReminderToAll(state, state.secondsRemaining());
                 }
@@ -501,11 +499,11 @@ public final class LiveAuctionService {
             }
 
             if (!creditResult.success()) {
-                // Economy rejected the deposit — without an explicit refund the winner's escrowed
+                // Economy rejected the deposit - without an explicit refund the winner's escrowed
                 // funds would be permanently lost from the economy.
                 plugin.getLogger().warning("Live auction " + state.id()
                         + ": failed to credit seller " + state.entry().sellerId()
-                        + " — refunding winner. Reason: " + creditResult.message());
+                        + " - refunding winner. Reason: " + creditResult.message());
                 transactionService.refundOrderBuyer(winner, winAmount);
                 // Return the item to the seller since the sale could not complete
                 ItemStack returnItem = state.listing().item();
@@ -544,7 +542,7 @@ public final class LiveAuctionService {
                 broadcastToAll(endMsg);
             }
         } else {
-            // No bids — return item to the seller
+            // No bids - return item to the seller
             ItemStack item = state.listing().item();
             if (item != null) {
                 UUID sellerId = state.entry().sellerId();

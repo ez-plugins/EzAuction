@@ -16,6 +16,8 @@ EzAuction configuration is split across focused YAML files, all located in `plug
 | [`discord.yml`](../integrations/discord.md) | Discord webhook URLs and event toggles |
 | [`orders-only.yml`](orders-only.md) | Restrict the plugin to buy-orders-only mode |
 
+> **Holograms** are configured inside `auction.yml` under the `holograms:` block. See [Auction Holograms](../features/auction-holograms.md) for placement and management.
+
 ## Reloading
 
 Use `/auction reload` to apply most changes at runtime. A full server restart is required when changing the **storage backend**.

@@ -4,11 +4,22 @@ All notable changes to EzAuction are documented here.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/). Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Release tags use the `v` prefix (e.g. `v2.2.0`).
 
-## [2.3.2] - 2026-06-29
+## [2.3.2] - 2026-08-13
 
 ### Fixed
 
+- **Hologram placement & removal** — rewrote the TextDisplay hologram platform to use the typed Paper API directly. Previously a `NamespacedKey(JavaPlugin, String)` lookup threw and was swallowed, so the PDC marker was never written and holograms could not be detected or removed. Holograms are now correctly tagged, re-attached after restarts, and persistent.
+- **Hologram removal flow** — `/auctionhologram` now supports `list [radius] [--untagged]`, `clear [radius] [--untagged]` (alias `remove`), and `clearall [radius] [--untagged]`. Tagged `clear` removes the nearest EzAuction hologram immediately; `clearall` and any `--untagged` clear use two-step confirmation. Search uses the player's eye location and the new `removal-radius` config (default 10 blocks) instead of the placement-only `search-radius`.
+- **Safer `clear --untagged`** — removing untagged displays (which also match other plugins' TextDisplays) now requires a second run within 15 seconds. The first run reports how many untagged displays are in range; the second removes only the nearest one, so a stray bulk delete of another plugin's holograms is avoided.
+- **Placement confirmation shows coordinates** — the success message for `/auctionhologram <type>` now reports the exact spawn coordinates and world (e.g. `Placed … hologram at 12,66,-4 (world)`), matching where the hologram actually landed (the targeted block plus the configured `height-offset`).
+- **Existing orphans stay orphaned** — holograms placed before this fix carry no marker; reach them with `--untagged` (also matches other plugins' TextDisplays). Run `list --untagged` before `clear --untagged`.
+- **Hardened** — spherical distance filtering for removal, removed a latent `ConcurrentModificationException` in the update loop, and made `max-holograms` enforcement live with a distinct denial message.
 - **Buy Orders GUI inventory theft vulnerability** - fixed a critical security issue where players could steal items from the Buy Orders overview. Both the `/orders` command and the Buy Orders tab in `/ah` were unprotected, allowing players to drag items out of the GUI into their inventory, or place items into the GUI (which would be deleted on close). All item interactions in buy order displays are now cancelled, and items are cloned so the backing order data is never directly accessible.
+
+### Changed
+
+- **Folia-safe scheduler shim** — all 23 direct scheduler calls now route through `compat/Scheduler`, which sends sync/delayed/repeating tasks to Folia's global region scheduler (and async tasks to its async scheduler) via reflection, falling back to the regular Bukkit scheduler on Paper/Spigot. This lets the plugin boot on Folia without `IllegalStateException` async-thread-access crashes. FoliaLib was intentionally not added as a dependency.
+- **Server boot smoke workflow** — added `.github/workflows/server-boot.yml` which boots the built plugin on real Paper, Folia, and Spigot servers, failing the job on `SEVERE`/`FATAL`/async-access errors or if the plugin never reaches its enabled state. The real `Vault` and `EzEconomy` jars (committed under `plugins/`) are dropped into each server's `plugins/` folder so the full enable chain is exercised; for Folia the workflow injects `folia-supported: true` into a copy of the plugin jar so Folia actually loads it. Paper and Folia are downloaded from PaperMC's Fill API; Spigot is built from source via BuildTools (no prebuilt jar is published). The old in-process `spigot-smoke.yml` YAML round-trip workflow was removed in favour of this real-server boot.
 
 ## [2.3.1] - 2026-05-27
 

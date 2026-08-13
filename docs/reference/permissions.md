@@ -15,7 +15,7 @@ parent: Reference
 | `ezauction.cancel` | true | Cancel own active listings |
 | `ezauction.hologram` | true | Use auction hologram commands |
 | `ezauction.live` | true | Use live auction features and commands |
-| `ezauction.bid` | true | Use `/bid` — place bids, join/leave sessions, toggle mute-chat |
+| `ezauction.bid` | true | Use `/bid` - place bids, join/leave sessions, toggle mute-chat |
 | `ezauction.auction.live.notify` | true | Toggle and configure countdown notifications via `/bid notify` |
 | `ezauction.auction.live.sell` | true | Sell items into the live auction queue via `/liveauction sell` or the GUI button |
 | `ezauction.auction.live.admin` | op | Force-cancel active live auctions via `/liveauction cancel <id>` |
@@ -29,7 +29,7 @@ parent: Reference
 | `ezauction.bypass.fee` | op | Create listings without paying the listing fee |
 | `ezauction.bypass.duration` | op | Set listing durations beyond the configured maximum |
 | `ezauction.admin.reload` | op | Reload plugin configuration via `/auction reload` |
-| `ezauction.admin.*` | op | Wildcard — all admin permissions |
+| `ezauction.admin.*` | op | Wildcard - all admin permissions |
 
 ## Permission groups (example)
 
@@ -64,5 +64,5 @@ ezauction.discord
 
 ## Related
 
-- [Commands](commands.md) — command-level permission requirements
-- [Team Auctions](../features/team-auctions.md) — team permission details
+- [Commands](commands.md) - command-level permission requirements
+- [Team Auctions](../features/team-auctions.md) - team permission details

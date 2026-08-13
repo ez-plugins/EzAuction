@@ -1,4 +1,5 @@
 package com.skyblockexp.ezauction.live.preferences;
+import com.skyblockexp.ezauction.compat.Scheduler;
 
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -41,7 +42,7 @@ public final class PlayerLivePreferencesManager {
 
     /**
      * Returns the preferences for the given player, loading from storage if not yet cached.
-     * Never returns null — falls back to {@link PlayerLivePreferences#defaults(UUID)}.
+     * Never returns null - falls back to {@link PlayerLivePreferences#defaults(UUID)}.
      */
     public PlayerLivePreferences getPreferences(UUID playerId) {
         return cache.computeIfAbsent(playerId, id -> {
@@ -61,7 +62,7 @@ public final class PlayerLivePreferencesManager {
      */
     public void savePreferences(PlayerLivePreferences preferences) {
         cache.put(preferences.playerId(), preferences);
-        plugin.getServer().getScheduler().runTaskAsynchronously(plugin, () -> {
+        Scheduler.runAsync(plugin, () -> {
             try {
                 storage.save(preferences);
             } catch (Exception ex) {

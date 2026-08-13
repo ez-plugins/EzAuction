@@ -32,6 +32,23 @@ The main configuration file. Controls language, listing rules, durations, deposi
 | `gui-title` | string | `"Auction House"` | Title shown on the browser GUI. |
 | `holograms-enabled` | boolean | `false` | Enable hologram displays (requires Minecraft 1.19+). |
 
+## Holograms
+
+Requires Minecraft 1.19+ (TextDisplay entities). Holograms are configured under the top-level `holograms:` block.
+
+See [Auction Holograms](../features/auction-holograms.md) for placement, listing, and safe removal.
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| `holograms.enabled` | boolean | `true` | Enable in-world auction hologram displays. |
+| `holograms.update-interval-ticks` | long | `100` | Interval between hologram refreshes (20 ticks = 1 second). |
+| `holograms.search-radius` | double | `2.5` | Horizontal radius used to re-attach existing holograms when placing a new one. |
+| `holograms.height-offset` | double | `1.75` | Vertical offset applied above the targeted block when spawning. |
+| `holograms.removal-radius` | double | `10.0` | Default radius searched by `/auctionhologram list`, `clear`, and `clearall`. |
+| `holograms.max-removal-radius` | double | `64.0` | Hard cap on the radius a player may pass to those commands. |
+| `holograms.allow-untagged-removal` | boolean | `true` | Allow the `--untagged` flag, which also matches other plugins' TextDisplays. Use with care. |
+| `holograms.max-holograms` | int | `100` | Maximum number of tracked holograms; placement is denied beyond this. |
+
 ## Currency
 
 | Key | Type | Default | Description |
@@ -53,7 +70,7 @@ When enabled and TeamsAPI is present:
 
 See [Team Auctions](../features/team-auctions.md) for the full feature guide.
 
-## Live auctions — countdown
+## Live auctions - countdown
 
 Controls the countdown timer displayed during live auctions. Requires the [EzCountdown](https://modrinth.com/plugin/ezcountdown) soft-dependency for non-chat displays.
 
@@ -68,14 +85,14 @@ Controls the countdown timer displayed during live auctions. Requires the [EzCou
 | `live-auctions.countdown.chat-reminder-interval-seconds` | integer | `0` | Send a chat reminder every N seconds. `0` = disabled. |
 | `live-auctions.countdown.chat-reminder-at-seconds` | list | `[30, 10, 5]` | Send a chat reminder when this many seconds remain. Empty list = disabled. |
 
-## Live auctions — bidding
+## Live auctions - bidding
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | `live-auctions.bidding.minimum-bid-increment-percent` | double | `5.0` | Minimum bid must be at least this % above the current bid. |
 | `live-auctions.bidding.minimum-bid-increment-fixed` | double | `10.0` | Minimum bid must be at least this amount above the current bid. Both percent and fixed are evaluated; the higher result wins. |
 
-## Live auctions — chat filter
+## Live auctions - chat filter
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|

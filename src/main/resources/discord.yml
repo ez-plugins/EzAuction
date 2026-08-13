@@ -48,7 +48,7 @@ message-format:
 # Both can be active at the same time.
 webhook:
   enabled: false
-  # Full Discord webhook URL. Keep this secret — treat it like a password.
+  # Full Discord webhook URL. Keep this secret - treat it like a password.
   url: null
   # Override the display name shown in Discord (null = use webhook's configured name).
   username: "EzAuction"

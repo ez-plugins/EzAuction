@@ -15,7 +15,7 @@ Current release: **2.3.1** (live auction escrow safety fix and regression covera
 - Fast installation and first-start checklist
 - Full configuration reference for every YAML file
 - Command and permission tables
-- Feature walkthroughs (auction house, buy orders, live auctions, team auctions)
+- Feature walkthroughs (auction house, buy orders, live auctions, team auctions, holograms)
 - Integration guides (Discord, EzShops, TeamsAPI)
 - Developer API and custom event reference
 

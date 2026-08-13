@@ -90,7 +90,7 @@ public final class AuctionConfigurationLoader {
 
         ConfigurationSection displaySection = getSection(baseConfiguration, "display");
         AuctionDisplayConfiguration displayConfiguration = AuctionDisplayConfiguration.from(displaySection);
-        // Apply date format globally — DateUtil is a static utility
+        // Apply date format globally - DateUtil is a static utility
         com.skyblockexp.ezauction.util.DateUtil.setDateFormat(displayConfiguration.dateFormat());
 
         boolean debug = baseConfiguration != null && baseConfiguration.isBoolean("debug") && baseConfiguration.getBoolean("debug");

@@ -3,7 +3,7 @@ package com.skyblockexp.ezauction.config;
 import org.bukkit.configuration.ConfigurationSection;
 
 /**
- * Configuration for display formatting — date/time patterns and currency templates.
+ * Configuration for display formatting - date/time patterns and currency templates.
  *
  * <p>Loaded from the {@code display:} section of {@code auction.yml}.</p>
  */

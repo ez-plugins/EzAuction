@@ -76,9 +76,9 @@ Requires `ezauction.auction.live.admin`.
 
 When an item is announced in chat, hovering over the item name shows:
 
-- **Enchantments** — all applied enchantments and their level
-- **Potion effects** — active effects and duration for potions/tipped arrows
-- **Shulker contents** — preview of the items stored inside a shulker box
+- **Enchantments** - all applied enchantments and their level
+- **Potion effects** - active effects and duration for potions/tipped arrows
+- **Shulker contents** - preview of the items stored inside a shulker box
 
 ## Countdown notifications
 
@@ -105,7 +105,7 @@ See [auction.yml configuration](../configuration/auction-yml.md#live-auctions--c
 
 Bids are placed with `/bid <amount>`. Clickable bid suggestions appear in chat.
 
-The **first bid** on any live auction only needs to meet the starting price — no increment is required on the opening bid. Subsequent bids must exceed the current highest bid by at least the configured minimum increment (`bid-increment.percent` or `bid-increment.fixed`, whichever is larger).
+The **first bid** on any live auction only needs to meet the starting price - no increment is required on the opening bid. Subsequent bids must exceed the current highest bid by at least the configured minimum increment (`bid-increment.percent` or `bid-increment.fixed`, whichever is larger).
 
 Typing `/bid` with no amount (or sending an empty response in the chat prompt) will automatically place a bid at the current minimum.
 

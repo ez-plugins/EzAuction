@@ -25,7 +25,7 @@ public class DateUtil {
         try {
             dateFormatter = DateTimeFormatter.ofPattern(pattern);
         } catch (IllegalArgumentException ignored) {
-            // Invalid pattern — keep the existing formatter
+            // Invalid pattern - keep the existing formatter
         }
     }
 

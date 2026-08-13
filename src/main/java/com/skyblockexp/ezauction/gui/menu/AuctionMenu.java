@@ -1,4 +1,5 @@
 package com.skyblockexp.ezauction.gui.menu;
+import com.skyblockexp.ezauction.compat.Scheduler;
 
 import com.skyblockexp.ezauction.compat.ItemTagStorage;
 import com.skyblockexp.ezauction.config.AuctionMenuConfiguration;
@@ -190,7 +191,7 @@ public class AuctionMenu implements Listener {
         }
         event.setCancelled(true);
         searchHandler.removePendingSearchInput(playerId);
-        plugin.getServer().getScheduler().runTask(plugin,
+        Scheduler.run(plugin,
                 () -> searchHandler.handleSearchInput(event.getPlayer(), prompt, event.getMessage()));
     }
 
@@ -233,7 +234,7 @@ public class AuctionMenu implements Listener {
         if (!player.isOnline()) {
             return;
         }
-        plugin.getServer().getScheduler().runTask(plugin,
+        Scheduler.run(plugin,
                 () -> clickHandler.reopenPreviewOrigin(player, holder));
     }
 
@@ -296,7 +297,7 @@ public class AuctionMenu implements Listener {
     }
 
     // -------------------------------------------------------------------------
-    // Inner sort enums — kept for backward compatibility with any callers that
+    // Inner sort enums - kept for backward compatibility with any callers that
     // reference AuctionMenu.ListingSort / AuctionMenu.OrderSort by name.
     // They delegate entirely to the canonical gui.view enums.
     // -------------------------------------------------------------------------

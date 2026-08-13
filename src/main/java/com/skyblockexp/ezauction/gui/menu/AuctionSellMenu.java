@@ -1,4 +1,5 @@
 package com.skyblockexp.ezauction.gui.menu;
+import com.skyblockexp.ezauction.compat.Scheduler;
 import com.skyblockexp.ezauction.gui.state.SellMenuState;
 import com.skyblockexp.ezauction.gui.holder.SellMenuHolder;
 
@@ -629,7 +630,7 @@ public class AuctionSellMenu {
 
         event.setCancelled(true);
         pendingPriceInputs.remove(playerId);
-        plugin.getServer().getScheduler().runTask(plugin,
+        Scheduler.run(plugin,
                 () -> handleCustomPriceInput(event.getPlayer(), state, event.getMessage()));
     }
 

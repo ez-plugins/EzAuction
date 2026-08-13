@@ -13,8 +13,8 @@ import java.util.Optional;
  *
  * <p>All public methods guard against EzCountdown being absent or not yet initialised.
  * Any {@link Throwable} thrown by the underlying API is caught and treated as "not available".
- * EzCountdown types are only referenced inside method bodies — never in field declarations or
- * method signatures — so this class loads safely even when EzCountdown is not installed.</p>
+ * EzCountdown types are only referenced inside method bodies - never in field declarations or
+ * method signatures - so this class loads safely even when EzCountdown is not installed.</p>
  */
 public final class EzCountdownIntegration {
 
@@ -34,7 +34,7 @@ public final class EzCountdownIntegration {
         this.autoDetect = autoDetect;
     }
 
-    /** Convenience constructor — auto-detect defaults to {@code false} for backward compatibility. */
+    /** Convenience constructor - auto-detect defaults to {@code false} for backward compatibility. */
     public EzCountdownIntegration(JavaPlugin plugin, boolean configEnabled) {
         this(plugin, configEnabled, false);
     }

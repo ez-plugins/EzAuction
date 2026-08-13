@@ -128,7 +128,7 @@ public final class DiscordWebhookNotifier {
             dispatch(json);
         } else {
             dispatch(buildPlainPayload(
-                    "**New Auction Listed** — " + item + " (" + quantity + ") by **" + seller
+                    "**New Auction Listed** - " + item + " (" + quantity + ") by **" + seller
                             + "** for " + price + " | Duration: " + duration + " | ID: " + listingId
             ));
         }
@@ -148,7 +148,7 @@ public final class DiscordWebhookNotifier {
             dispatch(json);
         } else {
             dispatch(buildPlainPayload(
-                    "**Auction Ended** — " + item + " by **" + seller + "** sold for " + price
+                    "**Auction Ended** - " + item + " by **" + seller + "** sold for " + price
                             + " | ID: " + listingId
             ));
         }
@@ -168,7 +168,7 @@ public final class DiscordWebhookNotifier {
             dispatch(json);
         } else {
             dispatch(buildPlainPayload(
-                    "**New Bid** — **" + bidder + "** bid " + amount + " on " + item
+                    "**New Bid** - **" + bidder + "** bid " + amount + " on " + item
                             + " | ID: " + listingId
             ));
         }
@@ -187,7 +187,7 @@ public final class DiscordWebhookNotifier {
             dispatch(json);
         } else {
             dispatch(buildPlainPayload(
-                    "**Auction Cancelled** — " + item + " by **" + seller + "** | ID: " + listingId
+                    "**Auction Cancelled** - " + item + " by **" + seller + "** | ID: " + listingId
             ));
         }
     }
@@ -205,7 +205,7 @@ public final class DiscordWebhookNotifier {
             dispatch(json);
         } else {
             dispatch(buildPlainPayload(
-                    "**Auction Expired** — " + item + " by **" + seller + "** (no buyer) | ID: " + listingId
+                    "**Auction Expired** - " + item + " by **" + seller + "** (no buyer) | ID: " + listingId
             ));
         }
     }
@@ -214,7 +214,7 @@ public final class DiscordWebhookNotifier {
     public void sendTestMessage(String initiatedBy) {
         if (useEmbeds) {
             String json = buildEmbedPayload(
-                    "EzAuction — Webhook Test",
+                    "EzAuction - Webhook Test",
                     "This test message was triggered by **" + escapeJson(initiatedBy) + "**. "
                             + "If you can see this, your webhook is configured correctly!",
                     5793266, // #588FEF soft blue
@@ -224,7 +224,7 @@ public final class DiscordWebhookNotifier {
             dispatch(json);
         } else {
             dispatch(buildPlainPayload(
-                    "EzAuction webhook test initiated by " + initiatedBy + " — webhook is working."
+                    "EzAuction webhook test initiated by " + initiatedBy + " - webhook is working."
             ));
         }
     }
@@ -240,7 +240,7 @@ public final class DiscordWebhookNotifier {
     /** Returns a JSON fragment representing a single embed field. */
     private static String field(String name, String value, boolean inline) {
         return "{\"name\":\"" + escapeJson(name) + "\","
-                + "\"value\":\"" + escapeJson(value != null ? value : "—") + "\","
+                + "\"value\":\"" + escapeJson(value != null ? value : "-") + "\","
                 + "\"inline\":" + inline + "}";
     }
 
@@ -331,7 +331,7 @@ public final class DiscordWebhookNotifier {
                     } else if (response.statusCode() < 200 || response.statusCode() >= 300) {
                         plugin.getLogger().warning(
                                 "[EzAuction] Webhook returned HTTP " + response.statusCode()
-                                        + " — check that the webhook URL is valid and the bot has"
+                                        + " - check that the webhook URL is valid and the bot has"
                                         + " permission to post in the channel.");
                     }
                 });
