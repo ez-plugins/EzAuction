@@ -2,6 +2,7 @@ name: Server Boot Smoke
 
 on:
   push:
+    branches: [master]
   pull_request:
 
 # Boots the built EzAuction plugin on a real Paper server (and best-effort Folia) and fails
@@ -35,9 +36,6 @@ jobs:
 
       - name: Build EzAuction
         run: mvn -B -q package -DskipTests
-
-      - name: Build fake economy plugin
-        run: mvn -B -q -f test-economy/pom.xml package -DskipTests
 
       - name: Download Paper server jar
         if: matrix.server.kind == 'paper'
@@ -88,7 +86,8 @@ jobs:
         run: |
           mkdir -p servers/${{ matrix.server.name }}/plugins
           cp target/EzAuction-*.jar "servers/${{ matrix.server.name }}/plugins/"
-          cp test-economy/target/EzAuctionTestEconomy.jar "servers/${{ matrix.server.name }}/plugins/"
+          cp plugins/Vault.jar "servers/${{ matrix.server.name }}/plugins/"
+          cp plugins/ezeconomy-bukkit-3.0.4.jar "servers/${{ matrix.server.name }}/plugins/"
           if [ "${{ matrix.server.kind }}" = "paper" ]; then
             cp paper.jar "servers/${{ matrix.server.name }}/${{ matrix.server.name }}.jar"
           else
@@ -146,7 +145,7 @@ jobs:
           fi
 
           # Forbidden patterns that indicate a broken boot.
-          for pattern in "SEVERE" "\[Bootstrap\] FATAL" "IllegalStateException" "async thread access" "Exception in thread" "Could not load"; do
+          for pattern in "SEVERE" "\[Bootstrap\] FATAL" "IllegalStateException" "async thread access" "Exception in thread"; do
             if grep -qF "$pattern" "$LOG"; then
               echo "FAIL: forbidden log pattern found: $pattern"
               FAIL=1

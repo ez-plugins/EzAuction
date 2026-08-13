@@ -2,6 +2,7 @@ name: Spigot Smoke
 
 on:
   push:
+    branches: [master]
   pull_request:
 
 # Confirm that the YAML storage layer is fully functional on Spigot servers.

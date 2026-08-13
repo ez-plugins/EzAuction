@@ -1,6 +1,0 @@
-name: EzAuctionTestEconomy
-version: 1.0.0
-main: com.skyblockexp.ezauction.testeconomy.TestEconomyPlugin
-api-version: 1.13
-author: EzAuction
-description: Fake Vault economy provider for server-boot smoke tests.
