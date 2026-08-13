@@ -172,7 +172,11 @@ holograms:
 | `/bid [amount]` | Place a bid or view session status in an active live auction. | ezauction.bid |
 | `/auction claim` | Withdraw stored return items. | ezauction.auction |
 | `/auction search <query>` | Open the auction browser filtered by item name, enchantment, or keyword. | ezauction.auction.search |
-| `/auctionhologram <create/remove/list> [args]` | Manage auction holograms: create, remove, or list in-world auction displays. | ezauction.hologram.manage |
+| `/auctionhologram <type>` | Place a hologram showing the selected auction stats. | ezauction.hologram |
+| `/auctionhologram list [radius] [--untagged]` | List nearby auction holograms. | ezauction.hologram |
+| `/auctionhologram clear [radius]` | Remove the closest EzAuction hologram immediately. | ezauction.hologram |
+| `/auctionhologram clear [radius] --untagged` | Remove the closest **untagged** TextDisplay (may be another plugin's). Requires a second run within 15s to confirm. | ezauction.hologram |
+| `/auctionhologram clearall [radius] [--untagged]` | Remove all nearby holograms (requires confirmation). | ezauction.hologram |
 
 ## Setup Guide
 

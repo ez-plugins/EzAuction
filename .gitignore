@@ -19,6 +19,7 @@ out/
 
 # VS Code
 .vscode/
+.kilo/
 
 # OS files
 .DS_Store

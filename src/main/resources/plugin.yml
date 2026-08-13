@@ -28,7 +28,9 @@ commands:
     description: Place or remove EzAuction holographic displays.
     usage: |
       /<command> <type> - Place an auction hologram showing the selected data.
-      /<command> clear - Remove the closest auction hologram.
+      /<command> list [radius] [--untagged] - List nearby auction holograms.
+      /<command> clear [radius] [--untagged] - Remove the closest auction hologram.
+      /<command> clearall [radius] [--untagged] - Remove all nearby holograms (requires confirmation).
     permission: ezauction.hologram
     permission-message: You do not have permission to manage auction holograms.
   liveauction:

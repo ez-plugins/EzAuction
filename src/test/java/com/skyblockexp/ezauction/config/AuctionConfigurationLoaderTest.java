@@ -50,7 +50,7 @@ class AuctionConfigurationLoaderTest {
         AuctionMessageConfiguration guiMessages = configuration.messageConfiguration();
 
         assertEquals("&cSolo los jugadores pueden usar la casa de subastas.", general.consoleOnly());
-        assertEquals("&eUso: /{label} <tipo|clear>", holograms.usage());
+        assertEquals("&eUso: /{label} <tipo|list|clear|clearall>", holograms.usage());
         assertEquals("&cNo se pudo encontrar ese listado.", guiMessages.browser().listingNotFound());
     }
 
@@ -70,5 +70,29 @@ class AuctionConfigurationLoaderTest {
 
         assertEquals(AuctionBackendMessages.defaults().listing().creation().playersOnly(),
                 backendMessages.listing().creation().playersOnly());
+    }
+
+    @Test
+    void hologramRemovalKeysAreParsed() throws IOException {
+        JavaPlugin plugin = mock(JavaPlugin.class);
+        when(plugin.getDataFolder()).thenReturn(tempDir.toFile());
+        when(plugin.getLogger()).thenReturn(Logger.getLogger("AuctionConfigurationLoaderTest"));
+
+        String hologramsYml = """
+                holograms:
+                  enabled: true
+                  removal-radius: 12.0
+                  max-removal-radius: 50.0
+                  allow-untagged-removal: false
+                """;
+        Files.createDirectories(tempDir.resolve("messages"));
+        Files.writeString(tempDir.resolve("auction.yml"), hologramsYml);
+
+        AuctionConfiguration configuration = AuctionConfigurationLoader.load(plugin);
+        AuctionHologramConfiguration holograms = configuration.hologramConfiguration();
+
+        assertEquals(12.0D, holograms.removalRadius());
+        assertEquals(50.0D, holograms.maxRemovalRadius());
+        org.junit.jupiter.api.Assertions.assertFalse(holograms.allowUntaggedRemoval());
     }
 }

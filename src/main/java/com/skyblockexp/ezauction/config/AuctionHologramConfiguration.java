@@ -12,11 +12,17 @@ public final class AuctionHologramConfiguration {
     private static final long DEFAULT_UPDATE_INTERVAL_TICKS = 20L * 5L;
     private static final double DEFAULT_SEARCH_RADIUS = 2.5D;
     private static final double DEFAULT_HEIGHT_OFFSET = 1.75D;
+    private static final double DEFAULT_REMOVAL_RADIUS = 10.0D;
+    private static final double DEFAULT_MAX_REMOVAL_RADIUS = 64.0D;
+    private static final boolean DEFAULT_ALLOW_UNTAGGED_REMOVAL = true;
 
     private final boolean enabled;
     private final long updateIntervalTicks;
     private final double searchRadius;
     private final double heightOffset;
+    private final double removalRadius;
+    private final double maxRemovalRadius;
+    private final boolean allowUntaggedRemoval;
     // Hologram advanced config fields
     private static final boolean DEFAULT_REQUIRE_PERMISSION = false;
     private static final String DEFAULT_VIEW_PERMISSION = "ezauction.hologram.view";
@@ -33,22 +39,18 @@ public final class AuctionHologramConfiguration {
 
     public AuctionHologramConfiguration(boolean enabled, long updateIntervalTicks, double searchRadius,
             double heightOffset) {
-        this.enabled = enabled;
-        this.updateIntervalTicks = sanitizeInterval(updateIntervalTicks);
-        this.searchRadius = sanitizeSearchRadius(searchRadius);
-        this.heightOffset = sanitizeHeightOffset(heightOffset);
-        this.maxHolograms = DEFAULT_MAX_HOLOGRAMS;
-        this.batchUpdate = DEFAULT_BATCH_UPDATE;
-        this.requirePermission = DEFAULT_REQUIRE_PERMISSION;
-        this.viewPermission = DEFAULT_VIEW_PERMISSION;
-        this.proximityLimit = DEFAULT_PROXIMITY_LIMIT;
-        this.proximityDistance = DEFAULT_PROXIMITY_DISTANCE;
+        this(enabled, updateIntervalTicks, searchRadius, heightOffset, DEFAULT_MAX_HOLOGRAMS, DEFAULT_BATCH_UPDATE,
+                DEFAULT_REQUIRE_PERMISSION, DEFAULT_VIEW_PERMISSION, DEFAULT_PROXIMITY_LIMIT, DEFAULT_PROXIMITY_DISTANCE,
+                DEFAULT_REMOVAL_RADIUS, DEFAULT_MAX_REMOVAL_RADIUS, DEFAULT_ALLOW_UNTAGGED_REMOVAL);
     }
 
     public boolean enabled() { return enabled; }
     public long updateIntervalTicks() { return updateIntervalTicks; }
     public double searchRadius() { return searchRadius; }
     public double heightOffset() { return heightOffset; }
+    public double removalRadius() { return removalRadius; }
+    public double maxRemovalRadius() { return maxRemovalRadius; }
+    public boolean allowUntaggedRemoval() { return allowUntaggedRemoval; }
     public int maxHolograms() { return maxHolograms; }
     public boolean batchUpdate() { return batchUpdate; }
     public boolean requirePermission() { return requirePermission; }
@@ -59,7 +61,8 @@ public final class AuctionHologramConfiguration {
     public AuctionHologramConfiguration(boolean enabled, long updateIntervalTicks, double searchRadius,
             double heightOffset, int maxHolograms, boolean batchUpdate,
             boolean requirePermission, String viewPermission,
-            boolean proximityLimit, double proximityDistance) {
+            boolean proximityLimit, double proximityDistance,
+            double removalRadius, double maxRemovalRadius, boolean allowUntaggedRemoval) {
         this.enabled = enabled;
         this.updateIntervalTicks = sanitizeInterval(updateIntervalTicks);
         this.searchRadius = sanitizeSearchRadius(searchRadius);
@@ -70,12 +73,16 @@ public final class AuctionHologramConfiguration {
         this.viewPermission = viewPermission != null ? viewPermission : DEFAULT_VIEW_PERMISSION;
         this.proximityLimit = proximityLimit;
         this.proximityDistance = proximityDistance > 0.0D ? proximityDistance : DEFAULT_PROXIMITY_DISTANCE;
+        this.removalRadius = sanitizeRemovalRadius(removalRadius);
+        this.maxRemovalRadius = sanitizeRemovalRadius(maxRemovalRadius);
+        this.allowUntaggedRemoval = allowUntaggedRemoval;
     }
 
     public static AuctionHologramConfiguration defaults() {
         return new AuctionHologramConfiguration(DEFAULT_ENABLED, DEFAULT_UPDATE_INTERVAL_TICKS, DEFAULT_SEARCH_RADIUS,
                 DEFAULT_HEIGHT_OFFSET, DEFAULT_MAX_HOLOGRAMS, DEFAULT_BATCH_UPDATE,
-                DEFAULT_REQUIRE_PERMISSION, DEFAULT_VIEW_PERMISSION, DEFAULT_PROXIMITY_LIMIT, DEFAULT_PROXIMITY_DISTANCE);
+                DEFAULT_REQUIRE_PERMISSION, DEFAULT_VIEW_PERMISSION, DEFAULT_PROXIMITY_LIMIT, DEFAULT_PROXIMITY_DISTANCE,
+                DEFAULT_REMOVAL_RADIUS, DEFAULT_MAX_REMOVAL_RADIUS, DEFAULT_ALLOW_UNTAGGED_REMOVAL);
     }
 
     public static AuctionHologramConfiguration from(ConfigurationSection section) {
@@ -98,7 +105,10 @@ public final class AuctionHologramConfiguration {
         String viewPermission = section.getString("view-permission", DEFAULT_VIEW_PERMISSION);
         boolean proximityLimit = section.getBoolean("proximity-limit", DEFAULT_PROXIMITY_LIMIT);
         double proximityDistance = section.getDouble("proximity-distance", DEFAULT_PROXIMITY_DISTANCE);
-        return new AuctionHologramConfiguration(enabled, updateInterval, searchRadius, heightOffset, maxHolograms, batchUpdate, requirePermission, viewPermission, proximityLimit, proximityDistance);
+        double removalRadius = section.getDouble("removal-radius", DEFAULT_REMOVAL_RADIUS);
+        double maxRemovalRadius = section.getDouble("max-removal-radius", DEFAULT_MAX_REMOVAL_RADIUS);
+        boolean allowUntaggedRemoval = section.getBoolean("allow-untagged-removal", DEFAULT_ALLOW_UNTAGGED_REMOVAL);
+        return new AuctionHologramConfiguration(enabled, updateInterval, searchRadius, heightOffset, maxHolograms, batchUpdate, requirePermission, viewPermission, proximityLimit, proximityDistance, removalRadius, maxRemovalRadius, allowUntaggedRemoval);
     }
 
     @Override
@@ -108,6 +118,9 @@ public final class AuctionHologramConfiguration {
             ", updateIntervalTicks=" + updateIntervalTicks +
             ", searchRadius=" + searchRadius +
             ", heightOffset=" + heightOffset +
+            ", removalRadius=" + removalRadius +
+            ", maxRemovalRadius=" + maxRemovalRadius +
+            ", allowUntaggedRemoval=" + allowUntaggedRemoval +
             ", maxHolograms=" + maxHolograms +
             ", batchUpdate=" + batchUpdate +
             ", requirePermission=" + requirePermission +
@@ -126,6 +139,9 @@ public final class AuctionHologramConfiguration {
                 updateIntervalTicks == that.updateIntervalTicks &&
                 Double.compare(that.searchRadius, searchRadius) == 0 &&
                 Double.compare(that.heightOffset, heightOffset) == 0 &&
+                Double.compare(that.removalRadius, removalRadius) == 0 &&
+                Double.compare(that.maxRemovalRadius, maxRemovalRadius) == 0 &&
+                allowUntaggedRemoval == that.allowUntaggedRemoval &&
                 maxHolograms == that.maxHolograms &&
                 batchUpdate == that.batchUpdate &&
                 requirePermission == that.requirePermission &&
@@ -136,7 +152,7 @@ public final class AuctionHologramConfiguration {
 
     @Override
     public int hashCode() {
-        return Objects.hash(enabled, updateIntervalTicks, searchRadius, heightOffset, maxHolograms, batchUpdate, requirePermission, viewPermission, proximityLimit, proximityDistance);
+        return Objects.hash(enabled, updateIntervalTicks, searchRadius, heightOffset, removalRadius, maxRemovalRadius, allowUntaggedRemoval, maxHolograms, batchUpdate, requirePermission, viewPermission, proximityLimit, proximityDistance);
     }
 
     private static long sanitizeInterval(long intervalTicks) {
@@ -149,6 +165,13 @@ public final class AuctionHologramConfiguration {
     private static double sanitizeSearchRadius(double radius) {
         if (!(Double.isFinite(radius)) || radius <= 0.0D) {
             return DEFAULT_SEARCH_RADIUS;
+        }
+        return radius;
+    }
+
+    private static double sanitizeRemovalRadius(double radius) {
+        if (!(Double.isFinite(radius)) || radius <= 0.0D) {
+            return DEFAULT_REMOVAL_RADIUS;
         }
         return radius;
     }

@@ -51,7 +51,7 @@ mysql:
   password: changeme
 ```
 
-See [Storage Configuration](../configuration/storage.md) for all options.
+See [Storage Configuration](configuration/storage.md) for all options.
 
 ## 5. Restart and verify
 

@@ -17,7 +17,9 @@ This section documents each EzAuction feature individually. Each page covers wha
 | [Buy Orders](buy-orders.md) | Players post purchase offers; sellers fulfil them |
 | [Live Auctions](live-auctions.md) | Real-time bidding queue |
 | [Team Auctions](team-auctions.md) | Team-scoped listings visible only to teammates |
-| [Transaction History](transaction-history.md) | Per-player history of all buys and sells |
+| [Auction Listings](auction-listings.md) | Listing lifecycle: fees, limits, cancelling, expiry, and claiming returns |
+| [Auction Holograms](auction-holograms.md) | In-world TextDisplay stats: placing, listing, and safe removal |
+| [Transaction History](auction-listings.md#transaction-history) | Per-player history of all buys and sells |
 
 ## Related sections
 

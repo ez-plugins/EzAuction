@@ -442,7 +442,19 @@ public final class AuctionCommandMessageConfiguration {
             String noneFound,
             String usage,
             String typesHeading,
-            String typesEntry) {
+            String typesEntry,
+            String listHeading,
+            String listEntry,
+            String listEmpty,
+            String clearedDetailed,
+            String clearallConfirm,
+            String clearallDone,
+            String clearallExpired,
+            String invalidRadius,
+            String untaggedDisabled,
+            String unknownTypeLabel,
+            String maxHologramsReached,
+            String untaggedClearConfirm) {
 
         private static final String DEFAULT_PLAYERS_ONLY = "&cOnly players may manage auction holograms.";
         private static final String DEFAULT_DISABLED = "&cAuction holograms are disabled in the configuration.";
@@ -452,12 +464,35 @@ public final class AuctionCommandMessageConfiguration {
         private static final String DEFAULT_PLACEMENT_FAILED =
                 "&cFailed to place the auction hologram. Ensure the chunk is loaded.";
         private static final String DEFAULT_PLACEMENT_SUCCESS =
-                "&aPlaced an auction hologram for &6{display}&a.";
+                "&aPlaced &6{display} &ahologram at &e{x},{y},{z} &a(&e{world}&a).";
+        private static final String DEFAULT_UNTAGGED_CLEAR_CONFIRM =
+                "&eFound &6{count} &euntagged display(s) within &6{radius} &eblocks (may include other"
+                + " plugins' holograms). Run &6/auctionhologram clear --untagged &eagain within 15s to"
+                + " remove the nearest.";
         private static final String DEFAULT_CLEARED = "&eRemoved the nearest auction hologram.";
         private static final String DEFAULT_NONE_FOUND = "&cNo auction hologram found nearby.";
-        private static final String DEFAULT_USAGE = "&eUsage: /{label} <type|clear>";
+        private static final String DEFAULT_USAGE = "&eUsage: /{label} <type|list|clear|clearall>";
         private static final String DEFAULT_TYPES_HEADING = "&6Available hologram types:";
         private static final String DEFAULT_TYPES_ENTRY = "&7- &6{name}&7 ({display})";
+        private static final String DEFAULT_LIST_HEADING = "&6Nearby auction holograms:";
+        private static final String DEFAULT_LIST_ENTRY =
+                "&7#{index} &6{type} &7@ &e{world} {x},{y},{z} &7(&e{distance}&7 blocks)";
+        private static final String DEFAULT_LIST_EMPTY = "&cNo auction holograms found nearby.";
+        private static final String DEFAULT_CLEARED_DETAILED =
+                "&eRemoved &6{type} &eauction hologram &7(&e{distance}&7 blocks away).";
+        private static final String DEFAULT_CLEARALL_CONFIRM =
+                "&eFound &6{count} &eauction hologram(s) within &6{radius} &eblocks of {label}."
+                + " Run the command again within 15s to remove them.";
+        private static final String DEFAULT_CLEARALL_DONE = "&aRemoved &6{count} &aauction hologram(s).";
+        private static final String DEFAULT_CLEARALL_EXPIRED =
+                "&cConfirmation window expired. Run &6/list &cagain, then re-run your clear command.";
+        private static final String DEFAULT_INVALID_RADIUS =
+                "&cInvalid radius '&6{input}&c'. Use a number up to &6{max}&c blocks.";
+        private static final String DEFAULT_UNTAGGED_DISABLED =
+                "&cUntagged removal is disabled in the configuration (&6allow-untagged-removal&c).";
+        private static final String DEFAULT_UNKNOWN_TYPE_LABEL = "unknown";
+        private static final String DEFAULT_MAX_HOLOGRAMS_REACHED =
+                "&cMaximum of &6{max} &cauction holograms reached. Placement denied.";
 
         public HologramMessages {
             playersOnly = normalize(playersOnly, DEFAULT_PLAYERS_ONLY);
@@ -471,12 +506,28 @@ public final class AuctionCommandMessageConfiguration {
             usage = normalize(usage, DEFAULT_USAGE);
             typesHeading = normalize(typesHeading, DEFAULT_TYPES_HEADING);
             typesEntry = normalize(typesEntry, DEFAULT_TYPES_ENTRY);
+            listHeading = normalize(listHeading, DEFAULT_LIST_HEADING);
+            listEntry = normalize(listEntry, DEFAULT_LIST_ENTRY);
+            listEmpty = normalize(listEmpty, DEFAULT_LIST_EMPTY);
+            clearedDetailed = normalize(clearedDetailed, DEFAULT_CLEARED_DETAILED);
+            clearallConfirm = normalize(clearallConfirm, DEFAULT_CLEARALL_CONFIRM);
+            clearallDone = normalize(clearallDone, DEFAULT_CLEARALL_DONE);
+            clearallExpired = normalize(clearallExpired, DEFAULT_CLEARALL_EXPIRED);
+            invalidRadius = normalize(invalidRadius, DEFAULT_INVALID_RADIUS);
+            untaggedDisabled = normalize(untaggedDisabled, DEFAULT_UNTAGGED_DISABLED);
+            unknownTypeLabel = normalize(unknownTypeLabel, DEFAULT_UNKNOWN_TYPE_LABEL);
+            maxHologramsReached = normalize(maxHologramsReached, DEFAULT_MAX_HOLOGRAMS_REACHED);
+            untaggedClearConfirm = normalize(untaggedClearConfirm, DEFAULT_UNTAGGED_CLEAR_CONFIRM);
         }
 
         public static HologramMessages defaults() {
             return new HologramMessages(DEFAULT_PLAYERS_ONLY, DEFAULT_DISABLED, DEFAULT_UNKNOWN_TYPE,
                     DEFAULT_PLACEMENT_RANGE, DEFAULT_PLACEMENT_FAILED, DEFAULT_PLACEMENT_SUCCESS, DEFAULT_CLEARED,
-                    DEFAULT_NONE_FOUND, DEFAULT_USAGE, DEFAULT_TYPES_HEADING, DEFAULT_TYPES_ENTRY);
+                    DEFAULT_NONE_FOUND, DEFAULT_USAGE, DEFAULT_TYPES_HEADING, DEFAULT_TYPES_ENTRY,
+                    DEFAULT_LIST_HEADING, DEFAULT_LIST_ENTRY, DEFAULT_LIST_EMPTY, DEFAULT_CLEARED_DETAILED,
+                    DEFAULT_CLEARALL_CONFIRM, DEFAULT_CLEARALL_DONE, DEFAULT_CLEARALL_EXPIRED, DEFAULT_INVALID_RADIUS,
+                    DEFAULT_UNTAGGED_DISABLED, DEFAULT_UNKNOWN_TYPE_LABEL, DEFAULT_MAX_HOLOGRAMS_REACHED,
+                    DEFAULT_UNTAGGED_CLEAR_CONFIRM);
         }
 
         public static HologramMessages from(ConfigurationSection section) {
@@ -494,7 +545,19 @@ public final class AuctionCommandMessageConfiguration {
                     section.getString("none-found"),
                     section.getString("usage"),
                     section.getString("types-heading"),
-                    section.getString("types-entry"));
+                    section.getString("types-entry"),
+                    section.getString("list-heading"),
+                    section.getString("list-entry"),
+                    section.getString("list-empty"),
+                    section.getString("cleared-detailed"),
+                    section.getString("clearall-confirm"),
+                    section.getString("clearall-done"),
+                    section.getString("clearall-expired"),
+                    section.getString("invalid-radius"),
+                    section.getString("untagged-disabled"),
+                    section.getString("unknown-type-label"),
+                    section.getString("max-holograms-reached"),
+                    section.getString("untagged-clear-confirm"));
         }
     }
 }

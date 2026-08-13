@@ -5,10 +5,14 @@ import com.skyblockexp.ezauction.transaction.AuctionTransactionService;
 import com.skyblockexp.ezauction.compat.HologramDisplay;
 import com.skyblockexp.ezauction.compat.HologramPlatform;
 import com.skyblockexp.ezauction.config.AuctionHologramConfiguration;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Locale;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
@@ -64,13 +68,13 @@ public final class AuctionHologramManager {
         markerKey = null;
     }
 
-    public boolean ensureHologram(Location location, AuctionHologramType type) {
+    public Location ensureHologram(Location location, AuctionHologramType type) {
         if (location == null || type == null) {
-            return false;
+            return null;
         }
         World world = location.getWorld();
         if (world == null) {
-            return false;
+            return null;
         }
         Location spawnLocation = normalizeLocation(location.clone());
         spawnLocation.add(0.0D, configuration.heightOffset(), 0.0D);
@@ -79,7 +83,7 @@ public final class AuctionHologramManager {
         if (existing != null) {
             registerDisplay(existing, type);
             updateDisplay(existing, type);
-            return true;
+            return spawnLocation;
         }
 
         int chunkX = spawnLocation.getBlockX() >> 4;
@@ -87,56 +91,118 @@ public final class AuctionHologramManager {
         if (!world.isChunkLoaded(chunkX, chunkZ)) {
             world.loadChunk(chunkX, chunkZ);
             if (!world.isChunkLoaded(chunkX, chunkZ)) {
-                return false;
+                return null;
             }
         }
 
         // Enforce max hologram count
         if (trackedDisplays.size() >= configuration.maxHolograms()) {
             plugin.getLogger().warning("Max auction hologram count reached (" + configuration.maxHolograms() + "). Placement denied.");
-            return false;
+            return null;
         }
         HologramDisplay created = hologramPlatform.spawn(spawnLocation);
         if (created == null) {
-            return false;
+            return null;
         }
         hologramPlatform.configureBase(created);
         markDisplay(created, type);
         registerDisplay(created, type);
         updateDisplay(created, type);
-        return true;
+        return spawnLocation;
     }
 
-    public boolean removeNearest(Location location) {
-        if (location == null) {
-            return false;
+    /**
+     * Finds EzAuction holograms near the given origin, sorted by ascending distance.
+     *
+     * @param origin          search centre; use the player's eye location so the vertical
+     *                        placement offset is covered
+     * @param radius          spherical search radius in blocks
+     * @param includeUntagged when {@code true}, also returns untagged {@code TextDisplay} entities
+     * @return matches sorted nearest-first; never {@code null}
+     */
+    public List<HologramMatch> findNearby(Location origin, double radius, boolean includeUntagged) {
+        if (origin == null) {
+            return List.of();
         }
-        World world = location.getWorld();
+        World world = origin.getWorld();
         if (world == null) {
-            return false;
+            return List.of();
         }
-        Location searchLocation = normalizeLocation(location.clone());
-        double radius = configuration.searchRadius();
-        Collection<HologramDisplay> nearby = hologramPlatform.findNearby(searchLocation, radius);
-        HologramDisplay closest = null;
-        double closestDistance = Double.MAX_VALUE;
-        for (HologramDisplay display : nearby) {
+        double effectiveRadius = radius > 0.0D ? radius : configuration.removalRadius();
+        List<HologramMatch> matches = new ArrayList<>();
+        for (HologramDisplay display : hologramPlatform.findNearby(origin, effectiveRadius)) {
             AuctionHologramType type = readType(display);
-            if (type == null) {
+            if (type == null && !includeUntagged) {
                 continue;
             }
-            double distance = display.location().distanceSquared(searchLocation);
-            if (distance < closestDistance) {
-                closestDistance = distance;
-                closest = display;
+            double distance = distanceTo(display, origin);
+            if (distance >= 0.0D) {
+                matches.add(new HologramMatch(display, type, distance));
             }
         }
-        if (closest == null) {
+        matches.sort(Comparator.comparingDouble(HologramMatch::distance));
+        return matches;
+    }
+
+    public double removalRadius() {
+        return configuration.removalRadius();
+    }
+
+    public double maxRemovalRadius() {
+        return configuration.maxRemovalRadius();
+    }
+
+    public boolean allowUntaggedRemoval() {
+        return configuration.allowUntaggedRemoval();
+    }
+
+    /**
+     * Removes a single matched hologram. Untracks it by unique id then removes the entity.
+     *
+     * @return {@code true} if the display was valid and removed
+     */
+    public boolean remove(HologramMatch match) {
+        if (match == null || match.display() == null) {
             return false;
         }
-        trackedDisplays.remove(closest.uniqueId());
-        closest.remove();
-        return true;
+        UUID id = match.display().uniqueId();
+        if (id != null) {
+            trackedDisplays.remove(id);
+        }
+        if (match.display().isValid()) {
+            match.display().remove();
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Removes all matched holograms.
+     *
+     * @return the number of displays actually removed
+     */
+    public int removeAll(Collection<HologramMatch> matches) {
+        if (matches == null || matches.isEmpty()) {
+            return 0;
+        }
+        int removed = 0;
+        for (HologramMatch match : matches) {
+            if (remove(match)) {
+                removed++;
+            }
+        }
+        return removed;
+    }
+
+    private double distanceTo(HologramDisplay display, Location origin) {
+        Location location = display.location();
+        if (location == null || origin.getWorld() == null || location.getWorld() == null) {
+            return -1.0D;
+        }
+        if (!location.getWorld().equals(origin.getWorld())) {
+            return -1.0D;
+        }
+        return location.distance(origin);
     }
 
     public Map<AuctionHologramType, Integer> trackedCounts() {
@@ -181,10 +247,12 @@ public final class AuctionHologramManager {
             // Update only a subset per tick for scalability
             int batchSize = Math.max(1, trackedDisplays.size() / 10);
             int count = 0;
-            for (Map.Entry<UUID, HologramEntry> entry : trackedDisplays.entrySet()) {
+            Iterator<Map.Entry<UUID, HologramEntry>> iterator = trackedDisplays.entrySet().iterator();
+            while (iterator.hasNext()) {
+                Map.Entry<UUID, HologramEntry> entry = iterator.next();
                 HologramDisplay display = entry.getValue().display();
                 if (!isDisplayValid(display)) {
-                    trackedDisplays.remove(entry.getKey());
+                    iterator.remove();
                     continue;
                 }
                 try {
@@ -286,5 +354,15 @@ public final class AuctionHologramManager {
     }
 
     private record HologramEntry(HologramDisplay display, AuctionHologramType type) {
+    }
+
+    /**
+     * A single hologram discovered by a removal or listing search.
+     *
+     * @param display the underlying display entity
+     * @param type    the EzAuction hologram type, or {@code null} for an untagged display
+     * @param distance distance in blocks from the search origin
+     */
+    public record HologramMatch(HologramDisplay display, AuctionHologramType type, double distance) {
     }
 }

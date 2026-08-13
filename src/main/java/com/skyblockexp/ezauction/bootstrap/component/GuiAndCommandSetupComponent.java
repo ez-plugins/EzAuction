@@ -120,7 +120,7 @@ public class GuiAndCommandSetupComponent {
         if (hologramConfiguration != null && hologramConfiguration.enabled() && hologramSupportAvailable) {
             hologramManager = new AuctionHologramManager(plugin, auctionManager, transactionService, hologramConfiguration, hologramPlatform);
             hologramManager.enable();
-            hologramCommand = new AuctionHologramCommand(hologramManager, commandMessageConfiguration.holograms());
+            hologramCommand = new AuctionHologramCommand(plugin, hologramManager, commandMessageConfiguration.holograms());
         } else if (hologramConfiguration != null && hologramConfiguration.enabled()) {
             plugin.getLogger().warning("Auction holograms requested but unavailable on this platform; feature will remain disabled.");
         }
