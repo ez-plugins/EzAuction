@@ -180,7 +180,7 @@ class AuctionHologramManagerRemovalTest {
     void isHologramEntityTrueForTextDisplay() {
         PlayerMock player = server.addPlayer();
         HologramDisplay display = platform.spawn(player.getLocation());
-        Entity entity = player.getWorld().getEntitiesByClass(TextDisplay.class).get(0);
+        Entity entity = player.getWorld().getEntitiesByClass(TextDisplay.class).iterator().next();
         assertTrue(manager.isHologramEntity(entity));
     }
 
@@ -190,7 +190,7 @@ class AuctionHologramManagerRemovalTest {
         Location origin = player.getEyeLocation();
         HologramDisplay display = platform.spawn(origin.clone().add(1.0D, 0.0D, 0.0D));
         platform.setMarker(display, MARKER_KEY, AuctionHologramType.ACTIVE_LISTINGS.name());
-        Entity entity = player.getWorld().getEntitiesByClass(TextDisplay.class).get(0);
+        Entity entity = player.getWorld().getEntitiesByClass(TextDisplay.class).iterator().next();
 
         assertEquals(AuctionHologramType.ACTIVE_LISTINGS, manager.readType(entity));
     }
