@@ -153,7 +153,7 @@ class LiveAuctionServiceBidTest {
         when(transactionService.withdrawBuyer(any(), anyDouble()))
                 .thenReturn(AuctionOperationResult.success("ok"));
 
-        // Second bid — only delta (140 - 115 = 25) should be withdrawn
+        // Second bid - only delta (140 - 115 = 25) should be withdrawn
         service.bid(bidder, "auction-1", 140.0);
 
         verify(transactionService).withdrawBuyer(bidder, 25.0);

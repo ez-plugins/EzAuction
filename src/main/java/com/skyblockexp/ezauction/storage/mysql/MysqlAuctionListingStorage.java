@@ -78,7 +78,7 @@ public class MysqlAuctionListingStorage implements AuctionStorage, DistributedAu
             try {
                 statement.executeUpdate("ALTER TABLE `" + listingsTable + "` ADD COLUMN team_uuid CHAR(36) NULL");
             } catch (SQLException ignored) {
-                // Column already exists — safe to ignore
+                // Column already exists - safe to ignore
             }
             statement.executeUpdate("CREATE TABLE IF NOT EXISTS `" + ordersTable + "` ("
                     + "id VARCHAR(36) NOT NULL PRIMARY KEY,"

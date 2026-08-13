@@ -6,7 +6,7 @@ parent: Features
 
 # Auction Listings
 
-Everything owners and players need to know about the lifecycle of a standard auction listing — from creating it, through fees and limits, to selling, cancelling, and reclaiming expired or returned items. For the live real-time bidding mode, see [Live Auctions](live-auctions.md). For purchase offers, see [Buy Orders](buy-orders.md).
+Everything owners and players need to know about the lifecycle of a standard auction listing - from creating it, through fees and limits, to selling, cancelling, and reclaiming expired or returned items. For the live real-time bidding mode, see [Live Auctions](live-auctions.md). For purchase offers, see [Buy Orders](buy-orders.md).
 
 ## Creating a listing
 
@@ -58,7 +58,7 @@ Cancelling early returns the listed item. Whether the up-front listing fee is re
 
 ## Expiry
 
-When `auto-remove-expired` is enabled, unsold listings are removed when their duration ends. The item does not disappear — it becomes a pending return that the player must collect.
+When `auto-remove-expired` is enabled, unsold listings are removed when their duration ends. The item does not disappear - it becomes a pending return that the player must collect.
 
 ## Claiming returns
 

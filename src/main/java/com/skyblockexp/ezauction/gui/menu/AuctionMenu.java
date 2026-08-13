@@ -296,7 +296,7 @@ public class AuctionMenu implements Listener {
     }
 
     // -------------------------------------------------------------------------
-    // Inner sort enums — kept for backward compatibility with any callers that
+    // Inner sort enums - kept for backward compatibility with any callers that
     // reference AuctionMenu.ListingSort / AuctionMenu.OrderSort by name.
     // They delegate entirely to the canonical gui.view enums.
     // -------------------------------------------------------------------------

@@ -41,7 +41,7 @@ public final class PlayerLivePreferencesManager {
 
     /**
      * Returns the preferences for the given player, loading from storage if not yet cached.
-     * Never returns null — falls back to {@link PlayerLivePreferences#defaults(UUID)}.
+     * Never returns null - falls back to {@link PlayerLivePreferences#defaults(UUID)}.
      */
     public PlayerLivePreferences getPreferences(UUID playerId) {
         return cache.computeIfAbsent(playerId, id -> {

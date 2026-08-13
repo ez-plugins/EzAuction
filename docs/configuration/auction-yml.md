@@ -70,7 +70,7 @@ When enabled and TeamsAPI is present:
 
 See [Team Auctions](../features/team-auctions.md) for the full feature guide.
 
-## Live auctions — countdown
+## Live auctions - countdown
 
 Controls the countdown timer displayed during live auctions. Requires the [EzCountdown](https://modrinth.com/plugin/ezcountdown) soft-dependency for non-chat displays.
 
@@ -85,14 +85,14 @@ Controls the countdown timer displayed during live auctions. Requires the [EzCou
 | `live-auctions.countdown.chat-reminder-interval-seconds` | integer | `0` | Send a chat reminder every N seconds. `0` = disabled. |
 | `live-auctions.countdown.chat-reminder-at-seconds` | list | `[30, 10, 5]` | Send a chat reminder when this many seconds remain. Empty list = disabled. |
 
-## Live auctions — bidding
+## Live auctions - bidding
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | `live-auctions.bidding.minimum-bid-increment-percent` | double | `5.0` | Minimum bid must be at least this % above the current bid. |
 | `live-auctions.bidding.minimum-bid-increment-fixed` | double | `10.0` | Minimum bid must be at least this amount above the current bid. Both percent and fixed are evaluated; the higher result wins. |
 
-## Live auctions — chat filter
+## Live auctions - chat filter
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|

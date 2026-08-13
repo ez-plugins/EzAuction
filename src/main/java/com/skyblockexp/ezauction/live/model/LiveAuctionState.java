@@ -135,7 +135,7 @@ public final class LiveAuctionState {
      * @return minimum next bid (always strictly greater than currentBid when any increment is set)
      */
     public double minimumNextBid(double pct, double fixed) {
-        // First bid only needs to meet the starting price — no increment required.
+        // First bid only needs to meet the starting price - no increment required.
         if (!hasBids()) return currentBid;
         double base = currentBid;
         double byPercent = pct > 0 ? base * (1.0 + pct / 100.0) : base;

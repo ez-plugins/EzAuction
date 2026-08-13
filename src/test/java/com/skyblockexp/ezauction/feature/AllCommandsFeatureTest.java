@@ -48,7 +48,7 @@ import com.skyblockexp.ezauction.transaction.AuctionTransactionHistory;
 import com.skyblockexp.ezauction.transaction.AuctionTransactionService;
 
 /**
- * Feature-level tests covering every command and subcommand — both happy-path
+ * Feature-level tests covering every command and subcommand - both happy-path
  * (succeeds as expected) and key sad-path (permission denied, bad input) cases.
  *
  * <p>Each nested class corresponds to one command.  Tests use MockBukkit for a
@@ -118,7 +118,7 @@ class AllCommandsFeatureTest {
 
     private PlayerMock noPermPlayer(String name) {
         PlayerMock p = server.addPlayer(name);
-        // Non-op player — only gets default permissions from MockBukkit
+        // Non-op player - only gets default permissions from MockBukkit
         return p;
     }
 
@@ -127,7 +127,7 @@ class AllCommandsFeatureTest {
     }
 
     // ======================================================================
-    // /auction (no args) — open browser GUI
+    // /auction (no args) - open browser GUI
     // ======================================================================
     @Nested
     class AuctionNoArgs {
@@ -605,7 +605,7 @@ class AllCommandsFeatureTest {
             boolean handled = cmd.onCommand(sender, mockCommand(), "auction", new String[]{"reload"});
 
             assertTrue(handled);
-            // Registry is null in test context — message will contain "not initialized" or similar
+            // Registry is null in test context - message will contain "not initialized" or similar
             verify(sender).sendMessage(any(String.class));
         }
 
@@ -623,7 +623,7 @@ class AllCommandsFeatureTest {
     }
 
     // ======================================================================
-    // /auction <unknown subcommand> — usage
+    // /auction <unknown subcommand> - usage
     // ======================================================================
     @Nested
     class AuctionUnknownSubcommand {

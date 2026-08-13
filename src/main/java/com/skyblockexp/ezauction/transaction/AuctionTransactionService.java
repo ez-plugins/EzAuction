@@ -25,7 +25,7 @@ public class AuctionTransactionService {
     private final Economy economy;
     private final AuctionBackendMessages.EconomyMessages messages;
     private final AuctionBackendMessages.FallbackMessages fallbackMessages;
-    /** Optional currency display template — e.g. {@code "{amount} coins"}. Null/empty = use Vault/default. */
+    /** Optional currency display template - e.g. {@code "{amount} coins"}. Null/empty = use Vault/default. */
     private volatile String currencyTemplate = null;
     /** Optional number format for the {@code {amount}} placeholder inside the template. */
     private volatile java.text.DecimalFormat decimalFormat = null;
@@ -192,7 +192,7 @@ public class AuctionTransactionService {
 
     /**
      * Configures an optional currency display override. When set, the {@code template} is used
-     * instead of Vault's {@code economy.format()} — replace {@code {amount}} with the formatted number.
+     * instead of Vault's {@code economy.format()} - replace {@code {amount}} with the formatted number.
      *
      * @param template      e.g. {@code "{amount} coins"} or {@code "$&a{amount}"}. Null/blank = disable override.
      * @param numberPattern {@link java.text.DecimalFormat} pattern for {@code {amount}}, e.g. {@code "#,##0.00"}.

@@ -283,7 +283,7 @@ public class AuctionListingService {
 
     /**
      * Places a bid on the given listing. Currently this method only fires an event and
-     * notifies listeners — it does not mutate the listing state or handle payments.
+     * notifies listeners - it does not mutate the listing state or handle payments.
      * This provides a safe hook for implementing a full bid workflow later.
      */
     public AuctionOperationResult placeBid(Player bidder, String listingId, double amount) {

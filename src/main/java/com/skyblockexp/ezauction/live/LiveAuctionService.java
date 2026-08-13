@@ -379,7 +379,7 @@ public final class LiveAuctionService {
 
     /**
      * Registers a callback that is invoked (on the main thread) with the listing ID whenever a
-     * live auction fully resolves — whether sold or returned unsold. Use this to remove the
+     * live auction fully resolves - whether sold or returned unsold. Use this to remove the
      * corresponding entry from the normal listing store and persist the change.
      */
     public void setListingResolutionCallback(Consumer<String> callback) {
@@ -501,11 +501,11 @@ public final class LiveAuctionService {
             }
 
             if (!creditResult.success()) {
-                // Economy rejected the deposit — without an explicit refund the winner's escrowed
+                // Economy rejected the deposit - without an explicit refund the winner's escrowed
                 // funds would be permanently lost from the economy.
                 plugin.getLogger().warning("Live auction " + state.id()
                         + ": failed to credit seller " + state.entry().sellerId()
-                        + " — refunding winner. Reason: " + creditResult.message());
+                        + " - refunding winner. Reason: " + creditResult.message());
                 transactionService.refundOrderBuyer(winner, winAmount);
                 // Return the item to the seller since the sale could not complete
                 ItemStack returnItem = state.listing().item();
@@ -544,7 +544,7 @@ public final class LiveAuctionService {
                 broadcastToAll(endMsg);
             }
         } else {
-            // No bids — return item to the seller
+            // No bids - return item to the seller
             ItemStack item = state.listing().item();
             if (item != null) {
                 UUID sellerId = state.entry().sellerId();

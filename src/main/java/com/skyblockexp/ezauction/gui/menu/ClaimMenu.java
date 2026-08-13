@@ -32,10 +32,10 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * <p>Layout:</p>
  * <ul>
- *   <li>Slots 0-44 — pending items (first 45 shown; each item lore shows expiry date)</li>
- *   <li>Slot 45 — Back button (returns to main auction browser)</li>
- *   <li>Slot 49 — Claim All button</li>
- *   <li>Other bottom-row slots — gray pane filler</li>
+ *   <li>Slots 0-44 - pending items (first 45 shown; each item lore shows expiry date)</li>
+ *   <li>Slot 45 - Back button (returns to main auction browser)</li>
+ *   <li>Slot 49 - Claim All button</li>
+ *   <li>Other bottom-row slots - gray pane filler</li>
  * </ul>
  */
 public final class ClaimMenu implements Listener {
@@ -204,7 +204,7 @@ public final class ClaimMenu implements Listener {
                     }
                 });
             }
-            default -> { /* item slots — no action for now */ }
+            default -> { /* item slots - no action for now */ }
         }
     }
 

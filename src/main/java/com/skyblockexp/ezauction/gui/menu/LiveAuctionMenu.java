@@ -181,7 +181,7 @@ public final class LiveAuctionMenu implements Listener {
             inventory.setItem(SELL_SLOT, sellBtn);
         }
 
-        // Cancel-queue button — only shown if viewer has a queued entry
+        // Cancel-queue button - only shown if viewer has a queued entry
         if (viewerUuid != null && liveAuctionService.hasQueuedEntry(viewerUuid)) {
             ItemStack cancelBtn = createButton(Material.RED_DYE, ChatColor.RED + messages.cancelButtonLabel(),
                     List.of(ChatColor.GRAY + messages.cancelButtonLore()));

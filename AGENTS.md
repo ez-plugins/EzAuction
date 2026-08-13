@@ -1,4 +1,4 @@
-# EzAuction — Agent Guidelines
+# EzAuction - Agent Guidelines
 
 A Paper Minecraft plugin providing a fully-featured auction house with GUI menus, live auctions, buy orders, Discord webhooks, hologram displays, and MySQL or YAML storage backends.
 
@@ -11,7 +11,7 @@ A Paper Minecraft plugin providing a fully-featured auction house with GUI menus
 | Commands | `command/` | `/auction`, `/order`, `/liveauction`, `/auctiondiscord`, etc. |
 | GUI | `gui/` | Inventory-based menus (browser, sell, history, orders) |
 | Services | `service/`, `claim/`, `live/`, `history/` | Business logic, no Bukkit I/O |
-| Storage | `storage/` — `yaml/`, `mysql/` | Persistence behind `AuctionStorage` interface |
+| Storage | `storage/` - `yaml/`, `mysql/` | Persistence behind `AuctionStorage` interface |
 | Events | `event/` | Bukkit custom events for external plugin hooks |
 | Integration | `integration/` | Optional Discord webhook notifier |
 | Compat | `compat/` | HologramPlatform abstraction, PDC/Lore item tag strategies |
@@ -21,7 +21,7 @@ See [docs/api.md](docs/api.md), [docs/events.md](docs/events.md), [docs/permissi
 
 ## Configuration
 
-All user-facing settings live in resource YML files — never hardcode values.
+All user-facing settings live in resource YML files - never hardcode values.
 
 | File | Purpose |
 |------|---------|
@@ -44,17 +44,17 @@ Messages live in `src/main/resources/messages/`, split into four per-language se
 | `menu-interactions_*.yml` | Chat prompts and input instructions |
 | `menu-layout_*.yml` | Slot assignments and layout metadata |
 
-**Supported languages:** `en` (default), `es`, `nl`, `zh` — set via `language:` in `auction.yml`.
+**Supported languages:** `en` (default), `es`, `nl`, `zh` - set via `language:` in `auction.yml`.
 
 Rules:
 - Every new player-visible string **must** be added to all four language files.
-- Use MiniMessage / Kyori Adventure components — no legacy `§` colour codes.
+- Use MiniMessage / Kyori Adventure components - no legacy `§` colour codes.
 - Keys must match exactly across all language files.
 - Never concatenate message fragments; use placeholders within a single key.
 
 ## Code Conventions
 
-- Java 21; target Paper 1.21+ — use Paper/Adventure APIs, not Bukkit-legacy equivalents.
+- Java 21; target Paper 1.21+ - use Paper/Adventure APIs, not Bukkit-legacy equivalents.
 - One responsibility per class. Split large classes; do not exceed ~300 lines without good reason.
 - Config objects are **immutable records or final-field POJOs** populated at load time by `AuctionConfigurationLoader`.
 - Feature entry points belong in dedicated packages (`live/`, `history/`, `integration/`, …). Do not add new feature logic to `EzAuctionPlugin` or `AuctionManager` directly.
@@ -79,8 +79,8 @@ mvn package -DskipTests   # build JAR without tests
 ## Documentation
 
 - Keep `docs/` in sync with every change to config keys, events, permissions, or the API.
-- `docs/configuration.md` — updated when any YML key is added, removed, or changed.
-- `docs/events.md` — updated when a new custom event is added.
-- `docs/permissions.md` — updated when a permission node changes.
-- `docs/api.md` — updated when the public API changes.
+- `docs/configuration.md` - updated when any YML key is added, removed, or changed.
+- `docs/events.md` - updated when a new custom event is added.
+- `docs/permissions.md` - updated when a permission node changes.
+- `docs/api.md` - updated when the public API changes.
 - Changelog entries go in `README.md` under the relevant version heading.

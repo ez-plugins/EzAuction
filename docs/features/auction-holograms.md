@@ -6,7 +6,7 @@ parent: Features
 
 # Auction Holograms
 
-EzAuction can display live auction stats in the world as floating `TextDisplay` holograms. They are a visual overview of your auction house — useful outside spawn, at shops, or in hubs.
+EzAuction can display live auction stats in the world as floating `TextDisplay` holograms. They are a visual overview of your auction house - useful outside spawn, at shops, or in hubs.
 
 Requires **Minecraft 1.19+** (TextDisplay entities) and a server running **Paper 1.21+**.
 
@@ -70,9 +70,9 @@ Lists matching displays nearest-first, one line per match with type, world, coor
 /auctionhologram clearall [radius] [--untagged]
 ```
 
-- **`clear`** (tagged) — removes the single nearest EzAuction hologram immediately.
-- **`clear --untagged`** — two-step, for safety. The first run reports how many untagged displays are in range (these may include other plugins' holograms); running the command again within **15 seconds** removes only the nearest one. This prevents an accidental bulk delete of another plugin's displays.
-- **`clearall`** — removes every matching hologram in range, also behind a two-step confirmation (run again within 15 seconds).
+- **`clear`** (tagged) - removes the single nearest EzAuction hologram immediately.
+- **`clear --untagged`** - two-step, for safety. The first run reports how many untagged displays are in range (these may include other plugins' holograms); running the command again within **15 seconds** removes only the nearest one. This prevents an accidental bulk delete of another plugin's displays.
+- **`clearall`** - removes every matching hologram in range, also behind a two-step confirmation (run again within 15 seconds).
 
 Radius defaults to `removal-radius` and is capped at `max-removal-radius`.
 

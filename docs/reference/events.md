@@ -80,7 +80,7 @@ Fired when a buy order is fulfilled. Not cancellable.
 
 ## `LiveAuctionStartedEvent`
 
-Fired when a live auction becomes active. Cancellable — cancel to prevent the auction from starting.
+Fired when a live auction becomes active. Cancellable - cancel to prevent the auction from starting.
 
 ```java
 public LiveAuctionStartedEvent(LiveAuctionState state)
@@ -93,7 +93,7 @@ boolean isCancelled() / void setCancelled(boolean cancel)
 
 ## `LiveAuctionBidPlacedEvent`
 
-Fired after bid validation passes but before the bid is committed. Cancellable — cancel to reject the bid silently.
+Fired after bid validation passes but before the bid is committed. Cancellable - cancel to reject the bid silently.
 
 ```java
 public LiveAuctionBidPlacedEvent(LiveAuctionState state, Player bidder, double amount)
@@ -193,5 +193,5 @@ public void onAuctionCreate(AuctionListingCreateEvent event) {
 
 ## Related
 
-- [Developer API](api.md) — programmatic access
-- [CONTRIBUTING.md](https://github.com/ez-plugins/EzAuction/blob/main/CONTRIBUTING.md) — adding new events
+- [Developer API](api.md) - programmatic access
+- [CONTRIBUTING.md](https://github.com/ez-plugins/EzAuction/blob/main/CONTRIBUTING.md) - adding new events

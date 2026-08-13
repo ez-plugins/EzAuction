@@ -31,13 +31,13 @@ import java.util.stream.Collectors;
  *
  * <p>Sub-command overview:</p>
  * <ul>
- *   <li>{@code /bid} — shows status (active session) or lists active auctions</li>
- *   <li>{@code /bid <amount>} — places a bid on the player's currently selected auction</li>
- *   <li>{@code /bid select <id>} — joins a live auction by its ID</li>
- *   <li>{@code /bid leave} — leaves the current live auction session</li>
- *   <li>{@code /bid notify [on|off]} — toggles notification preferences</li>
- *   <li>{@code /bid notify display <types...>} — sets EzCountdown display types</li>
- *   <li>{@code /bid mutechat [on|off]} — toggles chat filter while in auction</li>
+ *   <li>{@code /bid} - shows status (active session) or lists active auctions</li>
+ *   <li>{@code /bid <amount>} - places a bid on the player's currently selected auction</li>
+ *   <li>{@code /bid select <id>} - joins a live auction by its ID</li>
+ *   <li>{@code /bid leave} - leaves the current live auction session</li>
+ *   <li>{@code /bid notify [on|off]} - toggles notification preferences</li>
+ *   <li>{@code /bid notify display <types...>} - sets EzCountdown display types</li>
+ *   <li>{@code /bid mutechat [on|off]} - toggles chat filter while in auction</li>
  * </ul>
  */
 public final class BidCommand implements CommandExecutor, TabCompleter {
@@ -110,7 +110,7 @@ public final class BidCommand implements CommandExecutor, TabCompleter {
             liveAuctionService.getActiveAuction(activeId.get()).ifPresentOrElse(
                     state -> bidMenu.open(player, activeId.get()),
                     () -> {
-                        // Session stale — auto-clean
+                        // Session stale - auto-clean
                         sessionRegistry.leave(player.getUniqueId());
                         openPickerOrList(player);
                     });
@@ -153,7 +153,7 @@ public final class BidCommand implements CommandExecutor, TabCompleter {
             if (active.size() == 1) {
                 auctionId = active.iterator().next().id();
             } else {
-                // Multiple auctions — player must select one first
+                // Multiple auctions - player must select one first
                 player.sendMessage(colorize(messages.selectPrompt()));
                 listAuctions(player, active);
                 return;
@@ -168,7 +168,7 @@ public final class BidCommand implements CommandExecutor, TabCompleter {
 
     private void handleSelect(Player player, String[] args) {
         if (args.length < 2) {
-            // No ID given — open picker
+            // No ID given - open picker
             openPickerOrList(player);
             return;
         }

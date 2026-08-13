@@ -36,15 +36,15 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * <p>Layout (row × col, 0-indexed):</p>
  * <ul>
- *   <li>Slot 13 — auctioned item (centre top area)</li>
- *   <li>Slot 15 — status pane (current bid, top bidder, time remaining)</li>
- *   <li>Slot 28 — "Minimum bid" button (lime terracotta)</li>
- *   <li>Slot 29 — "+25%" button (lime concrete)</li>
- *   <li>Slot 30 — "+50%" button (lime stained glass)</li>
- *   <li>Slot 31 — "×2 current bid" button (gold ingot)</li>
- *   <li>Slot 33 — "Custom amount" button (yellow stained glass) — prompts via chat</li>
- *   <li>Slot 49 — "Leave auction" button (red stained glass)</li>
- *   <li>All others — gray stained glass pane filler</li>
+ *   <li>Slot 13 - auctioned item (centre top area)</li>
+ *   <li>Slot 15 - status pane (current bid, top bidder, time remaining)</li>
+ *   <li>Slot 28 - "Minimum bid" button (lime terracotta)</li>
+ *   <li>Slot 29 - "+25%" button (lime concrete)</li>
+ *   <li>Slot 30 - "+50%" button (lime stained glass)</li>
+ *   <li>Slot 31 - "×2 current bid" button (gold ingot)</li>
+ *   <li>Slot 33 - "Custom amount" button (yellow stained glass) - prompts via chat</li>
+ *   <li>Slot 49 - "Leave auction" button (red stained glass)</li>
+ *   <li>All others - gray stained glass pane filler</li>
  * </ul>
  *
  * <p>The menu auto-refreshes every 40 ticks while open. Custom-amount chat input is handled
@@ -112,7 +112,7 @@ public final class BidMenu implements Listener {
         BidMenuHolder existing = openMenus.remove(player.getUniqueId());
         if (existing != null) existing.cancelRefresh();
 
-        String title = ChatColor.DARK_RED + "" + ChatColor.BOLD + "Live Auction — Bid";
+        String title = ChatColor.DARK_RED + "" + ChatColor.BOLD + "Live Auction - Bid";
         Inventory inv = Bukkit.createInventory(null, SIZE, title);
         BidMenuHolder holder = new BidMenuHolder(player.getUniqueId(), auctionId, inv);
         openMenus.put(player.getUniqueId(), holder);
@@ -126,7 +126,7 @@ public final class BidMenu implements Listener {
             if (h == null || !h.auctionId.equals(auctionId)) return;
             Optional<LiveAuctionState> refreshed = liveAuctionService.getActiveAuction(auctionId);
             if (refreshed.isEmpty()) {
-                // Auction ended — close inventory on main thread (we're already on main thread via runTaskTimer)
+                // Auction ended - close inventory on main thread (we're already on main thread via runTaskTimer)
                 openMenus.remove(player.getUniqueId());
                 h.cancelRefresh();
                 player.closeInventory();
@@ -337,7 +337,7 @@ public final class BidMenu implements Listener {
                 player.closeInventory();
                 liveAuctionService.leaveAuction(player);
             }
-            default -> { /* filler — ignore */ }
+            default -> { /* filler - ignore */ }
         }
     }
 
@@ -381,7 +381,7 @@ public final class BidMenu implements Listener {
             }
             LiveAuctionState state = stateOpt.get();
             if (input.isEmpty()) {
-                // Empty input — bid the minimum required amount.
+                // Empty input - bid the minimum required amount.
                 double minimum = state.minimumNextBid(bidIncrementPct, bidIncrementFixed);
                 placeBid(player, auctionId, minimum, state);
                 return;
