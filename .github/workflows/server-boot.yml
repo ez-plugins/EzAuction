@@ -59,15 +59,25 @@ jobs:
           curl -fsSL -H "User-Agent: ${USER_AGENT}" "$URL" -o paper.jar
           test -s paper.jar || { echo "paper.jar is empty" >&2; exit 1; }
 
+      - name: Cache Gradle
+        if: matrix.server.kind == 'folia'
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: folia-gradle-1.21.1-${{ hashFiles('folia-src/gradle/wrapper/gradle-wrapper.properties') }}
+          restore-keys: folia-gradle-1.21.1-
+
       - name: Build Folia server jar
         if: matrix.server.kind == 'folia'
         id: folia
-        continue-on-error: true
+        timeout-minutes: 60
         run: |
-          git clone --depth 1 --branch "ver/1.21.1" https://github.com/PaperMC/Folia.git folia-src
+          git clone --branch "dev/1.21.1" https://github.com/PaperMC/Folia.git folia-src
           cd folia-src
           ./gradlew createMojmapBundlerJar --no-daemon
-          JAR=$(find . -name 'folia-*.jar' -path '*bundler*' | head -1)
+          JAR=$(find . -path '*/build/libs/folia-bundler-*.jar' | head -1)
           if [ -z "$JAR" ]; then
             echo "Folia jar not found after build" >&2
             exit 1
@@ -75,17 +85,32 @@ jobs:
           cp "$JAR" ../folia.jar
           echo "Built $JAR"
 
-      - name: Skip Folia if build unavailable
-        if: matrix.server.kind == 'folia' && steps.folia.outcome != 'success'
-        run: |
-          echo "::warning::Folia jar build was not available; skipping Folia boot (non-blocking)."
-          echo "SKIP_FOLIA=true" >> "$GITHUB_ENV"
-
       - name: Prepare server directory
-        if: env.SKIP_FOLIA != 'true'
         run: |
           mkdir -p servers/${{ matrix.server.name }}/plugins
-          cp target/EzAuction-*.jar "servers/${{ matrix.server.name }}/plugins/"
+          EZ_JAR=$(ls target/EzAuction-*.jar | head -1)
+          if [ "${{ matrix.server.kind }}" = "folia" ]; then
+            # Folia refuses to load plugins that do not declare folia support. Inject the flag
+            # into a copy of the built jar's plugin.yml so the boot actually exercises the plugin.
+            FOLIA_EZ="servers/${{ matrix.server.name }}/plugins/$(basename "$EZ_JAR")"
+            python3 - "$EZ_JAR" "$FOLIA_EZ" <<'PY'
+          import sys, zipfile, io
+          src, dst = sys.argv[1], sys.argv[2]
+          with zipfile.ZipFile(src) as zin, zipfile.ZipFile(dst, "w", zipfile.ZIP_DEFLATED) as zout:
+              for item in zin.infolist():
+                  data = zin.read(item.filename)
+                  if item.filename == "plugin.yml":
+                      text = data.decode("utf-8")
+                      if "folia-supported:" not in text:
+                          text = text.replace("api-version: 1.13\n",
+                                              "api-version: 1.13\nfolia-supported: true\n")
+                      data = text.encode("utf-8")
+                  zout.writestr(item, data)
+          PY
+            echo "Injected folia-supported: true into $(basename "$FOLIA_EZ")"
+          else
+            cp "$EZ_JAR" "servers/${{ matrix.server.name }}/plugins/"
+          fi
           cp plugins/Vault.jar "servers/${{ matrix.server.name }}/plugins/"
           cp plugins/ezeconomy-bukkit-3.0.4.jar "servers/${{ matrix.server.name }}/plugins/"
           if [ "${{ matrix.server.kind }}" = "paper" ]; then
@@ -95,11 +120,9 @@ jobs:
           fi
 
       - name: Accept EULA
-        if: env.SKIP_FOLIA != 'true'
         run: echo "eula=true" > "servers/${{ matrix.server.name }}/eula.txt"
 
       - name: Boot server and assert clean enable
-        if: env.SKIP_FOLIA != 'true'
         working-directory: servers/${{ matrix.server.name }}
         run: |
           set -euo pipefail
@@ -167,7 +190,7 @@ jobs:
           echo "Boot smoke test PASSED for ${{ matrix.server.name }}."
 
       - name: Upload server log on failure
-        if: failure() && env.SKIP_FOLIA != 'true'
+        if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: server-boot-${{ matrix.server.name }}-log
