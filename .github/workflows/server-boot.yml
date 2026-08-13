@@ -21,7 +21,7 @@ jobs:
       matrix:
         server:
           - { name: paper, kind: paper, version: "1.21.1" }
-          - { name: folia, kind: folia, version: "1.21.1" }
+          - { name: folia, kind: folia, version: "1.21.11" }
 
     steps:
       - name: Checkout
@@ -59,31 +59,25 @@ jobs:
           curl -fsSL -H "User-Agent: ${USER_AGENT}" "$URL" -o paper.jar
           test -s paper.jar || { echo "paper.jar is empty" >&2; exit 1; }
 
-      - name: Cache Gradle
+      - name: Download Folia server jar
         if: matrix.server.kind == 'folia'
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: folia-gradle-1.21.1-${{ hashFiles('folia-src/gradle/wrapper/gradle-wrapper.properties') }}
-          restore-keys: folia-gradle-1.21.1-
-
-      - name: Build Folia server jar
-        if: matrix.server.kind == 'folia'
-        id: folia
-        timeout-minutes: 60
+        env:
+          USER_AGENT: EzAuction-CI/1.0 (https://github.com/skyblockexp/EzAuction)
         run: |
-          git clone --branch "dev/1.21.1" https://github.com/PaperMC/Folia.git folia-src
-          cd folia-src
-          ./gradlew createMojmapBundlerJar --no-daemon
-          JAR=$(find . -path '*/build/libs/folia-bundler-*.jar' | head -1)
-          if [ -z "$JAR" ]; then
-            echo "Folia jar not found after build" >&2
-            exit 1
-          fi
-          cp "$JAR" ../folia.jar
-          echo "Built $JAR"
+          VERSION="${{ matrix.server.version }}"
+          # Folia publishes prebuilt jars via the same Fill v3 service as Paper. Building from
+          # source is impractical in CI (heavy Gradle build + version-specific task config), so
+          # we download the newest build for the requested Minecraft version.
+          API="https://fill.papermc.io/v3/projects/folia/versions/${VERSION}/builds"
+          URL=$(curl -fsSL -H "User-Agent: ${USER_AGENT}" "$API" | python3 -c '
+          import sys, json
+          data = json.load(sys.stdin)
+          newest = max(data, key=lambda b: b["id"])
+          print(newest["downloads"]["server:default"]["url"])
+          ')
+          echo "Resolved Folia download: $URL"
+          curl -fsSL -H "User-Agent: ${USER_AGENT}" "$URL" -o folia.jar
+          test -s folia.jar || { echo "folia.jar is empty" >&2; exit 1; }
 
       - name: Prepare server directory
         run: |
