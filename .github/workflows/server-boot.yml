@@ -1,0 +1,164 @@
+name: Server Boot Smoke
+
+on:
+  push:
+  pull_request:
+
+# Boots the built EzAuction plugin on a real Paper server (and best-effort Folia) and fails
+# the job if the server log shows boot errors or the plugin never reaches its enabled state.
+#
+# This complements (does not replace) the MockBukkit `mvn verify` (ci.yml) and the YAML
+# storage round-trip (spigot-smoke.yml). The FoliaLib-style scheduler shim in
+# `compat/Scheduler.java` is what lets the plugin actually boot on Folia's regionised threads.
+
+jobs:
+  server-boot:
+    name: Boot EzAuction on ${{ matrix.server.name }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        server:
+          - { name: paper, kind: paper, version: "1.21.1" }
+          - { name: folia, kind: folia, version: "1.21.1" }
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: Build EzAuction
+        run: mvn -B -q package -DskipTests
+
+      - name: Build fake economy plugin
+        run: mvn -B -q -f test-economy/pom.xml package -DskipTests
+
+      - name: Download Paper server jar
+        if: matrix.server.kind == 'paper'
+        run: |
+          VERSION="${{ matrix.server.version }}"
+          API="https://api.papermc.io/v2/projects/paper/versions/${VERSION}/builds"
+          BUILD=$(curl -fsSL "$API" | jq -r '.builds[-1].build')
+          FILE=$(curl -fsSL "$API/${BUILD}" | jq -r '.downloads.application.name')
+          echo "Resolved Paper build $BUILD -> $FILE"
+          curl -fsSL "$API/${BUILD}/downloads/${FILE}" -o paper.jar
+
+      - name: Build Folia server jar
+        if: matrix.server.kind == 'folia'
+        id: folia
+        continue-on-error: true
+        run: |
+          git clone --depth 1 --branch "ver/1.21.1" https://github.com/PaperMC/Folia.git folia-src
+          cd folia-src
+          ./gradlew createMojmapBundlerJar --no-daemon
+          JAR=$(find . -name 'folia-*.jar' -path '*bundler*' | head -1)
+          if [ -z "$JAR" ]; then
+            echo "Folia jar not found after build" >&2
+            exit 1
+          fi
+          cp "$JAR" ../folia.jar
+          echo "Built $JAR"
+
+      - name: Skip Folia if build unavailable
+        if: matrix.server.kind == 'folia' && steps.folia.outcome != 'success'
+        run: |
+          echo "::warning::Folia jar build was not available; skipping Folia boot (non-blocking)."
+          echo "SKIP_FOLIA=true" >> "$GITHUB_ENV"
+
+      - name: Prepare server directory
+        if: env.SKIP_FOLIA != 'true'
+        run: |
+          mkdir -p servers/${{ matrix.server.name }}/plugins
+          cp target/EzAuction-*.jar "servers/${{ matrix.server.name }}/plugins/"
+          cp test-economy/target/EzAuctionTestEconomy.jar "servers/${{ matrix.server.name }}/plugins/"
+          if [ "${{ matrix.server.kind }}" = "paper" ]; then
+            cp paper.jar "servers/${{ matrix.server.name }}/${{ matrix.server.name }}.jar"
+          else
+            cp folia.jar "servers/${{ matrix.server.name }}/${{ matrix.server.name }}.jar"
+          fi
+
+      - name: Accept EULA
+        if: env.SKIP_FOLIA != 'true'
+        run: echo "eula=true" > "servers/${{ matrix.server.name }}/eula.txt"
+
+      - name: Boot server and assert clean enable
+        if: env.SKIP_FOLIA != 'true'
+        working-directory: servers/${{ matrix.server.name }}
+        run: |
+          set -euo pipefail
+          SERVER_JAR="${{ matrix.server.name }}.jar"
+          LOG="logs/latest.log"
+          mkdir -p logs
+          # Boot headless; auto-stop once the server reports "Done".
+          timeout 300 java -jar "$SERVER_JAR" nogui > "$LOG" 2>&1 &
+          PID=$!
+          echo "Server PID: $PID"
+          # Wait for the "Done" line (server finished loading) or the process to exit.
+          for i in $(seq 1 600); do
+            if grep -q "Done (" "$LOG" 2>/dev/null; then
+              echo "Server reported Done."
+              break
+            fi
+            if ! kill -0 "$PID" 2>/dev/null; then
+              echo "Server process exited before Done." >&2
+              break
+            fi
+            sleep 1
+          done
+          # Give the plugin a moment to finish onEnable after "Done".
+          sleep 5
+          if kill -0 "$PID" 2>/dev/null; then
+            echo "stop" > /proc/$PID/fd/0 2>/dev/null || true
+            sleep 5
+            kill "$PID" 2>/dev/null || true
+          fi
+          wait "$PID" 2>/dev/null || true
+
+          echo "=================== BOOT LOG (tail) ==================="
+          tail -n 60 "$LOG" || true
+          echo "======================================================="
+
+          # --- Assertions ---
+          FAIL=0
+          if grep -q "EzAuction plugin enabled." "$LOG"; then
+            echo "PASS: plugin reached enabled state."
+          else
+            echo "FAIL: 'EzAuction plugin enabled.' not found in log."
+            FAIL=1
+          fi
+
+          # Forbidden patterns that indicate a broken boot.
+          for pattern in "SEVERE" "\[Bootstrap\] FATAL" "IllegalStateException" "async thread access" "Exception in thread" "Could not load"; do
+            if grep -qF "$pattern" "$LOG"; then
+              echo "FAIL: forbidden log pattern found: $pattern"
+              FAIL=1
+            fi
+          done
+
+          # Folia-specific region scheduler failures.
+          if [ "${{ matrix.server.kind }}" = "folia" ]; then
+            if grep -qE "Exception|Error" "$LOG" && grep -qiE "RegionizedServer|region scheduler" "$LOG"; then
+              echo "FAIL: Folia region scheduler error detected."
+              FAIL=1
+            fi
+          fi
+
+          if [ "$FAIL" -ne 0 ]; then
+            echo "Boot smoke test FAILED for ${{ matrix.server.name }}."
+            exit 1
+          fi
+          echo "Boot smoke test PASSED for ${{ matrix.server.name }}."
+
+      - name: Upload server log on failure
+        if: failure() && env.SKIP_FOLIA != 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: server-boot-${{ matrix.server.name }}-log
+          path: servers/${{ matrix.server.name }}/logs/latest.log
+          if-no-files-found: warn

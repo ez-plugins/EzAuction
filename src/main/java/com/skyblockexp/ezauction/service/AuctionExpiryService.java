@@ -1,5 +1,6 @@
 
 package com.skyblockexp.ezauction.service;
+import com.skyblockexp.ezauction.compat.Scheduler;
 
 import com.skyblockexp.ezauction.transaction.AuctionTransactionService;
 import com.skyblockexp.ezauction.model.AuctionListing;
@@ -72,7 +73,7 @@ public class AuctionExpiryService {
         if (expiryTask != null) {
             expiryTask.cancel();
         }
-        expiryTask = plugin.getServer().getScheduler().runTaskTimer(plugin, this::purgeExpiredEntries, 20L, 20L * 60L);
+        expiryTask = Scheduler.runTimer(plugin, this::purgeExpiredEntries, 20L, 20L * 60L);
     }
 
     public void purgeExpiredEntries() {

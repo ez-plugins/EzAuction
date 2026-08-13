@@ -16,6 +16,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/). Version
 - **Hardened** — spherical distance filtering for removal, removed a latent `ConcurrentModificationException` in the update loop, and made `max-holograms` enforcement live with a distinct denial message.
 - **Buy Orders GUI inventory theft vulnerability** - fixed a critical security issue where players could steal items from the Buy Orders overview. Both the `/orders` command and the Buy Orders tab in `/ah` were unprotected, allowing players to drag items out of the GUI into their inventory, or place items into the GUI (which would be deleted on close). All item interactions in buy order displays are now cancelled, and items are cloned so the backing order data is never directly accessible.
 
+### Changed
+
+- **Folia-safe scheduler shim** — all 23 direct scheduler calls now route through `compat/Scheduler`, which sends sync/delayed/repeating tasks to Folia's global region scheduler (and async tasks to its async scheduler) via reflection, falling back to the regular Bukkit scheduler on Paper/Spigot. This lets the plugin boot on Folia without `IllegalStateException` async-thread-access crashes. FoliaLib was intentionally not added as a dependency.
+- **Server boot smoke workflow** — added `.github/workflows/server-boot.yml` which boots the built plugin on a real Paper (and best-effort Folia) server and fails the job on `SEVERE`/`FATAL`/async-access errors or if the plugin never reaches its enabled state. A minimal fake Vault economy plugin (`test-economy/`) is built and dropped into `plugins/` so the full enable chain is exercised.
+
 ## [2.3.1] - 2026-05-27
 
 ### Fixed

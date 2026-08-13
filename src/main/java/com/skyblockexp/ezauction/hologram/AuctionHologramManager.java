@@ -1,4 +1,5 @@
 package com.skyblockexp.ezauction.hologram;
+import com.skyblockexp.ezauction.compat.Scheduler;
 
 import com.skyblockexp.ezauction.service.AuctionManager;
 import com.skyblockexp.ezauction.transaction.AuctionTransactionService;
@@ -55,7 +56,7 @@ public final class AuctionHologramManager {
         markerKey = "auction_hologram_type";
         attachExistingDisplays();
         long interval = configuration.updateIntervalTicks();
-        updateTask = plugin.getServer().getScheduler().runTaskTimer(plugin, this::updateTrackedDisplays, 40L,
+        updateTask = Scheduler.runTimer(plugin, this::updateTrackedDisplays, 40L,
                 Math.max(20L, interval));
     }
 

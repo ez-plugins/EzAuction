@@ -1,4 +1,5 @@
 package com.skyblockexp.ezauction.gui.menu;
+import com.skyblockexp.ezauction.compat.Scheduler;
 
 import com.skyblockexp.ezauction.model.AuctionOperationResult;
 import com.skyblockexp.ezauction.live.LiveAuctionService;
@@ -121,7 +122,7 @@ public final class BidMenu implements Listener {
         player.openInventory(inv);
 
         // Schedule periodic refresh
-        BukkitTask task = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
+        BukkitTask task = Scheduler.runTimer(plugin, () -> {
             BidMenuHolder h = openMenus.get(player.getUniqueId());
             if (h == null || !h.auctionId.equals(auctionId)) return;
             Optional<LiveAuctionState> refreshed = liveAuctionService.getActiveAuction(auctionId);
@@ -369,7 +370,7 @@ public final class BidMenu implements Listener {
         event.setCancelled(true);
         String input = event.getMessage().trim();
 
-        Bukkit.getScheduler().runTask(plugin, () -> {
+        Scheduler.run(plugin, () -> {
             if ("cancel".equalsIgnoreCase(input)) {
                 open(player, auctionId);
                 return;

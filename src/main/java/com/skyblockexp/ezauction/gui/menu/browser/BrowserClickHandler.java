@@ -1,4 +1,5 @@
 package com.skyblockexp.ezauction.gui.menu.browser;
+import com.skyblockexp.ezauction.compat.Scheduler;
 
 import com.skyblockexp.ezauction.gui.holder.BrowserMenuHolder;
 import com.skyblockexp.ezauction.gui.holder.ConfirmMenuHolder;
@@ -104,7 +105,7 @@ public final class BrowserClickHandler {
             player.closeInventory();
             ClaimMenu claimMenu = claimMenuSupplier.get();
             if (claimMenu != null) {
-                Bukkit.getScheduler().runTask(ctx.plugin, () -> claimMenu.open(player));
+                Scheduler.run(ctx.plugin, () -> claimMenu.open(player));
             } else {
                 player.performCommand("auction claim");
             }
@@ -114,7 +115,7 @@ public final class BrowserClickHandler {
             player.closeInventory();
             LiveAuctionPickerMenu liveAuctionPickerMenu = livePickerMenuSupplier.get();
             if (liveAuctionPickerMenu != null) {
-                Bukkit.getScheduler().runTask(ctx.plugin, () -> liveAuctionPickerMenu.open(player));
+                Scheduler.run(ctx.plugin, () -> liveAuctionPickerMenu.open(player));
             } else {
                 player.performCommand("liveauction");
             }
@@ -497,6 +498,6 @@ public final class BrowserClickHandler {
     }
 
     private void runSync(Runnable runnable) {
-        ctx.plugin.getServer().getScheduler().runTask(ctx.plugin, runnable);
+        Scheduler.run(ctx.plugin, runnable);
     }
 }

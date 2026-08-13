@@ -1,4 +1,5 @@
 package com.skyblockexp.ezauction.gui.menu;
+import com.skyblockexp.ezauction.compat.Scheduler;
 
 import com.skyblockexp.ezauction.service.AuctionManager;
 import com.skyblockexp.ezauction.model.AuctionOperationResult;
@@ -704,7 +705,7 @@ public class AuctionOrderMenu implements Listener {
         pendingQuantityInputs.remove(playerId);
         OrderMenuState targetState = priceState != null ? priceState : quantityState;
         boolean updatingPrice = priceState != null;
-        plugin.getServer().getScheduler().runTask(plugin,
+        Scheduler.run(plugin,
                 () -> handleChatInput(event.getPlayer(), targetState, event.getMessage(), updatingPrice));
     }
 
