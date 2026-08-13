@@ -41,13 +41,25 @@ jobs:
 
       - name: Download Paper server jar
         if: matrix.server.kind == 'paper'
+        env:
+          USER_AGENT: EzAuction-CI/1.0 (https://github.com/skyblockexp/EzAuction)
         run: |
           VERSION="${{ matrix.server.version }}"
-          API="https://api.papermc.io/v2/projects/paper/versions/${VERSION}/builds"
-          BUILD=$(curl -fsSL "$API" | jq -r '.builds[-1].build')
-          FILE=$(curl -fsSL "$API/${BUILD}" | jq -r '.downloads.application.name')
-          echo "Resolved Paper build $BUILD -> $FILE"
-          curl -fsSL "$API/${BUILD}/downloads/${FILE}" -o paper.jar
+          # PaperMC retired the v2 downloads API; Fill v3 requires a descriptive User-Agent
+          # header and returns the download URL inline (key: server:default). We parse with
+          # python3 (always present on ubuntu-latest) to avoid a jq dependency.
+          API="https://fill.papermc.io/v3/projects/paper/versions/${VERSION}/builds"
+          URL=$(curl -fsSL -H "User-Agent: ${USER_AGENT}" "$API" | python3 -c '
+          import sys, json
+          data = json.load(sys.stdin)
+          stable = [b for b in data if b.get("channel") == "STABLE"]
+          pool = stable if stable else data
+          newest = max(pool, key=lambda b: b["id"])
+          print(newest["downloads"]["server:default"]["url"])
+          ')
+          echo "Resolved Paper download: $URL"
+          curl -fsSL -H "User-Agent: ${USER_AGENT}" "$URL" -o paper.jar
+          test -s paper.jar || { echo "paper.jar is empty" >&2; exit 1; }
 
       - name: Build Folia server jar
         if: matrix.server.kind == 'folia'
