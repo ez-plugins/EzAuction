@@ -5,12 +5,12 @@ on:
     branches: [master]
   pull_request:
 
-# Boots the built EzAuction plugin on a real Paper server (and best-effort Folia) and fails
-# the job if the server log shows boot errors or the plugin never reaches its enabled state.
+# Boots the built EzAuction plugin on real Paper, Folia, and Spigot servers and fails the
+# job if the server log shows boot errors or the plugin never reaches its enabled state.
 #
-# This complements (does not replace) the MockBukkit `mvn verify` (ci.yml) and the YAML
-# storage round-trip (spigot-smoke.yml). The FoliaLib-style scheduler shim in
-# `compat/Scheduler.java` is what lets the plugin actually boot on Folia's regionised threads.
+# This complements (does not replace) the MockBukkit `mvn verify` (ci.yml). The FoliaLib-style
+# scheduler shim in `compat/Scheduler.java` is what lets the plugin actually boot on Folia's
+# regionised threads. Spigot is built from source via BuildTools (no prebuilt jar is published).
 
 jobs:
   server-boot:
@@ -22,6 +22,7 @@ jobs:
         server:
           - { name: paper, kind: paper, version: "1.21.1" }
           - { name: folia, kind: folia, version: "1.21.11" }
+          - { name: spigot, kind: spigot, version: "1.21.1" }
 
     steps:
       - name: Checkout
@@ -79,6 +80,28 @@ jobs:
           curl -fsSL -H "User-Agent: ${USER_AGENT}" "$URL" -o folia.jar
           test -s folia.jar || { echo "folia.jar is empty" >&2; exit 1; }
 
+      - name: Build Spigot server jar
+        if: matrix.server.kind == 'spigot'
+        id: spigot
+        timeout-minutes: 90
+        env:
+          GIT_AUTHOR_NAME: ci
+          GIT_AUTHOR_EMAIL: ci@ezauction.local
+          GIT_COMMITTER_NAME: ci
+          GIT_COMMITTER_EMAIL: ci@ezauction.local
+        run: |
+          VERSION="${{ matrix.server.version }}"
+          # Spigot publishes no prebuilt jar, so build it from source with BuildTools.
+          curl -fsSL -o BuildTools.jar "https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar"
+          java -jar BuildTools.jar --rev "$VERSION" --remapped
+          SPIGOT_JAR=$(ls spigot-*.jar | head -1)
+          if [ -z "$SPIGOT_JAR" ]; then
+            echo "Spigot jar not produced by BuildTools" >&2
+            exit 1
+          fi
+          cp "$SPIGOT_JAR" spigot.jar
+          echo "Built $SPIGOT_JAR"
+
       - name: Prepare server directory
         run: |
           mkdir -p servers/${{ matrix.server.name }}/plugins
@@ -107,11 +130,11 @@ jobs:
           fi
           cp plugins/Vault.jar "servers/${{ matrix.server.name }}/plugins/"
           cp plugins/ezeconomy-bukkit-3.0.4.jar "servers/${{ matrix.server.name }}/plugins/"
-          if [ "${{ matrix.server.kind }}" = "paper" ]; then
-            cp paper.jar "servers/${{ matrix.server.name }}/${{ matrix.server.name }}.jar"
-          else
-            cp folia.jar "servers/${{ matrix.server.name }}/${{ matrix.server.name }}.jar"
-          fi
+          case "${{ matrix.server.kind }}" in
+            paper)  cp paper.jar  "servers/${{ matrix.server.name }}/${{ matrix.server.name }}.jar" ;;
+            folia)  cp folia.jar  "servers/${{ matrix.server.name }}/${{ matrix.server.name }}.jar" ;;
+            spigot) cp spigot.jar "servers/${{ matrix.server.name }}/${{ matrix.server.name }}.jar" ;;
+          esac
 
       - name: Accept EULA
         run: echo "eula=true" > "servers/${{ matrix.server.name }}/eula.txt"
