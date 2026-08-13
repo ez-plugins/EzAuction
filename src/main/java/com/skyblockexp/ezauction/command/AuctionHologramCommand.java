@@ -73,10 +73,6 @@ public final class AuctionHologramCommand implements CommandExecutor, TabComplet
                     return true;
                 }
                 Location placement = resolvePlacementLocation(player);
-                if (placement == null) {
-                    sendMessage(player, messages.placementRange().replace("{range}", String.valueOf(TARGET_RANGE)));
-                    return true;
-                }
                 Location spawned = hologramManager.ensureHologram(placement, type);
                 if (spawned == null) {
                     sendMessage(player, messages.placementFailed());

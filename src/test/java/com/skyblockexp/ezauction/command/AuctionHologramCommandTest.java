@@ -164,6 +164,34 @@ class AuctionHologramCommandTest {
     }
 
     @Test
+    void clearWithRadiusArgUsesRestLoop() {
+        AuctionHologramManager manager = newManager();
+        AuctionHologramCommand cmd = new AuctionHologramCommand(plugin, manager, messages);
+        PlayerMock player = server.addPlayer();
+        Location origin = player.getEyeLocation();
+        HologramDisplay display = platform.spawn(origin.clone().add(1.0D, 0.0D, 0.0D));
+        platform.setMarker(display, MARKER_KEY, "ACTIVE_LISTINGS");
+
+        cmd.onCommand(player, command(), "auctionhologram", new String[]{"clear", "5"});
+        assertTrue(player.nextMessage().contains("Removed"));
+        assertEquals(0, manager.findNearby(origin, 10.0D, false).size());
+    }
+
+    @Test
+    void listWithRadiusArgUsesRestLoop() {
+        AuctionHologramManager manager = newManager();
+        AuctionHologramCommand cmd = new AuctionHologramCommand(plugin, manager, messages);
+        PlayerMock player = server.addPlayer();
+        Location origin = player.getEyeLocation();
+        HologramDisplay display = platform.spawn(origin.clone().add(1.0D, 0.0D, 0.0D));
+        platform.setMarker(display, MARKER_KEY, "ACTIVE_LISTINGS");
+
+        cmd.onCommand(player, command(), "auctionhologram", new String[]{"list", "5"});
+        assertTrue(player.nextMessage().contains("Nearby auction holograms"));
+        assertTrue(player.nextMessage().contains("active_listings"));
+    }
+
+    @Test
     void translateConvertsAmpersandToColorCode() {
         String translated = AuctionHologramCommand.translate("&cOnly players may manage");
         assertTrue(translated.contains("§c"));

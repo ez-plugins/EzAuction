@@ -251,6 +251,59 @@ class HologramRemovalHandlerTest {
         assertEquals(1, manager.findNearby(origin, 10.0D, false).size());
     }
 
+    @Test
+    void clearUntaggedNonExpiredPendingEmptyMatchesSendsNoneFound() throws Exception {
+        PlayerMock player = server.addPlayer();
+        List<AuctionHologramManager.HologramMatch> matches = manager.findNearby(player.getEyeLocation(), 10.0D, true);
+        injectNonExpiredPending(player, matches);
+
+        handler.clear(player, List.of("--untagged"));
+        assertTrue(player.nextMessage().contains("No auction hologram found nearby"));
+    }
+
+    @Test
+    void clearUntaggedRemovesUntaggedNearestUsesUnknownLabel() throws Exception {
+        PlayerMock player = server.addPlayer();
+        Location origin = player.getEyeLocation();
+        HologramDisplay untaggedNear = platform.spawn(origin.clone().add(1.0D, 0.0D, 0.0D));
+        HologramDisplay taggedFar = platform.spawn(origin.clone().add(3.0D, 0.0D, 0.0D));
+        platform.setMarker(taggedFar, MARKER_KEY, "ACTIVE_LISTINGS");
+
+        handler.clear(player, List.of("--untagged"));
+        player.nextMessage(); // confirm
+
+        handler.clear(player, List.of("--untagged"));
+        String removed = player.nextMessage();
+        assertTrue(removed.contains("Removed"));
+        assertTrue(removed.toLowerCase().contains("unknown"),
+                "nearest untagged should use the unknown label: " + removed);
+        List<AuctionHologramManager.HologramMatch> remaining = manager.findNearby(origin, 10.0D, true);
+        assertEquals(1, remaining.size());
+        assertEquals(taggedFar.uniqueId(), remaining.get(0).display().uniqueId());
+    }
+
+    @Test
+    void clearUntaggedSecondStepTaggedNearestUsesTypeName() throws Exception {
+        PlayerMock player = server.addPlayer();
+        Location origin = player.getEyeLocation();
+        HologramDisplay taggedNear = platform.spawn(origin.clone().add(1.0D, 0.0D, 0.0D));
+        platform.setMarker(taggedNear, MARKER_KEY, "ACTIVE_LISTINGS");
+        HologramDisplay taggedFar = platform.spawn(origin.clone().add(3.0D, 0.0D, 0.0D));
+        platform.setMarker(taggedFar, MARKER_KEY, "ACTIVE_ORDERS");
+
+        handler.clear(player, List.of("--untagged"));
+        player.nextMessage(); // confirm
+
+        handler.clear(player, List.of("--untagged"));
+        String removed = player.nextMessage();
+        assertTrue(removed.contains("Removed"));
+        assertTrue(removed.contains("active_listings"),
+                "nearest tagged should use the type name: " + removed);
+        List<AuctionHologramManager.HologramMatch> remaining = manager.findNearby(origin, 10.0D, true);
+        assertEquals(1, remaining.size());
+        assertEquals(taggedFar.uniqueId(), remaining.get(0).display().uniqueId());
+    }
+
     @SuppressWarnings("unchecked")
     private int pendingSize() throws Exception {
         Field field = HologramRemovalHandler.class.getDeclaredField("pendingConfirmations");
@@ -272,6 +325,23 @@ class HologramRemovalHandlerTest {
         Field createdAt = pendingClass.getDeclaredField("createdAt");
         createdAt.setAccessible(true);
         createdAt.set(pending, 0L);
+        map.put(player.getUniqueId(), pending);
+        assertFalse(((boolean) pendingClass.getDeclaredMethod("isExpired").invoke(pending)));
+    }
+
+    private void injectNonExpiredPending(PlayerMock player, List<AuctionHologramManager.HologramMatch> matches) throws Exception {
+        Field field = HologramRemovalHandler.class.getDeclaredField("pendingConfirmations");
+        field.setAccessible(true);
+        Map<UUID, Object> map = (Map<UUID, Object>) field.get(handler);
+
+        Class<?> pendingClass = Class.forName(
+                "com.skyblockexp.ezauction.command.hologram.HologramRemovalHandler$PendingClearAll");
+        Constructor<?> ctor = pendingClass.getDeclaredConstructor(List.class);
+        ctor.setAccessible(true);
+        Object pending = ctor.newInstance(matches);
+        Field createdAt = pendingClass.getDeclaredField("createdAt");
+        createdAt.setAccessible(true);
+        createdAt.set(pending, System.currentTimeMillis());
         map.put(player.getUniqueId(), pending);
         assertFalse(((boolean) pendingClass.getDeclaredMethod("isExpired").invoke(pending)));
     }

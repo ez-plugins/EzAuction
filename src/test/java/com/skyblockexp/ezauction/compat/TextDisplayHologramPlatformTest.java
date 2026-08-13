@@ -1,10 +1,13 @@
 package com.skyblockexp.ezauction.compat;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 
+import com.skyblockexp.ezauction.compat.HologramDisplay;
 import org.bukkit.Location;
 import org.bukkit.entity.TextDisplay;
 import org.junit.jupiter.api.BeforeEach;
@@ -60,5 +63,48 @@ class TextDisplayHologramPlatformTest {
         var nearby = platform.findNearby(origin, 10.0D);
         assertEquals(2, nearby.size());
         assertTrue(nearby.stream().anyMatch(d -> d.uniqueId().equals(near.uniqueId())));
+    }
+
+    @Test
+    void isDisplayEntityTrueForTextDisplayFalseOtherwise() {
+        PlayerMock player = server.addPlayer();
+        TextDisplay textDisplay = player.getWorld().spawn(player.getLocation(), TextDisplay.class);
+        assertTrue(platform.isDisplayEntity(textDisplay));
+        assertFalse(platform.isDisplayEntity(player));
+    }
+
+    @Test
+    void wrapReturnsWrapperForTextDisplayAndNullOtherwise() {
+        PlayerMock player = server.addPlayer();
+        TextDisplay textDisplay = player.getWorld().spawn(player.getLocation(), TextDisplay.class);
+        assertNotNull(platform.wrap(textDisplay));
+        assertNull(platform.wrap(player));
+    }
+
+    @Test
+    void configureBaseNullSafeForNonWrapper() {
+        HologramDisplay notWrapper = mock(HologramDisplay.class);
+        platform.configureBase(notWrapper);
+        platform.configureBase(null);
+    }
+
+    @Test
+    void setMarkerNullSafeForNonWrapper() {
+        HologramDisplay notWrapper = mock(HologramDisplay.class);
+        platform.setMarker(notWrapper, "auction_hologram_type", "ACTIVE_LISTINGS");
+        platform.setMarker(notWrapper, null, "ACTIVE_LISTINGS");
+        platform.setMarker(notWrapper, "auction_hologram_type", null);
+    }
+
+    @Test
+    void getMarkerNullSafeForNonWrapper() {
+        HologramDisplay notWrapper = mock(HologramDisplay.class);
+        assertNull(platform.getMarker(notWrapper, "auction_hologram_type"));
+        assertNull(platform.getMarker(notWrapper, null));
+    }
+
+    @Test
+    void spawnNullLocationReturnsNull() {
+        assertNull(platform.spawn(null));
     }
 }
